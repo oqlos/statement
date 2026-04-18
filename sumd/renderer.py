@@ -4,26 +4,6 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any
-
-from sumd.extractor import (
-    extract_pyproject,
-    extract_taskfile,
-    extract_openapi,
-    extract_doql,
-    extract_pyqual,
-    extract_python_modules,
-    extract_readme_title,
-    extract_requirements,
-    extract_makefile,
-    extract_goal,
-    extract_env,
-    extract_dockerfile,
-    extract_docker_compose,
-    extract_package_json,
-    extract_project_analysis,
-)
-from sumd.toon_parser import extract_testql_scenarios
 
 
 # ---------------------------------------------------------------------------
@@ -665,72 +645,13 @@ def generate_sumd_content(
     proj_dir: Path,
     return_sources: bool = False,
     raw_sources: bool = True,
+    profile: str = "rich",
 ) -> str | tuple[str, list[str]]:
-    """Generate SUMD.md content from a project directory."""
-    pkg_name = proj_dir.name
+    """Generate SUMD.md content from a project directory.
 
-    pyproj   = extract_pyproject(proj_dir)
-    tasks    = extract_taskfile(proj_dir)
-    scenarios = extract_testql_scenarios(proj_dir)
-    openapi  = extract_openapi(proj_dir)
-    doql     = extract_doql(proj_dir)
-    pyqual   = extract_pyqual(proj_dir)
-    modules  = extract_python_modules(proj_dir, pkg_name)
-    title    = extract_readme_title(proj_dir)
-    reqs     = extract_requirements(proj_dir)
-    makefile = extract_makefile(proj_dir)
-    goal     = extract_goal(proj_dir)
-    env_vars = extract_env(proj_dir)
-    dockerfile = extract_dockerfile(proj_dir)
-    compose  = extract_docker_compose(proj_dir)
-    pkg_json = extract_package_json(proj_dir)
-    project_analysis = extract_project_analysis(proj_dir)
-
-    sources_used = _collect_sources(
-        pyproj, reqs, tasks, makefile, scenarios, openapi, doql,
-        pyqual, goal, env_vars, dockerfile, compose, pkg_json,
-        modules, project_analysis,
+    Delegates to RenderPipeline — kept for backwards compatibility.
+    """
+    from sumd.pipeline import RenderPipeline  # local import to avoid circular
+    return RenderPipeline(proj_dir, raw_sources=raw_sources).run(
+        profile=profile, return_sources=return_sources
     )
-
-    name        = pyproj.get("name", pkg_name)
-    version     = pyproj.get("version", "0.0.0")
-    description = pyproj.get("description", title or name)
-    py_req      = pyproj.get("python_requires", "")
-    license_    = pyproj.get("license", "")
-    deps        = pyproj.get("dependencies", [])
-    dev_deps    = pyproj.get("dev_dependencies", [])
-    scripts     = pyproj.get("scripts", [])
-    ai_model    = pyproj.get("ai_model", "")
-
-    L: list[str] = []
-    a = L.append
-
-    a(f"# {title or name}")
-    a("")
-    a(description)
-    a("")
-
-    L.extend(_render_metadata_section(name, version, py_req, license_, ai_model, openapi, sources_used))
-
-    a("## Intent")
-    a("")
-    a(description)
-    a("")
-
-    L.extend(_render_architecture(doql, modules, name, proj_dir, raw_sources))
-    L.extend(_render_interfaces(scripts, openapi, scenarios, proj_dir, raw_sources))
-    L.extend(_render_workflows(doql, tasks, proj_dir, raw_sources))
-    L.extend(_render_quality(pyqual, proj_dir, raw_sources))
-    L.extend(_render_configuration_section(name, version))
-    L.extend(_render_dependencies(deps, dev_deps))
-    L.extend(_render_deployment(pkg_json, name, reqs, dockerfile, compose))
-    L.extend(_render_env_section(env_vars))
-    L.extend(_render_goal_section(goal))
-    L.extend(_render_extras(makefile, pkg_json))
-    L.extend(_render_code_analysis(project_analysis))
-
-    content = _inject_toc("\n".join(L))
-
-    if return_sources:
-        return content, sources_used
-    return content

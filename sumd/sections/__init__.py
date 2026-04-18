@@ -47,7 +47,7 @@ SECTION_REGISTRY: list[type] = [
 # Profile definitions — which section *names* are included per profile.
 # Sections not in a profile are skipped by RenderPipeline.
 PROFILES: dict[str, set[str]] = {
-    "minimal": {"metadata", "architecture", "workflows"},
+    "minimal": {"metadata", "architecture", "workflows", "dependencies", "deployment"},
     "light": {
         "metadata", "architecture", "interfaces", "workflows",
         "quality", "configuration", "dependencies", "deployment",

@@ -20,7 +20,7 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.1.19`
+- **version**: `0.1.20`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -374,7 +374,7 @@ tasks:
 ```yaml
 project:
   name: sumd
-  version: 0.1.19
+  version: 0.1.20
   env: local
 ```
 
@@ -844,7 +844,7 @@ def _render_configuration_section(name, version)  # CC=1, fan=0
 def _render_env_section(env_vars)  # CC=3, fan=2
 def _render_goal_section(goal)  # CC=9, fan=3
 def _inject_toc(content)  # CC=3, fan=6
-def generate_sumd_content(proj_dir, return_sources, raw_sources)  # CC=4, fan=34
+def generate_sumd_content(proj_dir, return_sources, raw_sources, profile)  # CC=1, fan=2
 ```
 
 ### `sumd.cli` (`sumd/cli.py`)
