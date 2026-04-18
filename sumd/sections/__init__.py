@@ -14,6 +14,7 @@ Usage (non-breaking — generate_sumd_content still works as before):
 
 from __future__ import annotations
 
+from sumd.sections.api_stubs import ApiStubsSection
 from sumd.sections.architecture import ArchitectureSection
 from sumd.sections.code_analysis import CodeAnalysisSection
 from sumd.sections.configuration import ConfigurationSection
@@ -25,6 +26,7 @@ from sumd.sections.interfaces import InterfacesSection
 from sumd.sections.metadata import MetadataSection
 from sumd.sections.quality import QualitySection
 from sumd.sections.source_snippets import SourceSnippetsSection
+from sumd.sections.test_contracts import TestContractsSection
 from sumd.sections.workflows import WorkflowsSection
 
 # Registry — ordered list of all section classes.
@@ -42,6 +44,8 @@ SECTION_REGISTRY: list[type] = [
     ExtrasSection,
     CodeAnalysisSection,
     SourceSnippetsSection,
+    ApiStubsSection,
+    TestContractsSection,
 ]
 
 # Profile definitions — which section *names* are included per profile.
@@ -57,6 +61,7 @@ PROFILES: dict[str, set[str]] = {
         "metadata", "architecture", "interfaces", "workflows",
         "quality", "configuration", "dependencies", "deployment",
         "environment", "extras", "code_analysis", "source_snippets",
+        "api_stubs", "test_contracts",
     },
 }
 

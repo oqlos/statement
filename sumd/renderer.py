@@ -31,7 +31,7 @@ def _render_architecture(
                 fpath = proj_dir / fname
                 if fpath.exists():
                     lang = "less" if fname.endswith(".less") else "css"
-                    a(f"```{lang} markpact:file path={fname}")
+                    a(f"```{lang} markpact:doql path={fname}")
                     a(fpath.read_text(encoding="utf-8").rstrip())
                     a("```")
                     a("")
@@ -139,7 +139,7 @@ def _render_interfaces_openapi(
     if raw_sources:
         op_path = proj_dir / "openapi.yaml"
         if op_path.exists():
-            a("```yaml markpact:file path=openapi.yaml")
+            a("```yaml markpact:openapi path=openapi.yaml")
             a(op_path.read_text(encoding="utf-8").rstrip())
             a("```")
             a("")
@@ -168,7 +168,7 @@ def _render_testql_raw(
         seen_scenario_files.add(rel)
         a(f"#### `{rel}`")
         a("")
-        a(f"```toon markpact:file path={rel}")
+        a(f"```toon markpact:testql path={rel}")
         a(fpath.read_text(encoding="utf-8").rstrip())
         a("```")
         a("")
@@ -240,12 +240,12 @@ def _render_workflows(doql: dict, tasks: list, proj_dir: Path, raw_sources: bool
         if raw_sources:
             taskfile_path = proj_dir / "Taskfile.yml"
             if taskfile_path.exists():
-                a("```yaml markpact:file path=Taskfile.yml")
+                a("```yaml markpact:taskfile path=Taskfile.yml")
                 a(taskfile_path.read_text(encoding="utf-8").rstrip())
                 a("```")
                 a("")
         else:
-            a("```yaml markpact:file path=Taskfile.yml")
+            a("```yaml markpact:taskfile path=Taskfile.yml")
             a("tasks:")
             for t in tasks:
                 a(f"  {t['name']}:")
@@ -269,7 +269,7 @@ def _render_quality(pyqual: dict, proj_dir: Path, raw_sources: bool) -> list[str
     if raw_sources:
         pyqual_path = proj_dir / "pyqual.yaml"
         if pyqual_path.exists():
-            a("```yaml markpact:file path=pyqual.yaml")
+            a("```yaml markpact:pyqual path=pyqual.yaml")
             a(pyqual_path.read_text(encoding="utf-8").rstrip())
             a("```")
             a("")
@@ -299,27 +299,54 @@ def _render_quality(pyqual: dict, proj_dir: Path, raw_sources: bool) -> list[str
     return L
 
 
-def _render_dependencies(deps: list, dev_deps: list) -> list[str]:
+def _render_dependencies(deps: list, dev_deps: list, pkg_json: dict | None = None) -> list[str]:
     L: list[str] = []
     a = L.append
     a("## Dependencies")
     a("")
-    a("### Runtime")
-    a("")
+    pkg_json = pkg_json or {}
+    node_deps = pkg_json.get("dependencies", [])
+    node_dev = pkg_json.get("devDependencies", [])
+
     if deps:
+        a("### Runtime")
+        a("")
         a("```text markpact:deps python")
         for dep in deps:
             a(dep)
         a("```")
+        a("")
+    elif node_deps:
+        a("### Runtime (Node.js)")
+        a("")
+        a("```text markpact:deps node")
+        for dep in node_deps[:30]:
+            a(dep)
+        if len(node_deps) > 30:
+            a(f"# (+{len(node_deps) - 30} more)")
+        a("```")
+        a("")
     else:
+        a("### Runtime")
+        a("")
         a("*(see pyproject.toml)*")
-    a("")
+        a("")
     if dev_deps:
         a("### Development")
         a("")
         a("```text markpact:deps python scope=dev")
         for dep in dev_deps:
             a(dep)
+        a("```")
+        a("")
+    elif node_dev:
+        a("### Development (Node.js)")
+        a("")
+        a("```text markpact:deps node scope=dev")
+        for dep in node_dev[:20]:
+            a(dep)
+        if len(node_dev) > 20:
+            a(f"# (+{len(node_dev) - 20} more)")
         a("```")
         a("")
     return L
@@ -437,11 +464,11 @@ def _render_code_analysis(project_analysis: list) -> list[str]:
         if lang == "markdown":
             a(entry["content"])
         elif lang == "text":
-            a(f"```text markpact:file path={entry['file']}")
+            a(f"```text markpact:analysis path={entry['file']}")
             a(entry["content"])
             a("```")
         else:
-            a(f"```{lang} markpact:file path={entry['file']}")
+            a(f"```{lang} markpact:analysis path={entry['file']}")
             a(entry["content"])
             a("```")
         a("")
@@ -475,6 +502,84 @@ def _render_source_snippets(source_snippets: list, top_n: int = 5) -> list[str]:
                 a(f"    def {m['name']}({args_str})  # CC={m['cc']}{cc_flag}")
         a("```")
         a("")
+    return L
+
+
+def _render_api_stubs(openapi: dict) -> list[str]:
+    """Render OpenAPI endpoints as Python-like typed stubs for LLM orientation."""
+    endpoints = openapi.get("endpoints", [])
+    schemas = openapi.get("schemas", [])
+    if not endpoints:
+        return []
+    L: list[str] = []
+    a = L.append
+    a("## API Stubs")
+    a("")
+    title = openapi.get("title", "")
+    version = openapi.get("version", "")
+    if title:
+        a(f"*{title} v{version} — auto-generated stubs from `openapi.yaml`.*")
+        a("")
+
+    # Group by tag for structure
+    by_tag: dict[str, list[dict]] = {}
+    for ep in endpoints:
+        tag = ep["tags"][0] if ep.get("tags") else "default"
+        by_tag.setdefault(tag, []).append(ep)
+
+    a("```python markpact:openapi path=openapi.yaml")
+    for tag, eps in by_tag.items():
+        a(f"# {tag}")
+        for ep in eps:
+            op_id = ep.get("operationId") or f"{ep['method'].lower()}_{ep['path'].replace('/', '_').strip('_')}"
+            summary = f"  # {ep['summary']}" if ep.get("summary") else ""
+            a(f"def {op_id}() -> Response:{summary}")
+            a(f"    \"{ep['method']} {ep['path']}\"")
+        a("")
+    a("```")
+    a("")
+    if schemas:
+        a("**Schemas**: " + ", ".join(f"`{s}`" for s in schemas))
+        a("")
+    return L
+
+
+def _render_test_contracts(scenarios: list) -> list[str]:
+    """Render test scenarios as contract signatures — endpoint + key assertions."""
+    if not scenarios:
+        return []
+    L: list[str] = []
+    a = L.append
+    a("## Test Contracts")
+    a("")
+    a("*Scenarios as contract signatures — what the system guarantees.*")
+    a("")
+
+    # Group by type
+    by_type: dict[str, list[dict]] = {}
+    for sc in scenarios:
+        sc_type = sc.get("type", "unknown")
+        by_type.setdefault(sc_type, []).append(sc)
+
+    for sc_type, scs in sorted(by_type.items()):
+        a(f"### {sc_type.title()} ({len(scs)})")
+        a("")
+        for sc in scs:
+            a(f"**`{sc['name']}`**")
+            if sc.get("endpoints"):
+                for ep in sc["endpoints"][:3]:
+                    status = ep.get("status", "")
+                    op = f" — `{ep['operationId']}`" if ep.get("operationId") else ""
+                    a(f"- `{ep['method']} {ep['path']}` → `{status}`{op}")
+            if sc.get("asserts"):
+                for ass in sc["asserts"][:3]:
+                    a(f"- assert `{ass['field']} {ass['op']} {ass['expected']}`")
+            if sc.get("performance"):
+                for p in sc["performance"][:2]:
+                    a(f"- perf `{p['metric']} < {p['threshold']}`")
+            if sc.get("detectors"):
+                a(f"- detectors: {sc['detectors']}")
+            a("")
     return L
 
 

@@ -314,8 +314,21 @@ _LANG_VALIDATORS = {
     "text":    _validate_deps_body,   # markpact:deps python
 }
 
-_VALID_MARKPACT_KINDS = {"file", "deps", "run", "test", "bootstrap", "publish"}
-_MARKPACT_REQUIRED_ATTRS = {"file": "path"}
+_VALID_MARKPACT_KINDS = {
+    # generic
+    "file", "deps", "run", "test", "bootstrap", "publish",
+    # semantic (Phase 2)
+    "doql", "openapi", "testql", "taskfile", "pyqual", "analysis",
+}
+_MARKPACT_REQUIRED_ATTRS = {
+    "file": "path",
+    "doql": "path",
+    "openapi": "path",
+    "testql": "path",
+    "taskfile": "path",
+    "pyqual": "path",
+    "analysis": "path",
+}
 
 
 def validate_codeblocks(content: str, source: str = "SUMD.md") -> list[CodeBlockIssue]:

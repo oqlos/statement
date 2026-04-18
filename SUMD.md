@@ -15,12 +15,13 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 - [Release Management (`goal.yaml`)](#release-management-goalyaml)
 - [Code Analysis](#code-analysis)
 - [Source Map](#source-map)
+- [Test Contracts](#test-contracts)
 - [Intent](#intent)
 
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.1.20`
+- **version**: `0.1.21`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -35,7 +36,7 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 ### DOQL Application Declaration (`app.doql.css`)
 
-```css markpact:file path=app.doql.css
+```css markpact:doql path=app.doql.css
 app {
   name: "sumd";
   version: "0.1.15";
@@ -188,7 +189,7 @@ environment[name="local"] {
 
 #### `testql-scenarios/smoke-generic.testql.toon.yaml`
 
-```toon markpact:file path=testql-scenarios/smoke-generic.testql.toon.yaml
+```toon markpact:testql path=testql-scenarios/smoke-generic.testql.toon.yaml
 # SCENARIO: smoke-generic.testql.toon.yaml — smoke generic
 # TYPE: smoke
 # VERSION: 1.0
@@ -211,7 +212,7 @@ API[2]{method, endpoint, status}:
 
 ### Taskfile Tasks (`Taskfile.yml`)
 
-```yaml markpact:file path=Taskfile.yml
+```yaml markpact:taskfile path=Taskfile.yml
 # Taskfile.yml — sumd (Structured Unified Markdown Descriptor) project runner
 # https://taskfile.dev
 
@@ -374,7 +375,7 @@ tasks:
 ```yaml
 project:
   name: sumd
-  version: 0.1.20
+  version: 0.1.21
   env: local
 ```
 
@@ -425,7 +426,7 @@ pip install -e .[dev]
 
 ### `project/map.toon.yaml`
 
-```toon markpact:file path=project/map.toon.yaml
+```toon markpact:analysis path=project/map.toon.yaml
 # sumd | 13f 3531L | python:11,css:1,shell:1 | 2026-04-18
 # stats: 132 func | 5 cls | 13 mod | CC̄=5.3 | critical:20 | cycles:0
 # alerts[5]: CC _scan_one_project=15; CC _render_testql_one_structured=15; CC _collect_pkg_sources=14; CC extract_dockerfile=13; CC validate_codeblocks=13
@@ -607,7 +608,7 @@ D:
 
 ### `project/calls.toon.yaml`
 
-```toon markpact:file path=project/calls.toon.yaml
+```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/oqlos/sumd
 # nodes: 88 | edges: 90 | modules: 6
 # CC̄=5.4
@@ -828,7 +829,7 @@ def _render_testql_one_structured(sc, L)  # CC=15, fan=4 ⚠
 def _render_interfaces_testql(scenarios, proj_dir, raw_sources, L)  # CC=3, fan=3
 def _render_workflows(doql, tasks, proj_dir, raw_sources)  # CC=12, fan=6 ⚠
 def _render_quality(pyqual, proj_dir, raw_sources)  # CC=12, fan=6 ⚠
-def _render_dependencies(deps, dev_deps)  # CC=5, fan=1
+def _render_dependencies(deps, dev_deps, pkg_json)  # CC=12, fan=3 ⚠
 def _render_deployment_install(pkg_json, name, L)  # CC=2, fan=2
 def _render_deployment_reqs(reqs, L)  # CC=5, fan=2
 def _render_deployment_docker(dockerfile, compose, L)  # CC=13, fan=4 ⚠
@@ -836,6 +837,8 @@ def _render_deployment(pkg_json, name, reqs, dockerfile, compose)  # CC=1, fan=4
 def _render_extras(makefile, pkg_json)  # CC=11, fan=4 ⚠
 def _render_code_analysis(project_analysis)  # CC=5, fan=1
 def _render_source_snippets(source_snippets, top_n)  # CC=8, fan=4
+def _render_api_stubs(openapi)  # CC=11, fan=9 ⚠
+def _render_test_contracts(scenarios)  # CC=13, fan=8 ⚠
 def _collect_pkg_sources(pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars)  # CC=14, fan=4 ⚠
 def _collect_infra_sources(dockerfile, compose, pkg_json, modules, project_analysis)  # CC=6, fan=3
 def _collect_sources(pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars, dockerfile, compose, pkg_json, modules, project_analysis)  # CC=1, fan=2
@@ -928,6 +931,15 @@ def _tool_generate_sumd(arguments)  # CC=5, fan=5
 def call_tool(name, arguments)  # CC=3, fan=4
 def main()  # CC=1, fan=3
 ```
+
+## Test Contracts
+
+*Scenarios as contract signatures — what the system guarantees.*
+
+### Smoke (1)
+
+**`smoke-generic.testql.toon.yaml — smoke generic`**
+- `GET /health` → `200`
 
 ## Intent
 

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.22] - 2026-04-18
+
+### Docs
+- Update README.md
+- Update SUMD.md
+
+### Test
+- Update tests/test_parser.py
+
+### Other
+- Update sumd.json
+- Update sumd/parser.py
+- Update sumd/renderer.py
+- Update sumd/sections/__init__.py
+- Update sumd/sections/api_stubs.py
+- Update sumd/sections/dependencies.py
+- Update sumd/sections/test_contracts.py
+
 ## [0.1.21] - 2026-04-18
 
 ### Docs
