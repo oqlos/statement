@@ -5,7 +5,7 @@
     {
       "name": "metadata",
       "type": "metadata",
-      "content": "- **name**: `sumd`\n- **version**: `0.1.12`\n- **python_requires**: `>=3.10`\n- **license**: Apache-2.0\n- **ai_model**: `openrouter/qwen/qwen3-coder-next`\n- **ecosystem**: SUMD + DOQL + testql + taskfile\n- **generated_from**: pyproject.toml, Taskfile.yml, app.doql.less, app.doql.css, goal.yaml, .env.example, src(4 mod)",
+      "content": "- **name**: `sumd`\n- **version**: `0.1.13`\n- **python_requires**: `>=3.10`\n- **license**: Apache-2.0\n- **ai_model**: `openrouter/qwen/qwen3-coder-next`\n- **ecosystem**: SUMD + DOQL + testql + taskfile\n- **generated_from**: pyproject.toml, Taskfile.yml, app.doql.less, app.doql.css, goal.yaml, .env.example, src(4 mod)",
       "level": 2
     },
     {
@@ -29,7 +29,7 @@
     {
       "name": "# doql interfaces",
       "type": "unknown",
-      "content": "- `interface[type=\"cli\"]` — framework: click\n- `interface[type=\"cli\"]` page=`sumd` — \n- `interface[type=\"cli\"]` — framework: click\n- `interface[type=\"cli\"]` page=`sumd` —",
+      "content": "- `interface[type=\"cli\"]` page=`sumd` —",
       "level": 2
     },
     {
@@ -59,7 +59,7 @@
     {
       "name": "# doql workflows (`app.doql.less`, `app.doql.css`)",
       "type": "unknown",
-      "content": "- **install** `[manual]`: `pip install -e .[dev]`\n- **quality** `[manual]`: `pyqual run`\n- **quality:fix** `[manual]`: `pyqual run --fix`\n- **quality:report** `[manual]`: `pyqual report`\n- **test** `[manual]`: `pytest -q`\n- **lint** `[manual]`: `ruff check .`\n- **fmt** `[manual]`: `ruff format .`\n- **build** `[manual]`: `python -m build`\n- **clean** `[manual]`: `rm -rf build/ dist/ *.egg-info`\n- **structure** `[manual]`: `*(no steps)*`\n- **doql:adopt** `[manual]`: `*(no steps)*`\n- **doql:export** `[manual]`: `if [ ! -f \"app.doql.css\" ]`\n- **doql:validate** `[manual]`: `*(no steps)*`\n- **doql:doctor** `[manual]`: `*(no steps)*`\n- **doql:build** `[manual]`: `*(no steps)*`\n- **docs:build** `[manual]`: `echo \"Building SUMD documentation...\" → python -m sumd.cli docs/ docs/`\n- **help** `[manual]`: `task --list`\n- **install** `[\"manual\"]`: `pip install -e .[dev]`\n- **quality** `[\"manual\"]`: `pyqual run`\n- **quality:fix** `[\"manual\"]`: `pyqual run --fix`\n- **quality:report** `[\"manual\"]`: `pyqual report`\n- **test** `[\"manual\"]`: `pytest -q`\n- **lint** `[\"manual\"]`: `ruff check .`\n- **fmt** `[\"manual\"]`: `ruff format .`\n- **build** `[\"manual\"]`: `python -m build`\n- **clean** `[\"manual\"]`: `rm -rf build/ dist/ *.egg-info`\n- **structure** `[\"manual\"]`: `*(no steps)*`\n- **doql:adopt** `[\"manual\"]`: `*(no steps)*`\n- **doql:export** `[\"manual\"]`: `if [ ! -f \"app.doql.css\" ]`\n- **doql:validate** `[\"manual\"]`: `*(no steps)*`\n- **doql:doctor** `[\"manual\"]`: `*(no steps)*`\n- **doql:build** `[\"manual\"]`: `*(no steps)*`\n- **docs:build** `[\"manual\"]`: `echo \"Building SUMD documentation...\" → python -m sumd.cli docs/ docs/`\n- **help** `[\"manual\"]`: `task --list`",
+      "content": "- **install** `[manual]`: `pip install -e .[dev]`\n- **quality** `[manual]`: `pyqual run`\n- **quality:fix** `[manual]`: `pyqual run --fix`\n- **quality:report** `[manual]`: `pyqual report`\n- **test** `[manual]`: `pytest -q`\n- **lint** `[manual]`: `ruff check .`\n- **fmt** `[manual]`: `ruff format .`\n- **build** `[manual]`: `python -m build`\n- **clean** `[manual]`: `rm -rf build/ dist/ *.egg-info`\n- **structure** `[manual]`: `echo \"📁 Analyzing sumd project structure...\"`\n- **doql:adopt** `[manual]`: `{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force;`\n- **doql:export** `[manual]`: `if [ ! -f \"app.doql.css\" ]; then`\n- **doql:validate** `[manual]`: `if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then`\n- **doql:doctor** `[manual]`: `{{.DOQL_CMD}} doctor`\n- **doql:build** `[manual]`: `if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then`\n- **docs:build** `[manual]`: `echo \"Building SUMD documentation...\";`\n- **help** `[manual]`: `task --list`",
       "level": 2
     },
     {
@@ -71,7 +71,7 @@
     {
       "name": "configuration",
       "type": "configuration",
-      "content": "```yaml\nproject:\n  name: sumd\n  version: 0.1.12\n  env: local\n```",
+      "content": "```yaml\nproject:\n  name: sumd\n  version: 0.1.13\n  env: local\n```",
       "level": 2
     },
     {
@@ -95,7 +95,7 @@
     {
       "name": "environment variables (`.env.example`)",
       "type": "unknown",
-      "content": "| Variable | Default | Description |\n|----------|---------|-------------|\n| `OPENROUTER_API_KEY` | `` | Required: OpenRouter API key (https://openrouter.ai/keys) |\n| `LLM_MODEL` | `openrouter/qwen/qwen3-coder-next` | Model (default: openrouter/qwen/qwen3-coder-next) |\n| `PFIX_AUTO_APPLY` | `true         # true = apply fixes without asking` | Behavior |\n| `PFIX_AUTO_INSTALL_DEPS` | `true   # true = auto pip/uv install` |  |\n| `PFIX_AUTO_RESTART` | `false        # true = os.execv restart after fix` |  |\n| `PFIX_MAX_RETRIES` | `3` |  |\n| `PFIX_DRY_RUN` | `false` |  |\n| `PFIX_ENABLED` | `true` |  |\n| `PFIX_GIT_COMMIT` | `false         # true = auto-commit fixes` | Git integration |\n| `PFIX_GIT_PREFIX` | `pfix:         # commit message prefix` |  |\n| `PFIX_CREATE_BACKUPS` | `false     # false = disable .pfix_backups/ directory` | Backup |",
+      "content": "| Variable | Default | Description |\n|----------|---------|-------------|\n| `OPENROUTER_API_KEY` | `*(not set)*` | Required: OpenRouter API key (https://openrouter.ai/keys) |\n| `LLM_MODEL` | `openrouter/qwen/qwen3-coder-next` | Model (default: openrouter/qwen/qwen3-coder-next) |\n| `PFIX_AUTO_APPLY` | `true` | true = apply fixes without asking |\n| `PFIX_AUTO_INSTALL_DEPS` | `true` | true = auto pip/uv install |\n| `PFIX_AUTO_RESTART` | `false` | true = os.execv restart after fix |\n| `PFIX_MAX_RETRIES` | `3` |  |\n| `PFIX_DRY_RUN` | `false` |  |\n| `PFIX_ENABLED` | `true` |  |\n| `PFIX_GIT_COMMIT` | `false` | true = auto-commit fixes |\n| `PFIX_GIT_PREFIX` | `pfix:` | commit message prefix |\n| `PFIX_CREATE_BACKUPS` | `false` | false = disable .pfix_backups/ directory |",
       "level": 2
     },
     {

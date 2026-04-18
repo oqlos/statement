@@ -5,7 +5,7 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.1.12`
+- **version**: `0.1.13`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -33,9 +33,6 @@ app {
 
 ### DOQL Interfaces
 
-- `interface[type="cli"]` — framework: click
-- `interface[type="cli"]` page=`sumd` — 
-- `interface[type="cli"]` — framework: click
 - `interface[type="cli"]` page=`sumd` — 
 
 ### Source Modules
@@ -65,31 +62,14 @@ app {
 - **fmt** `[manual]`: `ruff format .`
 - **build** `[manual]`: `python -m build`
 - **clean** `[manual]`: `rm -rf build/ dist/ *.egg-info`
-- **structure** `[manual]`: `*(no steps)*`
-- **doql:adopt** `[manual]`: `*(no steps)*`
-- **doql:export** `[manual]`: `if [ ! -f "app.doql.css" ]`
-- **doql:validate** `[manual]`: `*(no steps)*`
-- **doql:doctor** `[manual]`: `*(no steps)*`
-- **doql:build** `[manual]`: `*(no steps)*`
-- **docs:build** `[manual]`: `echo "Building SUMD documentation..." → python -m sumd.cli docs/ docs/`
+- **structure** `[manual]`: `echo "📁 Analyzing sumd project structure..."`
+- **doql:adopt** `[manual]`: `{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force;`
+- **doql:export** `[manual]`: `if [ ! -f "app.doql.css" ]; then`
+- **doql:validate** `[manual]`: `if [ ! -f "{{.DOQL_OUTPUT}}" ]; then`
+- **doql:doctor** `[manual]`: `{{.DOQL_CMD}} doctor`
+- **doql:build** `[manual]`: `if [ ! -f "{{.DOQL_OUTPUT}}" ]; then`
+- **docs:build** `[manual]`: `echo "Building SUMD documentation...";`
 - **help** `[manual]`: `task --list`
-- **install** `["manual"]`: `pip install -e .[dev]`
-- **quality** `["manual"]`: `pyqual run`
-- **quality:fix** `["manual"]`: `pyqual run --fix`
-- **quality:report** `["manual"]`: `pyqual report`
-- **test** `["manual"]`: `pytest -q`
-- **lint** `["manual"]`: `ruff check .`
-- **fmt** `["manual"]`: `ruff format .`
-- **build** `["manual"]`: `python -m build`
-- **clean** `["manual"]`: `rm -rf build/ dist/ *.egg-info`
-- **structure** `["manual"]`: `*(no steps)*`
-- **doql:adopt** `["manual"]`: `*(no steps)*`
-- **doql:export** `["manual"]`: `if [ ! -f "app.doql.css" ]`
-- **doql:validate** `["manual"]`: `*(no steps)*`
-- **doql:doctor** `["manual"]`: `*(no steps)*`
-- **doql:build** `["manual"]`: `*(no steps)*`
-- **docs:build** `["manual"]`: `echo "Building SUMD documentation..." → python -m sumd.cli docs/ docs/`
-- **help** `["manual"]`: `task --list`
 
 ### Taskfile Tasks (`Taskfile.yml`)
 
@@ -187,7 +167,7 @@ fi
 ```yaml
 project:
   name: sumd
-  version: 0.1.12
+  version: 0.1.13
   env: local
 ```
 
@@ -212,17 +192,17 @@ pip install -e .[dev]
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OPENROUTER_API_KEY` | `` | Required: OpenRouter API key (https://openrouter.ai/keys) |
+| `OPENROUTER_API_KEY` | `*(not set)*` | Required: OpenRouter API key (https://openrouter.ai/keys) |
 | `LLM_MODEL` | `openrouter/qwen/qwen3-coder-next` | Model (default: openrouter/qwen/qwen3-coder-next) |
-| `PFIX_AUTO_APPLY` | `true         # true = apply fixes without asking` | Behavior |
-| `PFIX_AUTO_INSTALL_DEPS` | `true   # true = auto pip/uv install` |  |
-| `PFIX_AUTO_RESTART` | `false        # true = os.execv restart after fix` |  |
+| `PFIX_AUTO_APPLY` | `true` | true = apply fixes without asking |
+| `PFIX_AUTO_INSTALL_DEPS` | `true` | true = auto pip/uv install |
+| `PFIX_AUTO_RESTART` | `false` | true = os.execv restart after fix |
 | `PFIX_MAX_RETRIES` | `3` |  |
 | `PFIX_DRY_RUN` | `false` |  |
 | `PFIX_ENABLED` | `true` |  |
-| `PFIX_GIT_COMMIT` | `false         # true = auto-commit fixes` | Git integration |
-| `PFIX_GIT_PREFIX` | `pfix:         # commit message prefix` |  |
-| `PFIX_CREATE_BACKUPS` | `false     # false = disable .pfix_backups/ directory` | Backup |
+| `PFIX_GIT_COMMIT` | `false` | true = auto-commit fixes |
+| `PFIX_GIT_PREFIX` | `pfix:` | commit message prefix |
+| `PFIX_CREATE_BACKUPS` | `false` | false = disable .pfix_backups/ directory |
 
 ## Release Management (`goal.yaml`)
 

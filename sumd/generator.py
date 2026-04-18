@@ -329,23 +329,38 @@ def _parse_doql_content(content: str) -> dict[str, Any]:
         attrs = dict(re.findall(r'(\w[\w-]*):\s*([^;]+);', m.group(2)))
         integrations.append({"selector": m.group(1).strip(), **attrs})
 
-    workflows: list[dict[str, Any]] = []
-    for m in re.finditer(r'workflow\[([^\]]+)\]\s*\{([^}]+)\}', content, re.DOTALL):
+    # workflows: deduplicate by name (later source wins)
+    # _BLOCK matches content allowing {{template}} and {single} brace expressions
+    _BLOCK = r'(?:[^{}]|\{\{[^}]*\}\}|\{[^}]*\})*'
+    workflows_map: dict[str, dict[str, Any]] = {}
+    for m in re.finditer(r'workflow\[([^\]]+)\]\s*\{(' + _BLOCK + r')\}', content, re.DOTALL):
         name_m = re.search(r'name="([^"]+)"', m.group(1))
-        steps = re.findall(r'step-\d+:\s*run cmd=(.+?);', m.group(2))
-        trigger_m = re.search(r'trigger:\s*(\S+?);', m.group(2))
-        workflows.append({
-            "name": name_m.group(1) if name_m else m.group(1).strip(),
+        wf_name = name_m.group(1) if name_m else m.group(1).strip()
+        body = m.group(2)
+        # steps: capture multi-line cmds, use first non-empty line as summary
+        raw_steps = re.findall(r'step-\d+:\s*run cmd=(' + _BLOCK + r');', body, re.DOTALL)
+        steps = []
+        for s in raw_steps:
+            first_line = next((l.strip() for l in s.splitlines() if l.strip()), s.strip())
+            steps.append(first_line)
+        trigger_m = re.search(r'trigger:\s*"?([^"\s;]+)"?;', body)
+        workflows_map[wf_name] = {
+            "name": wf_name,
             "trigger": trigger_m.group(1) if trigger_m else "manual",
-            "steps": [s.strip() for s in steps],
-        })
+            "steps": steps,
+        }
+
+    # interfaces: deduplicate by selector
+    iface_map: dict[str, dict[str, Any]] = {}
+    for iface in interfaces:
+        iface_map[iface["selector"]] = iface
 
     return {
         "app": app_meta,
         "entities": entities,
-        "interfaces": interfaces,
+        "interfaces": list(iface_map.values()),
         "integrations": integrations,
-        "workflows": workflows,
+        "workflows": list(workflows_map.values()),
     }
 
 
@@ -484,9 +499,21 @@ def extract_env(proj_dir: Path) -> list[dict[str, str]]:
         line_stripped = line.strip()
         if line_stripped.startswith("#"):
             pending_comment = line_stripped.lstrip("#").strip()
-        elif "=" in line_stripped and not line_stripped.startswith("#"):
-            key, _, val = line_stripped.partition("=")
-            vars_.append({"key": key.strip(), "default": val.strip(), "comment": pending_comment})
+        elif "=" in line_stripped:
+            key, _, rest = line_stripped.partition("=")
+            # split off inline comment: VALUE  # comment
+            if "  #" in rest:
+                val_part, inline_comment = rest.split("  #", 1)
+                comment = inline_comment.strip() or pending_comment
+            else:
+                val_part = rest
+                comment = pending_comment
+            val = val_part.strip()
+            vars_.append({
+                "key": key.strip(),
+                "default": val if val else "*(not set)*",
+                "comment": comment,
+            })
             pending_comment = ""
         else:
             pending_comment = ""
