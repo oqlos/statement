@@ -4,15 +4,20 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sumd"
-version = "0.1.4"
-description = "OqlOS Overview - Python package for statement management"
+version = "0.1.7"
+description = "SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
 authors = [
     {name = "Tom Sapletta", email = "tom@sapletta.com"}
 ]
-keywords = ["statement"]
+keywords = ["sumd", "markdown", "documentation", "llm", "project-descriptor"]
+dependencies = [
+    "click>=8.0",
+    "pyyaml>=6.0",
+    "toml>=0.10.0",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -21,6 +26,9 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
+
+[project.scripts]
+sumd = "sumd.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/tom/statement"

@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-04-18
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+- Update SUMD-SPEC.md
+
+### Test
+- Update tests/test_parser.py
+
+### Other
+- Update VERSION
+- Update sumd/__init__.py
+- Update sumd/cli.py
+- Update sumd/parser.py
+
+## [0.1.6] - 2026-04-18
+
+### Added
+- Multi-format export support (markdown, json, yaml, toml)
+- Generate command to create SUMD from structured formats
+- CLI `--output` option for export and generate commands
+- Format conversion schema documentation in SUMD-SPEC.md
+
+### Changed
+- Updated README with installation and usage examples
+- Updated SUMD-SPEC.md with format conversion section
+- Added toml dependency to pyproject.toml
+
+### Fixed
+- Added Optional import to cli.py
+
+## [0.1.5] - 2026-04-18
+
+### Added
+- SUMD v1 specification document
+- Python parser for SUMD format
+- CLI tool with validate, export, info, extract commands
+- Ecosystem architecture documentation (SUMD/DOQL/Taskfile)
+
+### Changed
+- Renamed package from statement to sumd
+- Updated package description and keywords
+
 ## [0.1.4] - 2026-04-18
 
 ## [0.1.3] - 2026-04-18

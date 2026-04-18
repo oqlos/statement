@@ -1,7 +1,23 @@
-"""Statement - Python package for statement management.
+"""SUMD - Structured Unified Markdown Descriptor.
 
-Licensed under Apache-2.0.
+SUMD is a semantic project descriptor format in Markdown that defines intent,
+structure, execution entry points, and mental model of a system for both humans and LLMs.
 """
 
-__version__ = "0.1.4"
-__all__ = []
+__version__ = "0.1.7"
+
+from sumd.parser import (
+    SUMDDocument,
+    SUMDParser,
+    parse,
+    parse_file,
+    validate,
+)
+
+__all__ = [
+    "SUMDDocument",
+    "SUMDParser",
+    "parse",
+    "parse_file",
+    "validate",
+]
