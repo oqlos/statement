@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from sumd.sections.api_stubs import ApiStubsSection
 from sumd.sections.architecture import ArchitectureSection
+from sumd.sections.call_graph import CallGraphSection
 from sumd.sections.code_analysis import CodeAnalysisSection
 from sumd.sections.configuration import ConfigurationSection
 from sumd.sections.dependencies import DependenciesSection
@@ -44,6 +45,7 @@ SECTION_REGISTRY: list[type] = [
     ExtrasSection,
     CodeAnalysisSection,
     SourceSnippetsSection,
+    CallGraphSection,
     ApiStubsSection,
     TestContractsSection,
 ]
@@ -61,7 +63,7 @@ PROFILES: dict[str, set[str]] = {
         "metadata", "architecture", "interfaces", "workflows",
         "quality", "configuration", "dependencies", "deployment",
         "environment", "extras", "code_analysis", "source_snippets",
-        "api_stubs", "test_contracts",
+        "call_graph", "api_stubs", "test_contracts",
     },
 }
 

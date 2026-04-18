@@ -11,10 +11,12 @@ class CodeAnalysisSection:
     profiles = frozenset({"rich"})
 
     def should_render(self, ctx: RenderContext) -> bool:
-        return bool(ctx.project_analysis)
+        # Skip if ALL entries are calls.toon (handled by CallGraphSection)
+        non_calls = [e for e in ctx.project_analysis if "calls.toon" not in e.get("file", "")]
+        return bool(non_calls)
 
     def render(self, ctx: RenderContext) -> list[str]:
-        return _render_code_analysis(ctx.project_analysis)
+        return _render_code_analysis(ctx.project_analysis, skip_files={"calls.toon"})
 
 
 assert isinstance(CodeAnalysisSection(), Section)

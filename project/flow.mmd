@@ -23,26 +23,26 @@ flowchart TD
     end
 
     subgraph Core
-        sumd__toon_parser___parse_toon_block_config("_parse_toon_block_config CC=9")
-        sumd__toon_parser___parse_toon_file["_parse_toon_file"]
-        sumd__toon_parser__extract_testql_scenarios["extract_testql_scenarios"]
+        sumd__extractor___fan_out["_fan_out"]
+        sumd__extractor___analyse_py_top_funcs["_analyse_py_top_funcs"]
+        sumd__extractor___analyse_py_module["_analyse_py_module"]
+        sumd__extractor___render_map_detail["_render_map_detail"]
+        sumd__extractor__generate_map_toon("generate_map_toon CC=11")
+        sumd__pipeline__RenderPipeline___collect["_collect"]
+        sumd__pipeline__RenderPipeline___build_registered_sections["_build_registered_sections"]
+        sumd__pipeline__RenderPipeline___render_legacy_sections["_render_legacy_sections"]
+        sumd__pipeline__RenderPipeline___assemble["_assemble"]
+        sumd__pipeline__RenderPipeline__run["run"]
         sumd__mcp_server__list_tools["list_tools"]
         sumd__mcp_server___tool_parse_sumd["_tool_parse_sumd"]
         sumd__mcp_server___tool_validate_sumd["_tool_validate_sumd"]
         sumd__mcp_server___tool_list_sections["_tool_list_sections"]
         sumd__mcp_server___tool_get_section["_tool_get_section"]
-        sumd__mcp_server___tool_info_sumd["_tool_info_sumd"]
-        sumd__mcp_server___tool_generate_sumd["_tool_generate_sumd"]
-        sumd__mcp_server__call_tool["call_tool"]
-        sumd__mcp_server__main["main"]
-        sumd__renderer___render_testql_one_structured{{_render_testql_one_structured CC=15}}
-        sumd__renderer__generate_sumd_content["generate_sumd_content"]
-        sumd__parser__SUMDParser__parse["parse"]
-        ...["+12 more"]
+        ...["+52 more"]
     end
 
     subgraph Exporters
         sumd__mcp_server___tool_export_sumd["_tool_export_sumd"]
     end
 
-    class sumd__cli__cli,sumd__cli__validate,sumd__cli__export,sumd__cli__info,sumd__cli__generate,sumd__cli__extract,sumd__cli___detect_projects,sumd__cli___run_analysis_tools,sumd__cli___export_sumd_json,sumd__cli___scan_one_project entry
+    class sumd__pipeline__RenderPipeline___collect,sumd__pipeline__RenderPipeline___build_registered_sections,sumd__pipeline__RenderPipeline___render_legacy_sections,sumd__pipeline__RenderPipeline___assemble,sumd__pipeline__RenderPipeline__run,sumd__mcp_server__list_tools,sumd__mcp_server___tool_parse_sumd,sumd__mcp_server___tool_validate_sumd,sumd__mcp_server___tool_export_sumd,sumd__mcp_server___tool_list_sections entry

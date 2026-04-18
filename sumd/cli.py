@@ -10,8 +10,8 @@ from typing import Optional
 import click
 
 from sumd.parser import SUMDParser, parse_file
-from sumd.parser import validate_sumd_file, CodeBlockIssue
-from sumd.generator import generate_sumd_content, generate_map_toon
+from sumd.parser import validate_sumd_file
+from sumd.generator import generate_map_toon
 from sumd.pipeline import RenderPipeline
 
 __version__ = "0.1.15"
@@ -267,7 +267,8 @@ def _scan_one_project(
     sumd_path = proj_dir / "SUMD.md"
 
     if sumd_path.exists() and not fix:
-        click.echo(f"  {'~'} {proj_dir.name:<18} {'skip':<10} {'\u2013':<10} already exists (use --fix to overwrite)")
+        dash = "\u2013"
+        click.echo(f"  {'~'} {proj_dir.name:<18} {'skip':<10} {dash:<10} already exists (use --fix to overwrite)")
         return {"status": "SKIP", "path": str(sumd_path)}
 
     try:
@@ -309,7 +310,8 @@ def _scan_one_project(
         }
 
     except Exception as exc:
-        click.echo(f"  \u274c {proj_dir.name:<18} {'error':<10} {'\u2013':<10} {exc}")
+        dash = "\u2013"
+        click.echo(f"  \u274c {proj_dir.name:<18} {'error':<10} {dash:<10} {exc}")
         return {"status": "ERROR", "error": str(exc)}
 
 
@@ -719,9 +721,9 @@ def scaffold(project: Path, output: Optional[Path], force: bool, scenario_type: 
     for f in skipped:
         click.echo(f"   ⏭  {out_dir / f} (already exists)")
     if generated:
-        click.echo(f"\n💡 Next steps:")
-        click.echo(f"   1. Fill in ASSERTs in generated files")
-        click.echo(f"   2. Run: sumd scan . --fix   (to embed scenarios in SUMD.md)")
+        click.echo("\n💡 Next steps:")
+        click.echo("   1. Fill in ASSERTs in generated files")
+        click.echo("   2. Run: sumd scan . --fix   (to embed scenarios in SUMD.md)")
         click.echo(f"   3. Run: testql run {out_dir}/")
 
 
@@ -763,7 +765,7 @@ def map_cmd(project: Path, output: Optional[Path], force: bool, stdout: bool):
     header = content.splitlines()[0] if content else ""
     click.echo(f"✅ Written {out_path}")
     click.echo(f"   {header}")
-    click.echo(f"\n💡 Next: sumd scan . --fix  (to embed map in SUMD.md)")
+    click.echo("\n💡 Next: sumd scan . --fix  (to embed map in SUMD.md)")
 
 
 def main():

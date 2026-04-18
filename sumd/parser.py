@@ -389,15 +389,15 @@ _METADATA_FIELDS = {"name", "version"}  # required metadata bullet keys
 
 def _check_h1(lines: list[str], source: str) -> list[str]:
     """Return error if H1 title is missing."""
-    if not any(re.match(r"^# [^#]", l) for l in lines):
+    if not any(re.match(r"^# [^#]", line) for line in lines):
         return [f"{source}: missing H1 title"]
     return []
 
 
 def _check_required_sections(lines: list[str], source: str) -> list[str]:
     """Return errors for any missing required H2 sections."""
-    found_h2 = {re.sub(r"`.*?`", "", l[3:]).strip().lower()
-                for l in lines if l.startswith("## ")}
+    found_h2 = {re.sub(r"`.*?`", "", line[3:]).strip().lower()
+                for line in lines if line.startswith("## ")}
     return [
         f"{source}: missing required section '## {req.title()}'"
         for req in _REQUIRED_H2
@@ -409,14 +409,14 @@ def _check_metadata_fields(lines: list[str], source: str) -> list[str]:
     """Return errors for missing required metadata bullet fields."""
     in_meta = False
     meta_found: set[str] = set()
-    for l in lines:
-        if l.startswith("## Metadata"):
+    for line in lines:
+        if line.startswith("## Metadata"):
             in_meta = True
             continue
-        if in_meta and l.startswith("## "):
+        if in_meta and line.startswith("## "):
             break
         if in_meta:
-            m = re.match(r"- \*\*(\w+)\*\*:", l)
+            m = re.match(r"- \*\*(\w+)\*\*:", line)
             if m:
                 meta_found.add(m.group(1).lower())
     return [
@@ -428,7 +428,7 @@ def _check_metadata_fields(lines: list[str], source: str) -> list[str]:
 
 def _check_unclosed_fences(lines: list[str], source: str) -> list[str]:
     """Return error if there is an odd number of ``` fence markers."""
-    if sum(1 for l in lines if re.match(r"^```", l)) % 2 != 0:
+    if sum(1 for line in lines if re.match(r"^```", line)) % 2 != 0:
         return [f"{source}: unclosed fenced code block (odd number of ``` markers)"]
     return []
 

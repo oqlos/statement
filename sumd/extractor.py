@@ -10,7 +10,6 @@ from typing import Any
 
 import yaml
 
-from sumd.toon_parser import extract_testql_scenarios  # re-export
 
 
 # ---------------------------------------------------------------------------
@@ -167,7 +166,7 @@ def _parse_doql_workflows(content: str) -> list[dict[str, Any]]:
         raw_steps = re.findall(r'step-\d+:\s*run cmd=(' + _BLOCK + r');', body, re.DOTALL)
         steps = []
         for s in raw_steps:
-            first_line = next((l.strip() for l in s.splitlines() if l.strip()), s.strip())
+            first_line = next((line.strip() for line in s.splitlines() if line.strip()), s.strip())
             steps.append(first_line)
         trigger_m = re.search(r'trigger:\s*"?([^"\s;]+)"?;', body)
         workflows_map[wf_name] = {
@@ -655,7 +654,7 @@ def generate_map_toon(proj_dir: Path) -> str:
 
     lang_counts, modules = _collect_map_files(proj_dir)
     total_files = len(modules)
-    total_lines = sum(l for _, l, _ in modules)
+    total_lines = sum(lines for _, lines, _ in modules)
 
     py_modules, all_funcs, all_classes, total_cls = _render_map_detail(proj_dir, modules)
 
@@ -676,7 +675,7 @@ def generate_map_toon(proj_dir: Path) -> str:
       f" | CC̄={avg_cc} | critical:{critical} | cycles:0")
     a(f"# alerts[5]: {alerts}")
     a(f"# hotspots[5]: {hotspots}")
-    a(f"# evolution: baseline")
+    a("# evolution: baseline")
     a("# Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods")
 
     a(f"M[{total_mod}]:")

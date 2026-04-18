@@ -252,7 +252,7 @@ def _render_workflows(doql: dict, tasks: list, proj_dir: Path, raw_sources: bool
                 if t["desc"]:
                     a(f'    desc: "{t["desc"]}"')
                 if t["cmd"]:
-                    a(f"    cmds:")
+                    a("    cmds:")
                     a(f"      - {t['cmd']}")
             a("```")
             a("")
@@ -450,14 +450,17 @@ def _render_extras(makefile: list, pkg_json: dict) -> list[str]:
     return L
 
 
-def _render_code_analysis(project_analysis: list) -> list[str]:
-    if not project_analysis:
+def _render_code_analysis(project_analysis: list, skip_files: set[str] | None = None) -> list[str]:
+    """Render Code Analysis section, optionally skipping files handled by other sections."""
+    skip_files = skip_files or set()
+    entries = [e for e in project_analysis if not any(s in e.get("file", "") for s in skip_files)]
+    if not entries:
         return []
     L: list[str] = []
     a = L.append
     a("## Code Analysis")
     a("")
-    for entry in project_analysis:
+    for entry in entries:
         a(f"### `{entry['file']}`")
         a("")
         lang = entry["lang"]
@@ -580,6 +583,92 @@ def _render_test_contracts(scenarios: list) -> list[str]:
             if sc.get("detectors"):
                 a(f"- detectors: {sc['detectors']}")
             a("")
+    return L
+
+
+def _parse_calls_toon(content: str) -> dict:
+    """Parse calls.toon.yaml text into structured dict for rendering."""
+    result: dict = {"nodes": 0, "edges": 0, "modules_count": 0, "cc_avg": 0.0, "hubs": [], "modules": []}
+    lines = content.splitlines()
+    # Parse header comments
+    for line in lines[:5]:
+        if line.startswith("# nodes:"):
+            import re as _re
+            m = _re.search(r"nodes:\s*(\d+).*edges:\s*(\d+).*modules:\s*(\d+)", line)
+            if m:
+                result["nodes"] = int(m.group(1))
+                result["edges"] = int(m.group(2))
+                result["modules_count"] = int(m.group(3))
+        if line.startswith("# CC"):
+            import re as _re
+            m = _re.search(r"CC[̄=\u0304]=?\s*([\d.]+)", line)
+            if m:
+                result["cc_avg"] = float(m.group(1))
+
+    # Parse HUBS section
+    in_hubs = False
+    current_hub: dict = {}
+    for line in lines:
+        if line.startswith("HUBS["):
+            in_hubs = True
+            continue
+        if in_hubs and line and not line.startswith(" "):
+            in_hubs = False
+        if in_hubs and line.startswith("  ") and not line.startswith("    "):
+            if current_hub:
+                result["hubs"].append(current_hub)
+            current_hub = {"name": line.strip()}
+        elif in_hubs and line.startswith("    "):
+            import re as _re
+            m = _re.search(r"CC=(\d+)\s+in:(\d+)\s+out:(\d+)\s+total:(\d+)", line)
+            if m and current_hub:
+                current_hub.update({
+                    "cc": int(m.group(1)), "in": int(m.group(2)),
+                    "out": int(m.group(3)), "total": int(m.group(4)),
+                })
+    if current_hub:
+        result["hubs"].append(current_hub)
+    return result
+
+
+def _render_call_graph(project_analysis: list) -> list[str]:
+    """Render call graph summary from calls.toon.yaml in project_analysis."""
+    calls_entry = next(
+        (e for e in project_analysis if "calls.toon" in e.get("file", "")), None
+    )
+    if not calls_entry:
+        return []
+
+    data = _parse_calls_toon(calls_entry["content"])
+    if not data["hubs"]:
+        return []
+
+    L: list[str] = []
+    a = L.append
+    a("## Call Graph")
+    a("")
+    a(f"*{data['nodes']} nodes · {data['edges']} edges · {data['modules_count']} modules · CC̄={data['cc_avg']}*")
+    a("")
+
+    # Top hubs table (top 8 by total degree)
+    top_hubs = sorted(data["hubs"], key=lambda h: h.get("total", 0), reverse=True)[:8]
+    a("### Hubs (by degree)")
+    a("")
+    a("| Function | CC | in | out | total |")
+    a("|----------|----|----|-----|-------|")
+    for hub in top_hubs:
+        name = hub["name"].split(".")[-1]  # short name
+        module = ".".join(hub["name"].split(".")[:-1])
+        cc_flag = " ⚠" if hub.get("cc", 0) >= 10 else ""
+        a(f"| `{name}` *(in {module})* | {hub.get('cc',0)}{cc_flag} | {hub.get('in',0)} | {hub.get('out',0)} | **{hub.get('total',0)}** |")
+    a("")
+
+    # Full embed for LLM reference under markpact tag
+    rel = calls_entry["file"]
+    a(f"```toon markpact:analysis path={rel}")
+    a(calls_entry["content"].rstrip())
+    a("```")
+    a("")
     return L
 
 
