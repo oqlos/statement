@@ -6,7 +6,7 @@ SUMD (Structured Unified Markdown Descriptor) is a semantic project descriptor f
 
 ## Ecosystem Context
 
-SUMD is part of a three-layer system:
+SUMD is part of a four-layer system:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -26,13 +26,20 @@ SUMD is part of a three-layer system:
 │              Task runner and workflow execution              │
 │              Automation and orchestration                   │
 └─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   TESTQL (weryfikacja)                       │
+│              Test Query Language - Token-Oriented            │
+│              API contracts, integration & E2E tests            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 - **SUMD → opis (description)**: Defines what the system is and how it should work
 - **DOQL → wykonanie (execution)**: Provides the language to manipulate and execute operations
 - **Taskfile → runtime**: Manages the actual execution of workflows and tasks
+- **TESTQL → weryfikacja (verification)**: Provides AI-friendly test scenarios, API contracts, and end-to-end validation
 
-SUMD documents can reference DOQL queries and Taskfile workflows to provide complete system documentation.
+SUMD documents can reference DOQL queries, Taskfile workflows, and TESTQL scenarios to provide complete system documentation.
 
 ## Format Conversion
 
