@@ -1,7 +1,13 @@
-# vallm batch | 33f | 10✓ 0⚠ 4✗ | 2026-04-18
+# vallm batch | 38f | 11✓ 1⚠ 4✗ | 2026-04-18
 
 SUMMARY:
-  scanned: 33  passed: 10 (30.3%)  warnings: 0  errors: 4  unsupported: 19
+  scanned: 38  passed: 11 (28.9%)  warnings: 1  errors: 4  unsupported: 23
+
+WARNINGS[1]{path,score}:
+  sumd/parser.py,0.97
+    issues[2]{rule,severity,message,line}:
+      complexity.cyclomatic,warning,validate_markdown has cyclomatic complexity 21 (max: 15),377
+      complexity.lizard_cc,warning,validate_markdown: CC=21 exceeds limit 15,377
 
 ERRORS[4]{path,score}:
   sumd/mcp_server.py,0.86
@@ -13,16 +19,16 @@ ERRORS[4]{path,score}:
   tests/test_parser.py,0.86
     issues[1]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'pytest' not found,3
-  sumd/cli.py,0.93
+  sumd/cli.py,0.95
     issues[2]{rule,severity,message,line}:
-      python.import.resolvable,error,Module 'toml' not found,136
-      python.import.resolvable,error,Module 'toml' not found,82
-  sumd/generator.py,0.94
+      python.import.resolvable,error,Module 'toml' not found,141
+      python.import.resolvable,error,Module 'toml' not found,87
+  sumd/generator.py,0.96
     issues[1]{rule,severity,message,line}:
-      python.import.resolvable,error,Module 'toml' not found,55
+      python.import.resolvable,error,Module 'toml' not found,60
 
 UNSUPPORTED[4]{bucket,count}:
-  *.md,9
+  *.md,12
   *.txt,1
   *.yml,1
-  other,8
+  other,9

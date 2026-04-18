@@ -374,33 +374,26 @@ _RECOMMENDED_H2 = {"interfaces"}  # present in API projects but not required
 _METADATA_FIELDS = {"name", "version"}  # required metadata bullet keys
 
 
-def validate_markdown(content: str, source: str = "SUMD.md") -> list[str]:
-    """Validate SUMD markdown structure.
+def _check_h1(lines: list[str], source: str) -> list[str]:
+    """Return error if H1 title is missing."""
+    if not any(re.match(r"^# [^#]", l) for l in lines):
+        return [f"{source}: missing H1 title"]
+    return []
 
-    Checks:
-    - H1 title present
-    - Required H2 sections present
-    - Metadata section has name and version bullets
-    - No broken markdown links [text]() with empty href
-    - No unclosed fenced code blocks
-    """
-    issues: list[str] = []
 
-    lines = content.splitlines()
-
-    # H1 check
-    h1_lines = [l for l in lines if re.match(r"^# [^#]", l)]
-    if not h1_lines:
-        issues.append(f"{source}: missing H1 title")
-
-    # H2 sections
+def _check_required_sections(lines: list[str], source: str) -> list[str]:
+    """Return errors for any missing required H2 sections."""
     found_h2 = {re.sub(r"`.*?`", "", l[3:]).strip().lower()
                 for l in lines if l.startswith("## ")}
-    for req in _REQUIRED_H2:
-        if not any(req in h for h in found_h2):
-            issues.append(f"{source}: missing required section '## {req.title()}'")
+    return [
+        f"{source}: missing required section '## {req.title()}'"
+        for req in _REQUIRED_H2
+        if not any(req in h for h in found_h2)
+    ]
 
-    # Metadata bullets
+
+def _check_metadata_fields(lines: list[str], source: str) -> list[str]:
+    """Return errors for missing required metadata bullet fields."""
     in_meta = False
     meta_found: set[str] = set()
     for l in lines:
@@ -413,24 +406,46 @@ def validate_markdown(content: str, source: str = "SUMD.md") -> list[str]:
             m = re.match(r"- \*\*(\w+)\*\*:", l)
             if m:
                 meta_found.add(m.group(1).lower())
-    for req in _METADATA_FIELDS:
-        if req not in meta_found:
-            issues.append(f"{source}: metadata section missing '**{req}**' field")
+    return [
+        f"{source}: metadata section missing '**{req}**' field"
+        for req in _METADATA_FIELDS
+        if req not in meta_found
+    ]
 
-    # Unclosed fenced blocks
-    fence_depth = 0
-    for i, l in enumerate(lines, 1):
-        if re.match(r"^```", l):
-            fence_depth = 1 - fence_depth  # toggle
-    if fence_depth:
-        issues.append(f"{source}: unclosed fenced code block (odd number of ``` markers)")
 
-    # Empty markdown links
-    empty_links = re.findall(r"\[([^\]]+)\]\(\s*\)", content)
-    for text in empty_links:
-        issues.append(f"{source}: empty link href for [{text}]()")
+def _check_unclosed_fences(lines: list[str], source: str) -> list[str]:
+    """Return error if there is an odd number of ``` fence markers."""
+    if sum(1 for l in lines if re.match(r"^```", l)) % 2 != 0:
+        return [f"{source}: unclosed fenced code block (odd number of ``` markers)"]
+    return []
 
-    return issues
+
+def _check_empty_links(content: str, source: str) -> list[str]:
+    """Return errors for markdown links with empty href."""
+    return [
+        f"{source}: empty link href for [{text}]()"
+        for text in re.findall(r"\[([^\]]+)\]\(\s*\)", content)
+    ]
+
+
+def validate_markdown(content: str, source: str = "SUMD.md") -> list[str]:
+    """Validate SUMD markdown structure.
+
+    Checks:
+    - H1 title present
+    - Required H2 sections present
+    - Metadata section has name and version bullets
+    - No broken markdown links [text]() with empty href
+    - No unclosed fenced code blocks
+    """
+    lines = content.splitlines()
+    return (
+        _check_h1(lines, source)
+        + _check_required_sections(lines, source)
+        + _check_metadata_fields(lines, source)
+        + _check_unclosed_fences(lines, source)
+        + _check_empty_links(content, source)
+    )
 
 
 # ---------------------------------------------------------------------------

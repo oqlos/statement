@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.16] - 2026-04-18
+
+### Docs
+- Update README.md
+- Update SUMD.md
+- Update TODO.md
+- Update code2llm_output/README.md
+- Update code2llm_output/context.md
+- Update docs/README.md
+- Update docs/USAGE.md
+- Update project/README.md
+- Update project/context.md
+
+### Test
+- Update testql-scenarios/smoke-generic.testql.toon.yaml
+
+### Other
+- Update app.doql.less
+- Update code2llm_output/index.html
+- Update project/analysis.toon.yaml
+- Update project/calls.mmd
+- Update project/calls.png
+- Update project/calls.toon.yaml
+- Update project/compact_flow.mmd
+- Update project/compact_flow.png
+- Update project/duplication.toon.yaml
+- Update project/evolution.toon.yaml
+- ... and 14 more files
+
 ## [0.1.15] - 2026-04-18
 
 ### Docs

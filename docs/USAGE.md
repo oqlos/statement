@@ -154,6 +154,42 @@ API[3]{method, endpoint, status}:
 
 ---
 
+### `sumd map` — generowanie project/map.toon.yaml
+
+Generuje `project/map.toon.yaml` — mapę kodu w formacie toon (identyczną z wyjściem `code2llm map`), bez potrzeby instalowania zewnętrznych narzędzi.
+
+```bash
+sumd map ./my-project            # → project/map.toon.yaml
+sumd map ./my-project --force    # nadpisz istniejący plik
+sumd map ./my-project --stdout   # wydrukuj na stdout
+```
+
+Zawartość wygenerowanego pliku:
+
+```toon
+# oqlos | 128f 19993L | python:124,shell:2,css:1,less:1 | 2026-04-18
+# stats: 287 func | 42 cls | 128 mod | CC̄=5.2 | critical:12 | cycles:0
+# alerts[5]: CC interpret=55; fan-out run=31; ...
+# hotspots[5]: interpret fan=31; parse fan=28; ...
+M[128]:
+  oqlos/core/interpreter.py,1243
+  oqlos/core/executor.py,512
+  ...
+D:
+  oqlos/core/interpreter.py:
+    e: Interpreter,run,parse,...
+    Interpreter: __init__(3),run(2),...
+    run(script;context)
+```
+
+Plik `project/map.toon.yaml` jest automatycznie osadzany w SUMD.md przy `sumd scan --fix`.
+
+Relacja do `code2llm`:
+- `sumd map` — wbudowane, zawsze dostępne, analizuje statycznie przez `ast` + `radon`
+- `sumd analyze --tools code2llm` — zewnętrzne narzędzie, wymaga instalacji, generuje więcej metryk
+
+---
+
 ### `sumd analyze` — analiza statyczna kodu
 
 Uruchamia narzędzia `code2llm`, `redup`, `vallm` i zapisuje wyniki w `project/`.
@@ -165,9 +201,24 @@ sumd analyze ./my-project --tools code2llm,redup
 sumd analyze ./my-project --force    # wymuś reinstalację narzędzi
 ```
 
+**Pełna lista plików generowanych w `project/`:**
+
+| Plik | Generuje | Polecenie / flaga |
+|------|---------|-------------------|
+| `analysis.toon.yaml` | `code2llm` | `-f toon` |
+| `evolution.toon.yaml` | `code2llm` | `-f evolution` |
+| `map.toon.yaml` | `sumd map` lub `code2llm` | `sumd map` / `-f map` |
+| `context.md` | `code2llm` | `-f context` |
+| `calls.mmd` | `code2llm` | `-f calls` |
+| `flow.mmd`, `compact_flow.mmd`, `calls.mmd` | `code2llm` | `-f mermaid --no-png` |
+| `duplication.toon.yaml` | `redup` | `redup scan --format toon` |
+| `validation.toon.yaml` | `vallm` | `vallm batch --format toon` |
+
+**Nie osadzane do SUMD.md:** `*.png`, `index.html`, `refactor-progress.txt`.
+
 | Narzędzie | Co robi | Generuje |
 |-----------|---------|----------|
-| `code2llm` | Analiza architektury, modułów, call graph | `context.md`, `analysis.toon.yaml`, `*.mmd` |
+| `code2llm` | Analiza architektury, modułów, call graph | `context.md`, `analysis.toon.yaml`, `evolution.toon.yaml`, `*.mmd` |
 | `redup` | Wykrywanie duplikacji kodu | `duplication.toon.yaml` |
 | `vallm` | Walidacja kodu przez LLM | `validation.toon.yaml` |
 

@@ -1,17 +1,22 @@
-# code2llm | 7f 1993L | python:6,shell:1 | 2026-04-18
-# CC̄=9.9 | critical:5/41 | dups:0 | cycles:0
+# code2llm | 10f 3151L | python:9,shell:1 | 2026-04-18
+# CC̄=6.5 | critical:10/104 | dups:0 | cycles:0
 
-HEALTH[5]:
-  🟡 CC    scan CC=16 (limit:15)
+HEALTH[10]:
+  🟡 CC    _analyse_py_module CC=15 (limit:15)
+  🟡 CC    generate_map_toon CC=22 (limit:15)
+  🟡 CC    _scan_one_project CC=16 (limit:15)
+  🟡 CC    lint CC=19 (limit:15)
+  🟡 CC    _scaffold_from_openapi CC=16 (limit:15)
+  🟡 CC    _render_architecture_doql_parsed CC=17 (limit:15)
+  🟡 CC    _render_interfaces_testql CC=20 (limit:15)
+  🟡 CC    _render_deployment CC=18 (limit:15)
+  🟡 CC    _collect_sources CC=19 (limit:15)
   🟡 CC    call_tool CC=24 (limit:15)
-  🟡 CC    _parse_toon_file CC=41 (limit:15)
-  🟡 CC    _parse_doql_content CC=17 (limit:15)
-  🟡 CC    generate_sumd_content CC=141 (limit:15)
 
 REFACTOR[1]:
-  1. split 5 high-CC methods  (CC>15)
+  1. split 10 high-CC methods  (CC>15)
 
-PIPELINES[17]:
+PIPELINES[27]:
   [1] Src [validate]: validate → parse_file
       PURITY: 100% pure
   [2] Src [export]: export → parse_file
@@ -24,12 +29,15 @@ PIPELINES[17]:
       PURITY: 100% pure
 
 LAYERS:
-  sumd/                           CC̄=9.9    ←in:0  →out:0
-  │ !! generator                 1077L  0C   19m  CC=141    ←1
+  sumd/                           CC̄=6.5    ←in:0  →out:0
+  │ !! cli                        742L  0C   22m  CC=19     ←0
+  │ !! extractor                  707L  0C   28m  CC=22     ←2
+  │ !! renderer                   634L  0C   18m  CC=20     ←1
+  │ parser                     476L  5C   23m  CC=13     ←2
   │ !! mcp_server                 321L  0C    5m  CC=24     ←0
-  │ !! cli                        291L  0C    8m  CC=16     ←0
-  │ parser                     224L  4C    9m  CC=9      ←2
-  │ __init__                    25L  0C    0m  CC=0.0    ←0
+  │ toon_parser                166L  0C    8m  CC=9      ←1
+  │ __init__                    33L  0C    0m  CC=0.0    ←0
+  │ generator                   17L  0C    0m  CC=0.0    ←0
   │
   ./                              CC̄=0.0    ←in:0  →out:0
   │ project.sh                  35L  0C    0m  CC=0.0    ←0

@@ -1,7 +1,7 @@
 <!-- code2docs:start --># sumd
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-41-green)
-> **41** functions | **4** classes | **7** files | CC̄ = 9.9
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-75-green)
+> **75** functions | **5** classes | **7** files | CC̄ = 8.5
 
 > Auto-generated project documentation from source code analysis.
 
@@ -156,6 +156,7 @@ sumd/
 - **`Section`** — Represents a SUMD section.
 - **`SUMDDocument`** — Represents a parsed SUMD document.
 - **`SUMDParser`** — Parser for SUMD markdown documents.
+- **`CodeBlockIssue`** — —
 
 ### Functions
 
@@ -169,12 +170,16 @@ sumd/
 - `generate(file, format, output)` — Generate a SUMD document from structured format.
 - `extract(file, section)` — Extract content from a SUMD document.
 - `scan(workspace, export_json, report, fix)` — Scan a workspace directory and generate SUMD.md for every project found.
+- `lint(files, workspace, as_json)` — Validate SUMD.md files — check markdown structure and codeblock formats.
+- `analyze(project, tools, force)` — Run analysis tools (code2llm, redup, vallm) on a project.
+- `scaffold(project, output, force, scenario_type)` — Generate testql scenario scaffolds from OpenAPI spec or SUMD.md.
+- `map_cmd(project, output, force, stdout)` — Generate project/map.toon.yaml — static code map in toon format.
 - `main()` — Main entry point for the CLI.
 - `extract_pyproject(proj_dir)` — —
 - `extract_taskfile(proj_dir)` — —
 - `extract_testql_scenarios(proj_dir)` — Scan all *.testql.toon.yaml and testql-scenarios/*.yaml files in project.
 - `extract_openapi(proj_dir)` — —
-- `extract_doql(proj_dir)` — Read app.doql.less and/or app.doql.css and merge into one dict.
+- `extract_doql(proj_dir)` — Read app.doql.less (preferred) or app.doql.css as fallback.
 - `extract_pyqual(proj_dir)` — —
 - `extract_python_modules(proj_dir, pkg_name)` — —
 - `extract_readme_title(proj_dir)` — —
@@ -185,10 +190,15 @@ sumd/
 - `extract_dockerfile(proj_dir)` — Parse Dockerfile — base image, exposed ports, entrypoint, labels.
 - `extract_docker_compose(proj_dir)` — Parse docker-compose*.yml — services with images, ports, environment.
 - `extract_package_json(proj_dir)` — Parse package.json — name, version, scripts, dependencies.
+- `generate_map_toon(proj_dir)` — Generate project/map.toon.yaml content for proj_dir.
+- `extract_project_analysis(proj_dir)` — Return list of {file, lang, content} for files present in project/ subdir.
 - `generate_sumd_content(proj_dir, return_sources, raw_sources)` — Generate SUMD.md content from a project directory.
 - `parse(content)` — Parse a SUMD markdown document.
 - `parse_file(path)` — Parse a SUMD file.
 - `validate(document)` — Validate a SUMD document.
+- `validate_codeblocks(content, source)` — Validate all fenced code blocks in *content*.
+- `validate_markdown(content, source)` — Validate SUMD markdown structure.
+- `validate_sumd_file(path)` — Run all validators on a SUMD.md file.
 
 
 ## Project Structure
@@ -196,10 +206,10 @@ sumd/
 📄 `project`
 📄 `scripts.generate_all_sumd`
 📦 `sumd`
-📄 `sumd.cli` (8 functions)
-📄 `sumd.generator` (19 functions)
+📄 `sumd.cli` (12 functions)
+📄 `sumd.generator` (40 functions)
 📄 `sumd.mcp_server` (5 functions)
-📄 `sumd.parser` (9 functions, 4 classes)
+📄 `sumd.parser` (18 functions, 5 classes)
 
 ## Requirements
 

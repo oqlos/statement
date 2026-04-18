@@ -1,0 +1,16 @@
+# SCENARIO: smoke-generic.testql.toon.yaml — smoke generic
+# TYPE: smoke
+# VERSION: 1.0
+# GENERATED: true
+
+# ── Konfiguracja ──────────────────────────────────────
+CONFIG[1]{key, value}:
+  base_path,  /api/v1  # TODO: adjust base_path
+
+# ── Wywołania API ─────────────────────────────────────
+API[2]{method, endpoint, status}:
+  GET,  /health,  200  # TODO: adjust
+  GET,  /,  200       # TODO: adjust
+# ── Asercje ───────────────────────────────────────────
+# ASSERT[0]{field, op, expected}:
+#   TODO: fill in assertions

@@ -192,6 +192,120 @@ def extract(file: Path, section: str):
         sys.exit(1)
 
 
+def _detect_projects(workspace: Path) -> list[Path]:
+    """Return sorted list of subdirectories containing pyproject.toml."""
+    return sorted(
+        d for d in workspace.iterdir()
+        if d.is_dir() and not d.name.startswith(".") and (d / "pyproject.toml").exists()
+    )
+
+
+def _run_analysis_tools(proj_dir: Path, tool_list: list[str]) -> None:
+    """Install and run code2llm/redup/vallm analysis tools for a project."""
+    tools_dir = proj_dir / ".sumd-tools"
+    venv_dir = tools_dir / "venv"
+    project_output = proj_dir / "project"
+
+    if not venv_dir.exists():
+        tools_dir.mkdir(exist_ok=True)
+        subprocess.run([sys.executable, "-m", "venv", str(venv_dir)], capture_output=True)
+        pip_path = venv_dir / "bin" / "pip"
+        if not pip_path.exists():
+            pip_path = venv_dir / "Scripts" / "pip.exe"
+        for pkg in tool_list:
+            subprocess.run([str(pip_path), "install", "-q", pkg], capture_output=True)
+
+    bin_dir = venv_dir / "bin"
+    if not bin_dir.exists():
+        bin_dir = venv_dir / "Scripts"
+
+    project_output.mkdir(exist_ok=True)
+
+    if "code2llm" in tool_list:
+        code2llm = bin_dir / ("code2llm.exe" if not (bin_dir / "code2llm").exists() else "code2llm")
+        subprocess.run(
+            [str(code2llm), str(proj_dir), "-f", "all", "-o", str(project_output), "--no-chunk"],
+            capture_output=True, cwd=str(proj_dir),
+        )
+
+    if "redup" in tool_list:
+        redup = bin_dir / ("redup.exe" if not (bin_dir / "redup").exists() else "redup")
+        subprocess.run(
+            [str(redup), "scan", str(proj_dir), "--format", "toon", "--output", str(project_output)],
+            capture_output=True, cwd=str(proj_dir),
+        )
+
+    if "vallm" in tool_list:
+        vallm = bin_dir / ("vallm.exe" if not (bin_dir / "vallm").exists() else "vallm")
+        subprocess.run(
+            [str(vallm), "batch", str(proj_dir), "--recursive", "--format", "toon", "--output", str(project_output)],
+            capture_output=True, cwd=str(proj_dir),
+        )
+
+
+def _scan_one_project(
+    proj_dir: Path, fix: bool, raw: bool, export_json: bool,
+    run_analyze: bool, tool_list: list[str], parser_inst: "SUMDParser",
+) -> dict:
+    """Generate SUMD.md for one project and return a result dict."""
+    sumd_path = proj_dir / "SUMD.md"
+
+    if sumd_path.exists() and not fix:
+        click.echo(f"  {'~'} {proj_dir.name:<18} {'skip':<10} {'\u2013':<10} already exists (use --fix to overwrite)")
+        return {"status": "SKIP", "path": str(sumd_path)}
+
+    try:
+        content, sources = generate_sumd_content(proj_dir, return_sources=True, raw_sources=raw)
+        sumd_path.write_text(content, encoding="utf-8")
+
+        result = validate_sumd_file(sumd_path)
+        md_issues = result["markdown"]
+        cb_errors = [c for c in result["codeblocks"] if c.kind == "error"]
+        cb_warnings = [c for c in result["codeblocks"] if c.kind == "warning"]
+        all_errors = md_issues + [c.message for c in cb_errors]
+
+        doc = parse_file(sumd_path)
+
+        if all_errors:
+            click.echo(f"  \u274c {proj_dir.name:<18} {'invalid':<10} {len(doc.sections):<10} {', '.join(sources)}")
+            for e in all_errors:
+                click.echo(f"       \u2193 {e}")
+            return {"status": "INVALID", "errors": all_errors, "path": str(sumd_path)}
+
+        warn_str = f" \u26a0 {len(cb_warnings)} warnings" if cb_warnings else ""
+        click.echo(f"  \u2705 {proj_dir.name:<18} {'ok':<10} {len(doc.sections):<10} {', '.join(sources)}{warn_str}")
+
+        if export_json:
+            json_path = proj_dir / "sumd.json"
+            data = {
+                "project_name": doc.project_name,
+                "description": doc.description,
+                "sections": [
+                    {"name": s.name, "type": s.type.value, "content": s.content, "level": s.level}
+                    for s in doc.sections
+                ],
+            }
+            json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+        if run_analyze:
+            click.echo("   \U0001f52c Running analysis...")
+            _run_analysis_tools(proj_dir, tool_list)
+            click.echo(f"   \u2705 Analysis complete \u2192 {proj_dir / 'project'}/")
+
+        return {
+            "status": "OK",
+            "project_name": doc.project_name,
+            "sections": len(doc.sections),
+            "sources": sources,
+            "path": str(sumd_path),
+            "warnings": [c.message for c in cb_warnings],
+        }
+
+    except Exception as exc:
+        click.echo(f"  \u274c {proj_dir.name:<18} {'error':<10} {'\u2013':<10} {exc}")
+        return {"status": "ERROR", "error": str(exc)}
+
+
 @cli.command()
 @click.argument("workspace", type=click.Path(exists=True, path_type=Path), default=".")
 @click.option("--export-json/--no-export-json", default=True, help="Also export sumd.json per project")
@@ -213,11 +327,9 @@ def scan(workspace: Path, export_json: bool, report: Optional[Path], fix: bool, 
     parser_inst = SUMDParser()
     results: dict = {}
     total = ok_count = skip_count = fail_count = 0
+    tool_list = [t.strip() for t in tools.split(",") if t.strip()]
 
-    project_dirs = sorted(
-        d for d in workspace.iterdir()
-        if d.is_dir() and not d.name.startswith(".") and (d / "pyproject.toml").exists()
-    )
+    project_dirs = _detect_projects(workspace)
 
     if not project_dirs:
         click.echo(f"⚠️  No projects found in {workspace} (looking for directories with pyproject.toml)")
@@ -229,119 +341,14 @@ def scan(workspace: Path, export_json: bool, report: Optional[Path], fix: bool, 
 
     for proj_dir in project_dirs:
         total += 1
-        sumd_path = proj_dir / "SUMD.md"
-
-        if sumd_path.exists() and not fix:
+        result = _scan_one_project(proj_dir, fix, raw, export_json, analyze, tool_list, parser_inst)
+        results[proj_dir.name] = result
+        if result["status"] == "SKIP":
             skip_count += 1
-            click.echo(f"  {'~'} {proj_dir.name:<18} {'skip':<10} {'–':<10} already exists (use --fix to overwrite)")
-            results[proj_dir.name] = {"status": "SKIP", "path": str(sumd_path)}
-            continue
-
-        try:
-            content, sources = generate_sumd_content(proj_dir, return_sources=True, raw_sources=raw)
-            sumd_path.write_text(content, encoding="utf-8")
-
-            result = validate_sumd_file(sumd_path)
-            md_issues = result["markdown"]
-            cb_errors = [c for c in result["codeblocks"] if c.kind == "error"]
-            cb_warnings = [c for c in result["codeblocks"] if c.kind == "warning"]
-            all_errors = md_issues + [c.message for c in cb_errors]
-
-            doc = parse_file(sumd_path)
-
-            if all_errors:
-                fail_count += 1
-                results[proj_dir.name] = {"status": "INVALID", "errors": all_errors, "path": str(sumd_path)}
-                click.echo(f"  ❌ {proj_dir.name:<18} {'invalid':<10} {len(doc.sections):<10} {', '.join(sources)}")
-                for e in all_errors:
-                    click.echo(f"       ↳ {e}")
-            else:
-                ok_count += 1
-                results[proj_dir.name] = {
-                    "status": "OK",
-                    "project_name": doc.project_name,
-                    "sections": len(doc.sections),
-                    "sources": sources,
-                    "path": str(sumd_path),
-                    "warnings": [c.message for c in cb_warnings],
-                }
-                warn_str = f" ⚠ {len(cb_warnings)} warnings" if cb_warnings else ""
-                sources_str = ", ".join(sources)
-                click.echo(f"  ✅ {proj_dir.name:<18} {'ok':<10} {len(doc.sections):<10} {sources_str}{warn_str}")
-
-            if export_json:
-                json_path = proj_dir / "sumd.json"
-                data = {
-                    "project_name": doc.project_name,
-                    "description": doc.description,
-                    "sections": [
-                        {"name": s.name, "type": s.type.value, "content": s.content, "level": s.level}
-                        for s in doc.sections
-                    ],
-                }
-                json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-
-            # Run analysis tools if requested
-            if analyze and ok_count > 0:
-                click.echo(f"   🔬 Running analysis...")
-                tools_dir = proj_dir / ".sumd-tools"
-                venv_dir = tools_dir / "venv"
-                project_output = proj_dir / "project"
-                
-                tool_list = [t.strip() for t in tools.split(",") if t.strip()]
-                
-                # Create venv if needed
-                if not venv_dir.exists():
-                    tools_dir.mkdir(exist_ok=True)
-                    subprocess.run(
-                        [sys.executable, "-m", "venv", str(venv_dir)],
-                        capture_output=True
-                    )
-                    pip_path = venv_dir / "bin" / "pip"
-                    if not pip_path.exists():
-                        pip_path = venv_dir / "Scripts" / "pip.exe"
-                    for pkg in tool_list:
-                        subprocess.run([str(pip_path), "install", "-q", pkg], capture_output=True)
-                
-                bin_dir = venv_dir / "bin"
-                if not bin_dir.exists():
-                    bin_dir = venv_dir / "Scripts"
-                
-                project_output.mkdir(exist_ok=True)
-                
-                if "code2llm" in tool_list:
-                    code2llm = bin_dir / "code2llm"
-                    if not code2llm.exists():
-                        code2llm = bin_dir / "code2llm.exe"
-                    subprocess.run(
-                        [str(code2llm), str(proj_dir), "-f", "all", "-o", str(project_output), "--no-chunk"],
-                        capture_output=True, cwd=str(proj_dir)
-                    )
-                
-                if "redup" in tool_list:
-                    redup = bin_dir / "redup"
-                    if not redup.exists():
-                        redup = bin_dir / "redup.exe"
-                    subprocess.run(
-                        [str(redup), "scan", str(proj_dir), "--format", "toon", "--output", str(project_output)],
-                        capture_output=True, cwd=str(proj_dir)
-                    )
-                
-                if "vallm" in tool_list:
-                    vallm = bin_dir / "vallm"
-                    if not vallm.exists():
-                        vallm = bin_dir / "vallm.exe"
-                    subprocess.run(
-                        [str(vallm), "batch", str(proj_dir), "--recursive", "--format", "toon", "--output", str(project_output)],
-                        capture_output=True, cwd=str(proj_dir)
-                    )
-                
-                click.echo(f"   ✅ Analysis complete → {project_output}/")
-
-        except Exception as exc:
+        elif result["status"] == "OK":
+            ok_count += 1
+        else:
             fail_count += 1
-            results[proj_dir.name] = {"status": "ERROR", "error": str(exc)}
-            click.echo(f"  ❌ {proj_dir.name:<18} {'error':<10} {'–':<10} {exc}")
 
     click.echo("─" * 70)
     click.echo(f"\n📊 Summary: {total} projects | ✅ {ok_count} ok | ⏭ {skip_count} skipped | ❌ {fail_count} failed\n")
@@ -421,117 +428,211 @@ def lint(files: tuple[Path, ...], workspace: Optional[Path], as_json: bool):
     sys.exit(0 if total_errors == 0 else 1)
 
 
+def _setup_tools_venv(venv_dir: Path, tool_list: list[str], force: bool) -> Path:
+    """Create .sumd-tools venv and install tools if needed. Returns bin_dir."""
+    tools_dir = venv_dir.parent
+    if not venv_dir.exists() or force:
+        click.echo("📁 Setting up tools environment...")
+        tools_dir.mkdir(exist_ok=True)
+        result = subprocess.run(
+            [sys.executable, "-m", "venv", str(venv_dir)],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            click.echo(f"❌ Failed to create venv: {result.stderr}", err=True)
+            sys.exit(1)
+        pip_path = venv_dir / "bin" / "pip"
+        if not pip_path.exists():
+            pip_path = venv_dir / "Scripts" / "pip.exe"
+        for pkg in tool_list:
+            click.echo(f"   📥 Installing {pkg}...")
+            subprocess.run([str(pip_path), "install", "-q", pkg], capture_output=True)
+    else:
+        click.echo(f"📁 Using existing venv: {venv_dir}")
+    bin_dir = venv_dir / "bin"
+    return bin_dir if bin_dir.exists() else venv_dir / "Scripts"
+
+
+def _run_code2llm_formats(bin_dir: Path, project: Path, project_output: Path) -> bool:
+    """Run code2llm for each format. Returns True if all succeeded."""
+    code2llm = bin_dir / "code2llm"
+    if not code2llm.exists():
+        code2llm = bin_dir / "code2llm.exe"
+    formats = [
+        ("toon",       "analysis.toon.yaml"),
+        ("evolution",  "evolution.toon.yaml"),
+        ("context",    "context.md"),
+        ("calls_toon", "calls.toon.yaml"),
+        ("mermaid",    "flow.mmd, compact_flow.mmd"),
+    ]
+    all_ok = True
+    for fmt, output_files in formats:
+        extra = ["--no-png"] if fmt in ("mermaid", "calls") else []
+        r = subprocess.run(
+            [str(code2llm), "./", "-f", fmt, "-o", str(project_output)] + extra,
+            capture_output=True, text=True, cwd=str(project),
+        )
+        if r.returncode != 0:
+            click.echo(f"   ⚠️  code2llm -f {fmt} failed", err=True)
+            all_ok = False
+        else:
+            click.echo(f"   ✅ code2llm -f {fmt} → {output_files}")
+    return all_ok
+
+
+def _run_tool_subprocess(bin_dir: Path, tool: str, cmd_args: list[str]) -> bool:
+    """Run a single analysis tool subprocess. Returns True on success."""
+    exe = bin_dir / tool
+    if not exe.exists():
+        exe = bin_dir / f"{tool}.exe"
+    r = subprocess.run([str(exe)] + cmd_args, capture_output=True, text=True)
+    if r.returncode == 0:
+        click.echo(f"   ✅ {tool} complete")
+        return True
+    click.echo(f"   ⚠️  {tool} failed", err=True)
+    return False
+
+
 @cli.command()
 @click.argument("project", type=click.Path(exists=True, path_type=Path))
 @click.option("--tools", type=str, default="code2llm,redup,vallm", help="Comma-separated list of tools to run")
 @click.option("--force/--no-force", default=False, help="Force reinstall tools even if venv exists")
 def analyze(project: Path, tools: str, force: bool):
     """Run analysis tools (code2llm, redup, vallm) on a project.
-    
+
     Installs tools to .sumd-tools/venv and generates analysis files in project/.
-    
+
     PROJECT: Path to the project directory to analyze
     """
-    import subprocess
-    
+    import subprocess as _sp  # noqa: F401 (already imported at top)
+
     project = project.resolve()
-    tools_dir = project / ".sumd-tools"
-    venv_dir = tools_dir / "venv"
+    venv_dir = project / ".sumd-tools" / "venv"
     project_output = project / "project"
-    
+
     tool_list = [t.strip() for t in tools.split(",") if t.strip()]
     valid_tools = {"code2llm", "redup", "vallm"}
     invalid = set(tool_list) - valid_tools
     if invalid:
         click.echo(f"❌ Unknown tools: {', '.join(invalid)}", err=True)
         sys.exit(1)
-    
+
     click.echo(f"🔍 Analyzing project: {project.name}")
     click.echo(f"📦 Tools: {', '.join(tool_list)}")
-    
-    # Create venv if needed
-    if not venv_dir.exists() or force:
-        click.echo(f"📁 Setting up tools environment...")
-        tools_dir.mkdir(exist_ok=True)
-        
-        result = subprocess.run(
-            [sys.executable, "-m", "venv", str(venv_dir)],
-            capture_output=True, text=True
-        )
-        if result.returncode != 0:
-            click.echo(f"❌ Failed to create venv: {result.stderr}", err=True)
-            sys.exit(1)
-        
-        pip_path = venv_dir / "bin" / "pip"
-        if not pip_path.exists():
-            pip_path = venv_dir / "Scripts" / "pip.exe"
-        
-        for pkg in tool_list:
-            click.echo(f"   📥 Installing {pkg}...")
-            subprocess.run([str(pip_path), "install", "-q", pkg], capture_output=True)
-    else:
-        click.echo(f"📁 Using existing venv: {venv_dir}")
-    
-    bin_dir = venv_dir / "bin"
-    if not bin_dir.exists():
-        bin_dir = venv_dir / "Scripts"
-    
+
+    bin_dir = _setup_tools_venv(venv_dir, tool_list, force)
     project_output.mkdir(exist_ok=True)
-    
     success_count = 0
-    
+
     if "code2llm" in tool_list:
         click.echo("🔬 Running code2llm...")
-        code2llm = bin_dir / "code2llm"
-        if not code2llm.exists():
-            code2llm = bin_dir / "code2llm.exe"
-        
-        result = subprocess.run(
-            [str(code2llm), str(project), "-f", "all", "-o", str(project_output), "--no-chunk"],
-            capture_output=True, text=True, cwd=str(project)
-        )
-        if result.returncode == 0:
-            click.echo("   ✅ code2llm complete")
+        if _run_code2llm_formats(bin_dir, project, project_output):
             success_count += 1
-        else:
-            click.echo(f"   ⚠️  code2llm failed", err=True)
-    
+
     if "redup" in tool_list:
         click.echo("🔍 Running redup...")
-        redup = bin_dir / "redup"
-        if not redup.exists():
-            redup = bin_dir / "redup.exe"
-        
-        result = subprocess.run(
-            [str(redup), "scan", str(project), "--format", "toon", "--output", str(project_output)],
-            capture_output=True, text=True, cwd=str(project)
-        )
-        if result.returncode == 0:
-            click.echo("   ✅ redup complete")
+        if _run_tool_subprocess(bin_dir, "redup", [
+            "scan", str(project), "--format", "toon", "--output", str(project_output)
+        ]):
             success_count += 1
-        else:
-            click.echo(f"   ⚠️  redup failed", err=True)
-    
+
     if "vallm" in tool_list:
         click.echo("✅ Running vallm...")
-        vallm = bin_dir / "vallm"
-        if not vallm.exists():
-            vallm = bin_dir / "vallm.exe"
-        
-        result = subprocess.run(
-            [str(vallm), "batch", str(project), "--recursive", "--format", "toon", "--output", str(project_output)],
-            capture_output=True, text=True, cwd=str(project)
-        )
-        if result.returncode == 0:
-            click.echo("   ✅ vallm complete")
+        if _run_tool_subprocess(bin_dir, "vallm", [
+            "batch", str(project), "--recursive", "--format", "toon", "--output", str(project_output)
+        ]):
             success_count += 1
-        else:
-            click.echo(f"   ⚠️  vallm failed", err=True)
-    
+
     click.echo(f"\n📊 Analysis complete: {success_count}/{len(tool_list)} tools succeeded")
     click.echo(f"📁 Output: {project_output}/")
-    
     sys.exit(0 if success_count == len(tool_list) else 1)
+
+
+def _api_scenario_template(
+    name: str, scenario_type: str, endpoints_block: str, base_path: str = "/api/v1"
+) -> str:
+    n_ep = endpoints_block.strip().count("\n  ") + 1
+    return (
+        f"# SCENARIO: {name}.testql.toon.yaml — {name.replace('-', ' ')}\n"
+        f"# TYPE: {scenario_type}\n"
+        f"# VERSION: 1.0\n"
+        f"# GENERATED: true\n"
+        f"\n"
+        f"# ── Konfiguracja ──────────────────────────────────────\n"
+        f"CONFIG[1]{{key, value}}:\n"
+        f"  base_path,  {base_path}\n"
+        f"\n"
+        f"# ── Wywołania API ─────────────────────────────────────\n"
+        f"API[{n_ep}]{{method, endpoint, status}}:\n"
+        f"{endpoints_block}\n"
+        f"# ── Asercje ───────────────────────────────────────────\n"
+        f"# ASSERT[0]{{field, op, expected}}:\n"
+        f"#   TODO: fill in assertions\n"
+    )
+
+
+def _scaffold_write(path: Path, content: str, force: bool,
+                    generated: list[str], skipped: list[str]) -> None:
+    if path.exists() and not force:
+        skipped.append(path.name)
+    else:
+        path.write_text(content, encoding="utf-8")
+        generated.append(path.name)
+
+
+def _scaffold_from_openapi(
+    spec: dict, out_dir: Path, scenario_type: str, force: bool,
+    generated: list[str], skipped: list[str],
+) -> int:
+    """Generate scenarios from OpenAPI spec into out_dir. Returns number of path entries."""
+    paths = spec.get("paths", {})
+    groups: dict[str, list[tuple[str, str]]] = {}
+    for path, methods in paths.items():
+        segment = path.strip("/").split("/")[0] or "root"
+        for method in methods:
+            if method.lower() in ("get", "post", "put", "delete", "patch"):
+                groups.setdefault(segment, []).append((method.upper(), path))
+
+    base = spec.get("servers", [{}])[0].get("url", "/api/v1").rstrip("/")
+
+    if scenario_type in ("smoke", "all"):
+        health_paths = [p for p in paths if any(k in p.lower() for k in ("health", "ping", "status"))]
+        ep_block = (
+            "\n".join(f"  GET,  {p},  200" for p in health_paths[:5])
+            if health_paths
+            else "  GET,  /health,  200  # TODO: adjust path"
+        )
+        _scaffold_write(
+            out_dir / "smoke-health.testql.toon.yaml",
+            _api_scenario_template("smoke-health", "smoke", ep_block, base),
+            force, generated, skipped,
+        )
+
+    if scenario_type in ("crud", "api", "all"):
+        for resource, eps in sorted(groups.items()):
+            if resource in ("health", "ping", "status"):
+                continue
+            safe_resource = re.sub(r"[^\w\-]", "_", resource).strip("_")
+            ep_lines = [f"  {method},  {path},  200" for method, path in eps[:8]]
+            if not ep_lines:
+                continue
+            _scaffold_write(
+                out_dir / f"api-{safe_resource}.testql.toon.yaml",
+                _api_scenario_template(f"api-{safe_resource}", "api", "\n".join(ep_lines), base),
+                force, generated, skipped,
+            )
+
+    return len(paths)
+
+
+def _scaffold_generic(out_dir: Path, force: bool, generated: list[str], skipped: list[str]) -> None:
+    click.echo("⚠️  No openapi.yaml found — generating generic smoke scaffold")
+    content = _api_scenario_template(
+        "smoke-generic", "smoke",
+        "  GET,  /health,  200  # TODO: adjust\n  GET,  /,  200       # TODO: adjust",
+        "/api/v1  # TODO: adjust base_path",
+    )
+    _scaffold_write(out_dir / "smoke-generic.testql.toon.yaml", content, force, generated, skipped)
 
 
 @cli.command()
@@ -559,40 +660,10 @@ def scaffold(project: Path, output: Optional[Path], force: bool, scenario_type: 
     project = project.resolve()
     out_dir = (output or (project / "testql-scenarios")).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    openapi_path = project / "openapi.yaml"
     generated: list[str] = []
     skipped: list[str] = []
 
-    def _write(path: Path, content: str) -> bool:
-        if path.exists() and not force:
-            skipped.append(path.name)
-            return False
-        path.write_text(content, encoding="utf-8")
-        generated.append(path.name)
-        return True
-
-    def _api_scenario(name: str, scenario_type: str, endpoints_block: str,
-                      base_path: str = "/api/v1") -> str:
-        n_ep = endpoints_block.strip().count("\n  ") + 1
-        return (
-            f"# SCENARIO: {name}.testql.toon.yaml — {name.replace('-', ' ')}\n"
-            f"# TYPE: {scenario_type}\n"
-            f"# VERSION: 1.0\n"
-            f"# GENERATED: true\n"
-            f"\n"
-            f"# ── Konfiguracja ──────────────────────────────────────\n"
-            f"CONFIG[1]{{key, value}}:\n"
-            f"  base_path,  {base_path}\n"
-            f"\n"
-            f"# ── Wywołania API ─────────────────────────────────────\n"
-            f"API[{n_ep}]{{method, endpoint, status}}:\n"
-            f"{endpoints_block}\n"
-            f"# ── Asercje ───────────────────────────────────────────\n"
-            f"# ASSERT[0]{{field, op, expected}}:\n"
-            f"#   TODO: fill in assertions\n"
-        )
-
+    openapi_path = project / "openapi.yaml"
     if openapi_path.exists():
         click.echo(f"📖 Reading {openapi_path.name}...")
         try:
@@ -600,55 +671,14 @@ def scaffold(project: Path, output: Optional[Path], force: bool, scenario_type: 
         except Exception as e:
             click.echo(f"❌ Failed to parse openapi.yaml: {e}", err=True)
             sys.exit(1)
-
-        paths = spec.get("paths", {})
-        # Group endpoints by first path segment (tag/resource)
-        groups: dict[str, list[tuple[str, str]]] = {}
-        for path, methods in paths.items():
-            segment = path.strip("/").split("/")[0] or "root"
-            for method in methods:
-                if method.lower() in ("get", "post", "put", "delete", "patch"):
-                    groups.setdefault(segment, []).append((method.upper(), path))
-
-        base = spec.get("servers", [{}])[0].get("url", "/api/v1").rstrip("/")
-
-        # Smoke test — health endpoints
-        if scenario_type in ("smoke", "all"):
-            health_paths = [p for p in paths if "health" in p.lower() or "ping" in p.lower() or "status" in p.lower()]
-            if health_paths:
-                ep_block = "\n".join(f"  GET,  {p},  200" for p in health_paths[:5])
-                fname = out_dir / "smoke-health.testql.toon.yaml"
-                _write(fname, _api_scenario("smoke-health", "smoke", ep_block, base))
-            else:
-                ep_block = "  GET,  /health,  200  # TODO: adjust path"
-                fname = out_dir / "smoke-health.testql.toon.yaml"
-                _write(fname, _api_scenario("smoke-health", "smoke", ep_block, base))
-
-        # Per-resource CRUD scenarios
-        if scenario_type in ("crud", "api", "all"):
-            for resource, eps in sorted(groups.items()):
-                if resource in ("health", "ping", "status"):
-                    continue
-                # sanitize resource name for filename
-                safe_resource = re.sub(r"[^\w\-]", "_", resource).strip("_")
-                ep_lines = []
-                for method, path in eps[:8]:  # cap at 8 per resource
-                    ep_lines.append(f"  {method},  {path},  200")
-                if not ep_lines:
-                    continue
-                fname = out_dir / f"api-{safe_resource}.testql.toon.yaml"
-                ep_block = "\n".join(ep_lines)
-                _write(fname, _api_scenario(f"api-{safe_resource}", "api", ep_block, base))
-        click.echo(f"   📋 {len(paths)} paths → {len(groups)} resource groups")
-
+        n_paths = _scaffold_from_openapi(spec, out_dir, scenario_type, force, generated, skipped)
+        groups_count = len({
+            (path.strip("/").split("/")[0] or "root")
+            for path in spec.get("paths", {})
+        })
+        click.echo(f"   📋 {n_paths} paths → {groups_count} resource groups")
     else:
-        click.echo(f"⚠️  No openapi.yaml found — generating generic smoke scaffold")
-        content = _api_scenario(
-            "smoke-generic", "smoke",
-            "  GET,  /health,  200  # TODO: adjust\n  GET,  /,  200       # TODO: adjust",
-            "/api/v1  # TODO: adjust base_path",
-        )
-        _write(out_dir / "smoke-generic.testql.toon.yaml", content)
+        _scaffold_generic(out_dir, force, generated, skipped)
 
     click.echo(f"\n📊 scaffold: {len(generated)} generated | {len(skipped)} skipped (use --force to overwrite)")
     for f in generated:

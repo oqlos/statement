@@ -1,39 +1,57 @@
-# code2llm/evolution | 41 func | 4f | 2026-04-18
+# code2llm/evolution | 104 func | 6f | 2026-04-18
 
-NEXT[6] (ranked by impact):
-  [1] !! SPLIT           sumd/generator.py
-      WHY: 1077L, 0 classes, max CC=141
-      EFFORT: ~4h  IMPACT: 151857
+NEXT[10] (ranked by impact):
+  [1] !! SPLIT           sumd/extractor.py
+      WHY: 707L, 0 classes, max CC=22
+      EFFORT: ~4h  IMPACT: 15554
 
-  [2] !! SPLIT-FUNC      generate_sumd_content  CC=141  fan=48
-      WHY: CC=141 exceeds 15
-      EFFORT: ~1h  IMPACT: 6768
+  [2] !! SPLIT           sumd/cli.py
+      WHY: 742L, 0 classes, max CC=19
+      EFFORT: ~4h  IMPACT: 14098
 
-  [3] !! SPLIT-FUNC      _parse_toon_file  CC=41  fan=18
-      WHY: CC=41 exceeds 15
-      EFFORT: ~1h  IMPACT: 738
+  [3] !! SPLIT           sumd/renderer.py
+      WHY: 634L, 0 classes, max CC=20
+      EFFORT: ~4h  IMPACT: 12680
 
   [4] !  SPLIT-FUNC      call_tool  CC=24  fan=20
       WHY: CC=24 exceeds 15
       EFFORT: ~1h  IMPACT: 480
 
-  [5] !  SPLIT-FUNC      _parse_doql_content  CC=17  fan=23
-      WHY: CC=17 exceeds 15
-      EFFORT: ~1h  IMPACT: 391
+  [5] !  SPLIT-FUNC      generate_map_toon  CC=22  fan=15
+      WHY: CC=22 exceeds 15
+      EFFORT: ~1h  IMPACT: 330
 
-  [6] !  SPLIT-FUNC      scan  CC=16  fan=24
+  [6] !  SPLIT-FUNC      lint  CC=19  fan=17
+      WHY: CC=19 exceeds 15
+      EFFORT: ~1h  IMPACT: 323
+
+  [7] !  SPLIT-FUNC      _scaffold_from_openapi  CC=16  fan=20
       WHY: CC=16 exceeds 15
-      EFFORT: ~1h  IMPACT: 384
+      EFFORT: ~1h  IMPACT: 320
+
+  [8] !  SPLIT-FUNC      _analyse_py_module  CC=15  fan=16
+      WHY: CC=15 exceeds 15
+      EFFORT: ~1h  IMPACT: 240
+
+  [9] !  SPLIT-FUNC      _render_interfaces_testql  CC=20  fan=10
+      WHY: CC=20 exceeds 15
+      EFFORT: ~1h  IMPACT: 200
+
+  [10] !  SPLIT-FUNC      _scan_one_project  CC=16  fan=12
+      WHY: CC=16 exceeds 15
+      EFFORT: ~1h  IMPACT: 192
 
 
-RISKS[1]:
-  ⚠ Splitting sumd/generator.py may break 19 import paths
+RISKS[3]:
+  ⚠ Splitting sumd/cli.py may break 22 import paths
+  ⚠ Splitting sumd/extractor.py may break 28 import paths
+  ⚠ Splitting sumd/renderer.py may break 18 import paths
 
 METRICS-TARGET:
-  CC̄:          9.9 → ≤5.0
-  max-CC:      141 → ≤20
-  god-modules: 1 → 0
-  high-CC(≥15): 5 → ≤2
+  CC̄:          6.5 → ≤4.5
+  max-CC:      24 → ≤12
+  god-modules: 3 → 0
+  high-CC(≥15): 10 → ≤5
   hub-types:   0 → ≤0
 
 PATTERNS (language parser shared logic):
@@ -61,4 +79,4 @@ PATTERNS (language parser shared logic):
     - Standardized FunctionInfo/ClassInfo models
 
 HISTORY:
-  (first run — no previous data)
+  prev CC̄=6.5 → now CC̄=6.5

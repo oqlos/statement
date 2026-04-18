@@ -10,26 +10,35 @@ flowchart TD
         sumd__cli__info["info"]
         sumd__cli__generate["generate"]
         sumd__cli__extract["extract"]
+        sumd__cli___detect_projects["_detect_projects"]
+        sumd__cli___run_analysis_tools["_run_analysis_tools"]
+        sumd__cli___scan_one_project["_scan_one_project"]
         sumd__cli__scan["scan"]
-        sumd__cli__main["main"]
+        sumd__cli__lint["lint"]
+        sumd__cli___setup_tools_venv["_setup_tools_venv"]
+        sumd__cli___run_code2llm_formats["_run_code2llm_formats"]
+        sumd__cli___run_tool_subprocess["_run_tool_subprocess"]
+        sumd__cli__analyze["analyze"]
+        ...["+7 more"]
     end
 
     subgraph Core
+        sumd__toon_parser___parse_toon_block_config("_parse_toon_block_config CC=9")
+        sumd__toon_parser___parse_toon_file["_parse_toon_file"]
+        sumd__toon_parser__extract_testql_scenarios["extract_testql_scenarios"]
+        sumd__extractor___analyse_py_module{{_analyse_py_module CC=15}}
+        sumd__extractor__generate_map_toon{{generate_map_toon CC=22}}
         sumd__mcp_server__list_tools["list_tools"]
         sumd__mcp_server__call_tool["call_tool"]
         sumd__mcp_server__main["main"]
-        sumd__generator___read_toml["_read_toml"]
-        sumd__generator__extract_pyproject["extract_pyproject"]
-        sumd__generator___parse_toon_file{{_parse_toon_file CC=41}}
-        sumd__generator___parse_doql_content{{_parse_doql_content CC=17}}
-        sumd__generator__generate_sumd_content{{generate_sumd_content CC=141}}
+        sumd__renderer___render_architecture_doql_parsed{{_render_architecture_doql_pars CC=17}}
+        sumd__renderer___render_interfaces_testql{{_render_interfaces_testql CC=20}}
+        sumd__renderer___render_deployment{{_render_deployment CC=18}}
+        sumd__renderer___collect_sources{{_collect_sources CC=19}}
+        sumd__renderer__generate_sumd_content["generate_sumd_content"]
         sumd__parser__SUMDParser__parse["parse"]
         sumd__parser__SUMDParser___parse_header["_parse_header"]
-        sumd__parser__SUMDParser___parse_sections["_parse_sections"]
-        sumd__parser__SUMDParser__validate["validate"]
-        sumd__parser__parse["parse"]
-        sumd__parser__parse_file["parse_file"]
-        sumd__parser__validate["validate"]
+        ...["+11 more"]
     end
 
-    class sumd__cli__cli,sumd__cli__validate,sumd__cli__export,sumd__cli__info,sumd__cli__generate,sumd__cli__extract,sumd__cli__scan,sumd__cli__main,sumd__mcp_server__list_tools,sumd__mcp_server__call_tool entry
+    class sumd__cli__cli,sumd__cli__validate,sumd__cli__export,sumd__cli__info,sumd__cli__generate,sumd__cli__extract,sumd__cli___detect_projects,sumd__cli___run_analysis_tools,sumd__cli___scan_one_project,sumd__cli__scan entry
