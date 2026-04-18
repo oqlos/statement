@@ -14,12 +14,13 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 - [Environment Variables (`.env.example`)](#environment-variables-envexample)
 - [Release Management (`goal.yaml`)](#release-management-goalyaml)
 - [Code Analysis](#code-analysis)
+- [Source Map](#source-map)
 - [Intent](#intent)
 
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.1.18`
+- **version**: `0.1.19`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -373,7 +374,7 @@ tasks:
 ```yaml
 project:
   name: sumd
-  version: 0.1.18
+  version: 0.1.19
   env: local
 ```
 
@@ -768,6 +769,164 @@ EDGES:
   sumd.mcp_server._tool_validate_sumd → sumd.mcp_server._resolve_path
   sumd.mcp_server._tool_validate_sumd → sumd.parser.SUMDParser.parse_file
   sumd.mcp_server._tool_validate_sumd → sumd.parser.validate
+```
+
+## Source Map
+
+*Top 5 modules by symbol density — signatures for LLM orientation.*
+
+### `sumd.extractor` (`sumd/extractor.py`)
+
+```python
+def _read_toml(path)  # CC=2, fan=2
+def extract_pyproject(proj_dir)  # CC=3, fan=5
+def extract_taskfile(proj_dir)  # CC=10, fan=7 ⚠
+def extract_openapi(proj_dir)  # CC=12, fan=12 ⚠
+def _parse_doql_entities(content)  # CC=4, fan=5
+def _parse_doql_interfaces(content)  # CC=3, fan=7
+def _parse_doql_workflows(content)  # CC=7, fan=10
+def _parse_doql_content(content)  # CC=6, fan=14
+def extract_doql(proj_dir)  # CC=3, fan=3
+def extract_pyqual(proj_dir)  # CC=5, fan=5
+def extract_python_modules(proj_dir, pkg_name)  # CC=4, fan=4
+def extract_readme_title(proj_dir)  # CC=4, fan=5
+def extract_requirements(proj_dir)  # CC=7, fan=7
+def extract_makefile(proj_dir)  # CC=7, fan=9
+def extract_goal(proj_dir)  # CC=3, fan=7
+def extract_env(proj_dir)  # CC=10, fan=9 ⚠
+def extract_dockerfile(proj_dir)  # CC=13, fan=9 ⚠
+def extract_docker_compose(proj_dir)  # CC=10, fan=12 ⚠
+def extract_package_json(proj_dir)  # CC=3, fan=6
+def _lang_of(path)  # CC=1, fan=2
+def _fan_out(func_node)  # CC=5, fan=5
+def _cc_estimate(func_node)  # CC=4, fan=4
+def _try_radon_cc(src)  # CC=3, fan=1
+def _analyse_py_top_funcs(tree, radon_cc)  # CC=5, fan=6
+def _analyse_py_top_classes(tree, radon_cc)  # CC=11, fan=9 ⚠
+def _analyse_py_module(path)  # CC=2, fan=6
+def _collect_map_files(proj_dir)  # CC=7, fan=11
+def _render_map_detail(proj_dir, modules)  # CC=5, fan=3
+def _map_cc_stats(all_funcs)  # CC=12, fan=8 ⚠
+def generate_map_toon(proj_dir)  # CC=11, fan=12 ⚠
+def extract_source_snippets(proj_dir, pkg_name)  # CC=6, fan=11
+def extract_project_analysis(proj_dir)  # CC=4, fan=5
+```
+
+### `sumd.renderer` (`sumd/renderer.py`)
+
+```python
+def _render_architecture(doql, modules, name, proj_dir, raw_sources)  # CC=12, fan=8 ⚠
+def _render_doql_app(doql, L)  # CC=3, fan=3
+def _render_doql_entities(doql, L)  # CC=6, fan=4
+def _render_doql_interfaces(doql, L)  # CC=6, fan=5
+def _render_doql_integrations(doql, L)  # CC=5, fan=5
+def _render_architecture_doql_parsed(doql, L)  # CC=1, fan=4
+def _render_interfaces(scripts, openapi, scenarios, proj_dir, raw_sources)  # CC=5, fan=4
+def _render_interfaces_openapi(openapi, proj_dir, raw_sources, L)  # CC=6, fan=7
+def _render_testql_raw(scenarios, proj_dir, L)  # CC=4, fan=7
+def _render_testql_one_structured(sc, L)  # CC=15, fan=4 ⚠
+def _render_interfaces_testql(scenarios, proj_dir, raw_sources, L)  # CC=3, fan=3
+def _render_workflows(doql, tasks, proj_dir, raw_sources)  # CC=12, fan=6 ⚠
+def _render_quality(pyqual, proj_dir, raw_sources)  # CC=12, fan=6 ⚠
+def _render_dependencies(deps, dev_deps)  # CC=5, fan=1
+def _render_deployment_install(pkg_json, name, L)  # CC=2, fan=2
+def _render_deployment_reqs(reqs, L)  # CC=5, fan=2
+def _render_deployment_docker(dockerfile, compose, L)  # CC=13, fan=4 ⚠
+def _render_deployment(pkg_json, name, reqs, dockerfile, compose)  # CC=1, fan=4
+def _render_extras(makefile, pkg_json)  # CC=11, fan=4 ⚠
+def _render_code_analysis(project_analysis)  # CC=5, fan=1
+def _render_source_snippets(source_snippets, top_n)  # CC=8, fan=4
+def _collect_pkg_sources(pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars)  # CC=14, fan=4 ⚠
+def _collect_infra_sources(dockerfile, compose, pkg_json, modules, project_analysis)  # CC=6, fan=3
+def _collect_sources(pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars, dockerfile, compose, pkg_json, modules, project_analysis)  # CC=1, fan=2
+def _render_metadata_section(name, version, py_req, license_, ai_model, openapi, sources_used)  # CC=5, fan=3
+def _render_configuration_section(name, version)  # CC=1, fan=0
+def _render_env_section(env_vars)  # CC=3, fan=2
+def _render_goal_section(goal)  # CC=9, fan=3
+def _inject_toc(content)  # CC=3, fan=6
+def generate_sumd_content(proj_dir, return_sources, raw_sources)  # CC=4, fan=34
+```
+
+### `sumd.cli` (`sumd/cli.py`)
+
+```python
+def cli()  # CC=1, fan=2
+def validate(file)  # CC=4, fan=8
+def export(file, format, output)  # CC=8, fan=11
+def info(file)  # CC=3, fan=7
+def generate(file, format, output)  # CC=8, fan=15
+def extract(file, section)  # CC=5, fan=8
+def _detect_projects(workspace)  # CC=5, fan=5
+def _run_analysis_tools(proj_dir, tool_list)  # CC=11, fan=4 ⚠
+def _export_sumd_json(proj_dir, doc)  # CC=2, fan=2
+def _scan_one_project(proj_dir, fix, raw, export_json, run_analyze, tool_list, parser_inst, profile)  # CC=15, fan=12 ⚠
+def scan(workspace, export_json, report, fix, raw, analyze, tools, profile)  # CC=9, fan=16
+def lint(files, workspace, as_json)  # CC=10, fan=12 ⚠
+def _lint_collect_paths(files, workspace)  # CC=6, fan=7
+def _lint_print_result(path, r)  # CC=9, fan=2
+def _setup_tools_venv(venv_dir, tool_list, force)  # CC=7, fan=6
+def _run_code2llm_formats(bin_dir, project, project_output)  # CC=5, fan=4
+def _run_tool_subprocess(bin_dir, tool, cmd_args)  # CC=3, fan=4
+def analyze(project, tools, force)  # CC=11, fan=17 ⚠
+def _api_scenario_template(name, scenario_type, endpoints_block, base_path)  # CC=1, fan=3
+def _scaffold_write(path, content, force, generated, skipped)  # CC=3, fan=3
+def _scaffold_smoke_scenario(paths, base, out_dir, force, generated, skipped)  # CC=6, fan=5
+def _scaffold_crud_scenarios(groups, base, out_dir, force, generated, skipped)  # CC=5, fan=7
+def _scaffold_from_openapi(spec, out_dir, scenario_type, force, generated, skipped)  # CC=7, fan=12
+def _scaffold_generic(out_dir, force, generated, skipped)  # CC=1, fan=3
+def scaffold(project, output, force, scenario_type)  # CC=9, fan=18
+def map_cmd(project, output, force, stdout)  # CC=7, fan=12
+def main()  # CC=1, fan=1
+```
+
+### `sumd.parser` (`sumd/parser.py`)
+
+```python
+def parse(content)  # CC=1, fan=2
+def parse_file(path)  # CC=1, fan=2
+def validate(document)  # CC=6, fan=2
+def _validate_yaml_body(body, path)  # CC=2, fan=1
+def _validate_less_css_body(body, path)  # CC=2, fan=1
+def _validate_mermaid_body(body, path)  # CC=3, fan=4
+def _validate_toon_body(body, path)  # CC=2, fan=1
+def _validate_bash_body(body, path)  # CC=4, fan=1
+def _validate_deps_body(body, path)  # CC=5, fan=6
+def validate_codeblocks(content, source)  # CC=13, fan=12 ⚠
+def _check_h1(lines, source)  # CC=3, fan=2
+def _check_required_sections(lines, source)  # CC=6, fan=6
+def _check_metadata_fields(lines, source)  # CC=9, fan=6
+def _check_unclosed_fences(lines, source)  # CC=4, fan=2
+def _check_empty_links(content, source)  # CC=2, fan=1
+def validate_markdown(content, source)  # CC=1, fan=6
+def validate_sumd_file(path)  # CC=3, fan=5
+class SectionType:  # SUMD section types.
+class Section:  # Represents a SUMD section.
+class SUMDDocument:  # Represents a parsed SUMD document.
+class SUMDParser:  # Parser for SUMD markdown documents.
+    def __init__()  # CC=1
+    def parse(content)  # CC=1
+    def parse_file(path)  # CC=1
+    def _parse_header(lines)  # CC=9
+    def _parse_sections(lines)  # CC=6
+    def validate(document)  # CC=6
+class CodeBlockIssue:
+```
+
+### `sumd.mcp_server` (`sumd/mcp_server.py`)
+
+```python
+def _doc_to_dict(doc)  # CC=2, fan=0
+def _resolve_path(path)  # CC=2, fan=3
+def list_tools()  # CC=1, fan=2
+def _tool_parse_sumd(arguments)  # CC=1, fan=5
+def _tool_validate_sumd(arguments)  # CC=1, fan=7
+def _tool_export_sumd(arguments)  # CC=5, fan=8
+def _tool_list_sections(arguments)  # CC=2, fan=4
+def _tool_get_section(arguments)  # CC=5, fan=6
+def _tool_info_sumd(arguments)  # CC=2, fan=5
+def _tool_generate_sumd(arguments)  # CC=5, fan=5
+def call_tool(name, arguments)  # CC=3, fan=4
+def main()  # CC=1, fan=3
 ```
 
 ## Intent

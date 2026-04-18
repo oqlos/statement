@@ -51,6 +51,7 @@ class RenderContext:
     compose: dict = field(default_factory=dict)
     pkg_json: dict = field(default_factory=dict)
     project_analysis: list = field(default_factory=list)
+    source_snippets: list = field(default_factory=list)
 
     # Rendering options
     raw_sources: bool = True

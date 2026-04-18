@@ -714,6 +714,37 @@ _PROJECT_ANALYSIS_FILES = [
 ]
 
 
+def extract_source_snippets(proj_dir: Path, pkg_name: str) -> list[dict]:
+    """Return per-module AST summary for source_snippets section.
+
+    Each entry: {module, path, funcs: [{name, args, cc, fan}], classes: [{name, methods, doc}]}
+    Sorted by total function+method count descending (highest-density modules first).
+    """
+    pkg_dir = proj_dir / pkg_name
+    if not pkg_dir.is_dir():
+        return []
+    results: list[dict] = []
+    for py_file in sorted(pkg_dir.glob("*.py")):
+        if py_file.stem.startswith("__"):
+            continue
+        analysis = _analyse_py_module(py_file)
+        if not analysis["funcs"] and not analysis["classes"]:
+            continue
+        rel = py_file.relative_to(proj_dir)
+        results.append({
+            "module": f"{pkg_name}.{py_file.stem}",
+            "path": str(rel),
+            "funcs": analysis["funcs"],
+            "classes": analysis["classes"],
+        })
+    # Sort by density: total public symbols (functions + all class methods)
+    def _density(entry: dict) -> int:
+        method_count = sum(len(c["methods"]) for c in entry["classes"])
+        return len(entry["funcs"]) + method_count
+    results.sort(key=_density, reverse=True)
+    return results
+
+
 def extract_project_analysis(proj_dir: Path) -> list[dict[str, str]]:
     """Return list of {file, lang, content} for files present in project/ subdir."""
     project_dir = proj_dir / "project"

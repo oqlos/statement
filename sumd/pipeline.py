@@ -40,6 +40,7 @@ from sumd.extractor import (
     extract_python_modules,
     extract_readme_title,
     extract_requirements,
+    extract_source_snippets,
     extract_taskfile,
 )
 from sumd.renderer import (
@@ -86,6 +87,7 @@ class RenderPipeline:
         compose  = extract_docker_compose(proj_dir)
         pkg_json = extract_package_json(proj_dir)
         project_analysis = extract_project_analysis(proj_dir)
+        source_snippets = extract_source_snippets(proj_dir, pkg_name)
 
         name        = pyproj.get("name", pkg_name)
         version     = pyproj.get("version", "0.0.0")
@@ -121,6 +123,7 @@ class RenderPipeline:
             compose=compose,
             pkg_json=pkg_json,
             project_analysis=project_analysis,
+            source_snippets=source_snippets,
             raw_sources=self.raw_sources,
             sources_used=sources_used,
             title=title or name,

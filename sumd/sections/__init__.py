@@ -24,6 +24,7 @@ from sumd.sections.extras import ExtrasSection
 from sumd.sections.interfaces import InterfacesSection
 from sumd.sections.metadata import MetadataSection
 from sumd.sections.quality import QualitySection
+from sumd.sections.source_snippets import SourceSnippetsSection
 from sumd.sections.workflows import WorkflowsSection
 
 # Registry — ordered list of all section classes.
@@ -40,6 +41,7 @@ SECTION_REGISTRY: list[type] = [
     EnvironmentSection,
     ExtrasSection,
     CodeAnalysisSection,
+    SourceSnippetsSection,
 ]
 
 # Profile definitions — which section *names* are included per profile.
@@ -54,7 +56,7 @@ PROFILES: dict[str, set[str]] = {
     "rich": {
         "metadata", "architecture", "interfaces", "workflows",
         "quality", "configuration", "dependencies", "deployment",
-        "environment", "extras", "code_analysis",
+        "environment", "extras", "code_analysis", "source_snippets",
     },
 }
 
