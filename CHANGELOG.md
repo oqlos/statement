@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-18
+
+### Test
+- Update tests/test_statement.py
+
+### Other
+- Update overview/__init__.py
+
 ## [0.1.1] - 2026-04-18
 
 ### Docs

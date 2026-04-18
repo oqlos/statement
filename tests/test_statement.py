@@ -8,4 +8,4 @@ def test_placeholder():
 
 def test_import():
     """Verify the main package can be imported."""
-    import statement  # noqa: F401
+    import overview  # noqa: F401
