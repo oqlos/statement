@@ -1,0 +1,28 @@
+# vallm batch | 33f | 10✓ 0⚠ 4✗ | 2026-04-18
+
+SUMMARY:
+  scanned: 33  passed: 10 (30.3%)  warnings: 0  errors: 4  unsupported: 19
+
+ERRORS[4]{path,score}:
+  sumd/mcp_server.py,0.86
+    issues[4]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'mcp.server.stdio' not found,20
+      python.import.resolvable,error,Module 'mcp.types' not found,21
+      python.import.resolvable,error,Module 'mcp.server' not found,22
+      python.import.resolvable,error,Module 'toml' not found,225
+  tests/test_parser.py,0.86
+    issues[1]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'pytest' not found,3
+  sumd/cli.py,0.93
+    issues[2]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'toml' not found,136
+      python.import.resolvable,error,Module 'toml' not found,82
+  sumd/generator.py,0.94
+    issues[1]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'toml' not found,55
+
+UNSUPPORTED[4]{bucket,count}:
+  *.md,9
+  *.txt,1
+  *.yml,1
+  other,8

@@ -1,0 +1,57 @@
+flowchart LR
+    subgraph sumd__cli
+        sumd__cli__export["export"]
+        sumd__cli__cli["cli"]
+        sumd__cli__extract["extract"]
+        sumd__cli__info["info"]
+        sumd__cli__main["main"]
+        sumd__cli__validate["validate"]
+    end
+    subgraph sumd__generator
+        sumd__generator__extract_makefile["extract_makefile"]
+        sumd__generator__extract_openapi["extract_openapi"]
+        sumd__generator__extract_pyproject["extract_pyproject"]
+        sumd__generator__extract_readme_title["extract_readme_title"]
+        sumd__generator__extract_doql["extract_doql"]
+        sumd__generator___read_toml["_read_toml"]
+        sumd__generator__extract_requirements["extract_requirements"]
+        sumd__generator__extract_testql_scenarios["extract_testql_scenarios"]
+        sumd__generator___parse_toon_file["_parse_toon_file"]
+        sumd__generator__extract_pyqual["extract_pyqual"]
+        sumd__generator__generate_sumd_content["generate_sumd_content"]
+        sumd__generator___parse_doql_content["_parse_doql_content"]
+        sumd__generator__extract_python_modules["extract_python_modules"]
+        sumd__generator__extract_taskfile["extract_taskfile"]
+    end
+    subgraph sumd__mcp_server
+        sumd__mcp_server___doc_to_dict["_doc_to_dict"]
+        sumd__mcp_server___resolve_path["_resolve_path"]
+        sumd__mcp_server__call_tool["call_tool"]
+    end
+    subgraph sumd__parser
+        sumd__parser__validate["validate"]
+        sumd__parser__SUMDParser__parse_file["parse_file"]
+    end
+    sumd__cli__validate --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__validate --> sumd__parser__validate
+    sumd__cli__export --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__info --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__extract --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__main --> sumd__cli__cli
+    sumd__mcp_server__call_tool --> sumd__mcp_server___resolve_path
+    sumd__mcp_server__call_tool --> sumd__parser__SUMDParser__parse_file
+    sumd__mcp_server__call_tool --> sumd__mcp_server___doc_to_dict
+    sumd__mcp_server__call_tool --> sumd__parser__validate
+    sumd__generator__extract_pyproject --> sumd__generator___read_toml
+    sumd__generator__extract_testql_scenarios --> sumd__generator___parse_toon_file
+    sumd__generator__extract_doql --> sumd__generator___parse_doql_content
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_pyproject
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_taskfile
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_testql_scenarios
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_openapi
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_doql
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_pyqual
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_python_modules
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_readme_title
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_requirements
+    sumd__generator__generate_sumd_content --> sumd__generator__extract_makefile

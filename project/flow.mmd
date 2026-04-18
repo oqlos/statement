@@ -1,0 +1,35 @@
+flowchart TD
+
+    %% Entry points (blue)
+    classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff
+
+    subgraph CLI
+        sumd__cli__cli["cli"]
+        sumd__cli__validate["validate"]
+        sumd__cli__export["export"]
+        sumd__cli__info["info"]
+        sumd__cli__generate["generate"]
+        sumd__cli__extract["extract"]
+        sumd__cli__scan["scan"]
+        sumd__cli__main["main"]
+    end
+
+    subgraph Core
+        sumd__mcp_server__list_tools["list_tools"]
+        sumd__mcp_server__call_tool["call_tool"]
+        sumd__mcp_server__main["main"]
+        sumd__generator___read_toml["_read_toml"]
+        sumd__generator__extract_pyproject["extract_pyproject"]
+        sumd__generator___parse_toon_file{{_parse_toon_file CC=41}}
+        sumd__generator___parse_doql_content{{_parse_doql_content CC=17}}
+        sumd__generator__generate_sumd_content{{generate_sumd_content CC=141}}
+        sumd__parser__SUMDParser__parse["parse"]
+        sumd__parser__SUMDParser___parse_header["_parse_header"]
+        sumd__parser__SUMDParser___parse_sections["_parse_sections"]
+        sumd__parser__SUMDParser__validate["validate"]
+        sumd__parser__parse["parse"]
+        sumd__parser__parse_file["parse_file"]
+        sumd__parser__validate["validate"]
+    end
+
+    class sumd__cli__cli,sumd__cli__validate,sumd__cli__export,sumd__cli__info,sumd__cli__generate,sumd__cli__extract,sumd__cli__scan,sumd__cli__main,sumd__mcp_server__list_tools,sumd__mcp_server__call_tool entry

@@ -5,7 +5,7 @@
     {
       "name": "metadata",
       "type": "metadata",
-      "content": "- **name**: `sumd`\n- **version**: `0.1.14`\n- **python_requires**: `>=3.10`\n- **license**: Apache-2.0\n- **ai_model**: `openrouter/qwen/qwen3-coder-next`\n- **ecosystem**: SUMD + DOQL + testql + taskfile\n- **generated_from**: pyproject.toml, Taskfile.yml, app.doql.less, app.doql.css, goal.yaml, .env.example, src(4 mod)",
+      "content": "- **name**: `sumd`\n- **version**: `0.1.15`\n- **python_requires**: `>=3.10`\n- **license**: Apache-2.0\n- **ai_model**: `openrouter/qwen/qwen3-coder-next`\n- **ecosystem**: SUMD + DOQL + testql + taskfile\n- **generated_from**: pyproject.toml, Taskfile.yml, app.doql.less, app.doql.css, goal.yaml, .env.example, src(4 mod), project/(12 analysis files)",
       "level": 2
     },
     {
@@ -23,7 +23,7 @@
     {
       "name": "# doql application declaration (`app.doql.less`, `app.doql.css`)",
       "type": "unknown",
-      "content": "```less\n// LESS format — define @variables here as needed\n\napp {\n  name: sumd;\n  version: 0.1.11;\n}\n\ninterface[type=\"cli\"] {\n  framework: click;\n}\ninterface[type=\"cli\"] page[name=\"sumd\"] {\n\n}\n\nworkflow[name=\"install\"] {\n  trigger: manual;\n  step-1: run cmd=pip install -e .[dev];\n}\n\nworkflow[name=\"quality\"] {\n  trigger: manual;\n  step-1: run cmd=pyqual run;\n}\n\nworkflow[name=\"quality:fix\"] {\n  trigger: manual;\n  step-1: run cmd=pyqual run --fix;\n}\n\nworkflow[name=\"quality:report\"] {\n  trigger: manual;\n  step-1: run cmd=pyqual report;\n}\n\nworkflow[name=\"test\"] {\n  trigger: manual;\n  step-1: run cmd=pytest -q;\n}\n\nworkflow[name=\"lint\"] {\n  trigger: manual;\n  step-1: run cmd=ruff check .;\n}\n\nworkflow[name=\"fmt\"] {\n  trigger: manual;\n  step-1: run cmd=ruff format .;\n}\n\nworkflow[name=\"build\"] {\n  trigger: manual;\n  step-1: run cmd=python -m build;\n}\n\nworkflow[name=\"clean\"] {\n  trigger: manual;\n  step-1: run cmd=rm -rf build/ dist/ *.egg-info;\n}\n\nworkflow[name=\"structure\"] {\n  trigger: manual;\n  step-1: run cmd=echo \"📁 Analyzing sumd project structure...\"\n{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force\necho \"🎨 Exporting to LESS format...\"\n{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\necho \"✅ Structure generated: app.doql.css + {{.DOQL_OUTPUT}}\";\n}\n\nworkflow[name=\"doql:adopt\"] {\n  trigger: manual;\n  step-1: run cmd={{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force;\n  step-2: run cmd=echo \"✅ Captured in app.doql.css\";\n}\n\nworkflow[name=\"doql:export\"] {\n  trigger: manual;\n  step-1: run cmd=if [ ! -f \"app.doql.css\" ]; then\necho \"❌ app.doql.css not found. Run: task structure\"\nexit 1\nfi;\n  step-2: run cmd={{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}};\n  step-3: run cmd=echo \"✅ Exported to {{.DOQL_OUTPUT}}\";\n}\n\nworkflow[name=\"doql:validate\"] {\n  trigger: manual;\n  step-1: run cmd=if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\necho \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\nexit 1\nfi;\n  step-2: run cmd={{.DOQL_CMD}} validate;\n}\n\nworkflow[name=\"doql:doctor\"] {\n  trigger: manual;\n  step-1: run cmd={{.DOQL_CMD}} doctor;\n}\n\nworkflow[name=\"doql:build\"] {\n  trigger: manual;\n  step-1: run cmd=if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\necho \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\nexit 1\nfi;\n  step-2: run cmd=# Regenerate LESS from CSS if CSS exists\nif [ -f \"app.doql.css\" ]; then\n{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\nfi;\n  step-3: run cmd={{.DOQL_CMD}} build app.doql.css --out build/;\n}\n\nworkflow[name=\"docs:build\"] {\n  trigger: manual;\n  step-1: run cmd=echo \"Building SUMD documentation...\";\n  step-2: run cmd=python -m sumd.cli docs/ docs/;\n}\n\nworkflow[name=\"help\"] {\n  trigger: manual;\n  step-1: run cmd=task --list;\n}\n\ndeploy {\n  target: docker-compose;\n}\n\nenvironment[name=\"local\"] {\n  runtime: docker-compose;\n  env_file: .env;\n}\n```\n\n```css\napp {\n  name: \"sumd\";\n  version: \"0.1.11\";\n}\n\ninterface[type=\"cli\"] {\n  framework: click;\n}\ninterface[type=\"cli\"] page[name=\"sumd\"] {\n\n}\n\nworkflow[name=\"install\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pip install -e .[dev];\n}\n\nworkflow[name=\"quality\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pyqual run;\n}\n\nworkflow[name=\"quality:fix\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pyqual run --fix;\n}\n\nworkflow[name=\"quality:report\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pyqual report;\n}\n\nworkflow[name=\"test\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pytest -q;\n}\n\nworkflow[name=\"lint\"] {\n  trigger: \"manual\";\n  step-1: run cmd=ruff check .;\n}\n\nworkflow[name=\"fmt\"] {\n  trigger: \"manual\";\n  step-1: run cmd=ruff format .;\n}\n\nworkflow[name=\"build\"] {\n  trigger: \"manual\";\n  step-1: run cmd=python -m build;\n}\n\nworkflow[name=\"clean\"] {\n  trigger: \"manual\";\n  step-1: run cmd=rm -rf build/ dist/ *.egg-info;\n}\n\nworkflow[name=\"structure\"] {\n  trigger: \"manual\";\n  step-1: run cmd=echo \"📁 Analyzing sumd project structure...\"\n{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force\necho \"🎨 Exporting to LESS format...\"\n{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\necho \"✅ Structure generated: app.doql.css + {{.DOQL_OUTPUT}}\";\n}\n\nworkflow[name=\"doql:adopt\"] {\n  trigger: \"manual\";\n  step-1: run cmd={{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force;\n  step-2: run cmd=echo \"✅ Captured in app.doql.css\";\n}\n\nworkflow[name=\"doql:export\"] {\n  trigger: \"manual\";\n  step-1: run cmd=if [ ! -f \"app.doql.css\" ]; then\n  echo \"❌ app.doql.css not found. Run: task structure\"\n  exit 1\nfi;\n  step-2: run cmd={{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}};\n  step-3: run cmd=echo \"✅ Exported to {{.DOQL_OUTPUT}}\";\n}\n\nworkflow[name=\"doql:validate\"] {\n  trigger: \"manual\";\n  step-1: run cmd=if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\n  echo \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\n  exit 1\nfi;\n  step-2: run cmd={{.DOQL_CMD}} validate;\n}\n\nworkflow[name=\"doql:doctor\"] {\n  trigger: \"manual\";\n  step-1: run cmd={{.DOQL_CMD}} doctor;\n}\n\nworkflow[name=\"doql:build\"] {\n  trigger: \"manual\";\n  step-1: run cmd=if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\n  echo \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\n  exit 1\nfi;\n  step-2: run cmd=# Regenerate LESS from CSS if CSS exists\nif [ -f \"app.doql.css\" ]; then\n  {{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\nfi;\n  step-3: run cmd={{.DOQL_CMD}} build app.doql.css --out build/;\n}\n\nworkflow[name=\"docs:build\"] {\n  trigger: \"manual\";\n  step-1: run cmd=echo \"Building SUMD documentation...\";\n  step-2: run cmd=python -m sumd.cli docs/ docs/;\n}\n\nworkflow[name=\"help\"] {\n  trigger: \"manual\";\n  step-1: run cmd=task --list;\n}\n\ndeploy {\n  target: docker-compose;\n}\n\nenvironment[name=\"local\"] {\n  runtime: docker-compose;\n  env_file: \".env\";\n}\n```",
+      "content": "```less markpact:file path=app.doql.less\n// LESS format — define @variables here as needed\n\napp {\n  name: sumd;\n  version: 0.1.15;\n}\n\ninterface[type=\"cli\"] {\n  framework: click;\n}\ninterface[type=\"cli\"] page[name=\"sumd\"] {\n\n}\n\nworkflow[name=\"install\"] {\n  trigger: manual;\n  step-1: run cmd=pip install -e .[dev];\n}\n\nworkflow[name=\"quality\"] {\n  trigger: manual;\n  step-1: run cmd=pyqual run;\n}\n\nworkflow[name=\"quality:fix\"] {\n  trigger: manual;\n  step-1: run cmd=pyqual run --fix;\n}\n\nworkflow[name=\"quality:report\"] {\n  trigger: manual;\n  step-1: run cmd=pyqual report;\n}\n\nworkflow[name=\"test\"] {\n  trigger: manual;\n  step-1: run cmd=pytest -q;\n}\n\nworkflow[name=\"lint\"] {\n  trigger: manual;\n  step-1: run cmd=ruff check .;\n}\n\nworkflow[name=\"fmt\"] {\n  trigger: manual;\n  step-1: run cmd=ruff format .;\n}\n\nworkflow[name=\"build\"] {\n  trigger: manual;\n  step-1: run cmd=python -m build;\n}\n\nworkflow[name=\"clean\"] {\n  trigger: manual;\n  step-1: run cmd=rm -rf build/ dist/ *.egg-info;\n}\n\nworkflow[name=\"structure\"] {\n  trigger: manual;\n  step-1: run cmd=echo \"📁 Analyzing sumd project structure...\"\n{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force\necho \"🎨 Exporting to LESS format...\"\n{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\necho \"✅ Structure generated: app.doql.css + {{.DOQL_OUTPUT}}\";\n}\n\nworkflow[name=\"doql:adopt\"] {\n  trigger: manual;\n  step-1: run cmd={{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force;\n  step-2: run cmd=echo \"✅ Captured in app.doql.css\";\n}\n\nworkflow[name=\"doql:export\"] {\n  trigger: manual;\n  step-1: run cmd=if [ ! -f \"app.doql.css\" ]; then\necho \"❌ app.doql.css not found. Run: task structure\"\nexit 1\nfi;\n  step-2: run cmd={{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}};\n  step-3: run cmd=echo \"✅ Exported to {{.DOQL_OUTPUT}}\";\n}\n\nworkflow[name=\"doql:validate\"] {\n  trigger: manual;\n  step-1: run cmd=if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\necho \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\nexit 1\nfi;\n  step-2: run cmd={{.DOQL_CMD}} validate;\n}\n\nworkflow[name=\"doql:doctor\"] {\n  trigger: manual;\n  step-1: run cmd={{.DOQL_CMD}} doctor;\n}\n\nworkflow[name=\"doql:build\"] {\n  trigger: manual;\n  step-1: run cmd=if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\necho \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\nexit 1\nfi;\n  step-2: run cmd=# Regenerate LESS from CSS if CSS exists\nif [ -f \"app.doql.css\" ]; then\n{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\nfi;\n  step-3: run cmd={{.DOQL_CMD}} build app.doql.css --out build/;\n}\n\nworkflow[name=\"docs:build\"] {\n  trigger: manual;\n  step-1: run cmd=echo \"Building SUMD documentation...\";\n  step-2: run cmd=python -m sumd.cli docs/ docs/;\n}\n\nworkflow[name=\"help\"] {\n  trigger: manual;\n  step-1: run cmd=task --list;\n}\n\ndeploy {\n  target: docker-compose;\n}\n\nenvironment[name=\"local\"] {\n  runtime: docker-compose;\n  env_file: .env;\n}\n```\n\n```css markpact:file path=app.doql.css\napp {\n  name: \"sumd\";\n  version: \"0.1.15\";\n}\n\ninterface[type=\"cli\"] {\n  framework: click;\n}\ninterface[type=\"cli\"] page[name=\"sumd\"] {\n\n}\n\nworkflow[name=\"install\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pip install -e .[dev];\n}\n\nworkflow[name=\"quality\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pyqual run;\n}\n\nworkflow[name=\"quality:fix\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pyqual run --fix;\n}\n\nworkflow[name=\"quality:report\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pyqual report;\n}\n\nworkflow[name=\"test\"] {\n  trigger: \"manual\";\n  step-1: run cmd=pytest -q;\n}\n\nworkflow[name=\"lint\"] {\n  trigger: \"manual\";\n  step-1: run cmd=ruff check .;\n}\n\nworkflow[name=\"fmt\"] {\n  trigger: \"manual\";\n  step-1: run cmd=ruff format .;\n}\n\nworkflow[name=\"build\"] {\n  trigger: \"manual\";\n  step-1: run cmd=python -m build;\n}\n\nworkflow[name=\"clean\"] {\n  trigger: \"manual\";\n  step-1: run cmd=rm -rf build/ dist/ *.egg-info;\n}\n\nworkflow[name=\"structure\"] {\n  trigger: \"manual\";\n  step-1: run cmd=echo \"📁 Analyzing sumd project structure...\"\n{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force\necho \"🎨 Exporting to LESS format...\"\n{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\necho \"✅ Structure generated: app.doql.css + {{.DOQL_OUTPUT}}\";\n}\n\nworkflow[name=\"doql:adopt\"] {\n  trigger: \"manual\";\n  step-1: run cmd={{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force;\n  step-2: run cmd=echo \"✅ Captured in app.doql.css\";\n}\n\nworkflow[name=\"doql:export\"] {\n  trigger: \"manual\";\n  step-1: run cmd=if [ ! -f \"app.doql.css\" ]; then\n  echo \"❌ app.doql.css not found. Run: task structure\"\n  exit 1\nfi;\n  step-2: run cmd={{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}};\n  step-3: run cmd=echo \"✅ Exported to {{.DOQL_OUTPUT}}\";\n}\n\nworkflow[name=\"doql:validate\"] {\n  trigger: \"manual\";\n  step-1: run cmd=if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\n  echo \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\n  exit 1\nfi;\n  step-2: run cmd={{.DOQL_CMD}} validate;\n}\n\nworkflow[name=\"doql:doctor\"] {\n  trigger: \"manual\";\n  step-1: run cmd={{.DOQL_CMD}} doctor;\n}\n\nworkflow[name=\"doql:build\"] {\n  trigger: \"manual\";\n  step-1: run cmd=if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\n  echo \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\n  exit 1\nfi;\n  step-2: run cmd=# Regenerate LESS from CSS if CSS exists\nif [ -f \"app.doql.css\" ]; then\n  {{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\nfi;\n  step-3: run cmd={{.DOQL_CMD}} build app.doql.css --out build/;\n}\n\nworkflow[name=\"docs:build\"] {\n  trigger: \"manual\";\n  step-1: run cmd=echo \"Building SUMD documentation...\";\n  step-2: run cmd=python -m sumd.cli docs/ docs/;\n}\n\nworkflow[name=\"help\"] {\n  trigger: \"manual\";\n  step-1: run cmd=task --list;\n}\n\ndeploy {\n  target: docker-compose;\n}\n\nenvironment[name=\"local\"] {\n  runtime: docker-compose;\n  env_file: \".env\";\n}\n```",
       "level": 2
     },
     {
@@ -53,13 +53,13 @@
     {
       "name": "# taskfile tasks (`taskfile.yml`)",
       "type": "unknown",
-      "content": "```yaml\ntasks:\n  install:\n    desc: \"Install Python dependencies (editable)\"\n    cmds:\n      - pip install -e .[dev]\n  quality:\n    desc: \"Run pyqual quality pipeline\"\n    cmds:\n      - pyqual run\n  quality:fix:\n    desc: \"Run pyqual with auto-fix\"\n    cmds:\n      - pyqual run --fix\n  quality:report:\n    desc: \"Generate pyqual quality report\"\n    cmds:\n      - pyqual report\n  test:\n    desc: \"Run pytest suite\"\n    cmds:\n      - pytest -q\n  lint:\n    desc: \"Run ruff lint check\"\n    cmds:\n      - ruff check .\n  fmt:\n    desc: \"Auto-format with ruff\"\n    cmds:\n      - ruff format .\n  build:\n    desc: \"Build wheel + sdist\"\n    cmds:\n      - python -m build\n  clean:\n    desc: \"Remove build artefacts\"\n    cmds:\n      - rm -rf build/ dist/ *.egg-info\n  all:\n    desc: \"Run install, quality check\"\n  structure:\n    desc: \"Generate project structure (app.doql.css + app.doql.less)\"\n    cmds:\n      - echo \"📁 Analyzing sumd project structure...\"\n{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force\necho \"🎨 Exporting to LESS format...\"\n{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\necho \"✅ Structure generated: app.doql.css + {{.DOQL_OUTPUT}}\"\n  doql:adopt:\n    desc: \"Reverse-engineer sumd project structure (CSS only)\"\n    cmds:\n      - {{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force\n  doql:export:\n    desc: \"Export to LESS format\"\n    cmds:\n      - if [ ! -f \"app.doql.css\" ]; then\n  echo \"❌ app.doql.css not found. Run: task structure\"\n  exit 1\nfi\n  doql:validate:\n    desc: \"Validate app.doql.less syntax\"\n    cmds:\n      - if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\n  echo \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\n  exit 1\nfi\n  doql:doctor:\n    desc: \"Run doql health checks\"\n    cmds:\n      - {{.DOQL_CMD}} doctor\n  doql:build:\n    desc: \"Generate code from app.doql.less\"\n    cmds:\n      - if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\n  echo \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\n  exit 1\nfi\n  analyze:\n    desc: \"Full doql analysis (structure + validate + doctor)\"\n  docs:build:\n    desc: \"Build documentation\"\n    cmds:\n      - echo \"Building SUMD documentation...\"\n  help:\n    desc: \"Show available tasks\"\n    cmds:\n      - task --list\n```",
+      "content": "```yaml markpact:file path=Taskfile.yml\n# Taskfile.yml — sumd (Structured Unified Markdown Descriptor) project runner\n# https://taskfile.dev\n\nversion: \"3\"\n\nvars:\n  APP_NAME: sumd\n  DOQL_OUTPUT: app.doql.less\n  DOQL_CMD: \"{{if eq OS \\\"windows\\\"}}doql.exe{{else}}doql{{end}}\"\n\nenv:\n  PYTHONPATH: \"{{.PWD}}\"\n\ntasks:\n  # ─────────────────────────────────────────────────────────────────────────────\n  # Development\n  # ─────────────────────────────────────────────────────────────────────────────\n\n  install:\n    desc: Install Python dependencies (editable)\n    cmds:\n      - pip install -e .[dev]\n\n  quality:\n    desc: Run pyqual quality pipeline\n    cmds:\n      - pyqual run\n\n  quality:fix:\n    desc: Run pyqual with auto-fix\n    cmds:\n      - pyqual run --fix\n\n  quality:report:\n    desc: Generate pyqual quality report\n    cmds:\n      - pyqual report\n\n  test:\n    desc: Run pytest suite\n    cmds:\n      - pytest -q\n\n  lint:\n    desc: Run ruff lint check\n    cmds:\n      - ruff check .\n\n  fmt:\n    desc: Auto-format with ruff\n    cmds:\n      - ruff format .\n\n  build:\n    desc: Build wheel + sdist\n    cmds:\n      - python -m build\n\n  clean:\n    desc: Remove build artefacts\n    cmds:\n      - rm -rf build/ dist/ *.egg-info\n\n  all:\n    desc: Run install, quality check\n    cmds:\n      - task: install\n      - task: quality\n\n  # ─────────────────────────────────────────────────────────────────────────────\n  # Doql Integration\n  # ─────────────────────────────────────────────────────────────────────────────\n\n  structure:\n    desc: Generate project structure (app.doql.css + app.doql.less)\n    cmds:\n      - |\n        echo \"📁 Analyzing sumd project structure...\"\n        {{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force\n        echo \"🎨 Exporting to LESS format...\"\n        {{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\n        echo \"✅ Structure generated: app.doql.css + {{.DOQL_OUTPUT}}\"\n\n  doql:adopt:\n    desc: Reverse-engineer sumd project structure (CSS only)\n    cmds:\n      - \"{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force\"\n      - echo \"✅ Captured in app.doql.css\"\n\n  doql:export:\n    desc: Export to LESS format\n    cmds:\n      - |\n        if [ ! -f \"app.doql.css\" ]; then\n          echo \"❌ app.doql.css not found. Run: task structure\"\n          exit 1\n        fi\n      - \"{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\"\n      - echo \"✅ Exported to {{.DOQL_OUTPUT}}\"\n\n  doql:validate:\n    desc: Validate app.doql.less syntax\n    cmds:\n      - |\n        if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\n          echo \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\n          exit 1\n        fi\n      - \"{{.DOQL_CMD}} validate\"\n\n  doql:doctor:\n    desc: Run doql health checks\n    cmds:\n      - \"{{.DOQL_CMD}} doctor\"\n\n  doql:build:\n    desc: Generate code from app.doql.less\n    cmds:\n      - |\n        if [ ! -f \"{{.DOQL_OUTPUT}}\" ]; then\n          echo \"❌ {{.DOQL_OUTPUT}} not found. Run: task structure\"\n          exit 1\n        fi\n      - |\n        # Regenerate LESS from CSS if CSS exists\n        if [ -f \"app.doql.css\" ]; then\n          {{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}\n        fi\n      - \"{{.DOQL_CMD}} build app.doql.css --out build/\"\n\n  analyze:\n    desc: Full doql analysis (structure + validate + doctor)\n    cmds:\n      - task: structure\n      - task: doql:validate\n      - task: doql:doctor\n\n  # ─────────────────────────────────────────────────────────────────────────────\n  # Documentation\n  # ─────────────────────────────────────────────────────────────────────────────\n\n  docs:build:\n    desc: Build documentation\n    cmds:\n      - echo \"Building SUMD documentation...\"\n      - python -m sumd.cli docs/ docs/\n\n  # ─────────────────────────────────────────────────────────────────────────────\n  # Utility\n  # ─────────────────────────────────────────────────────────────────────────────\n\n  help:\n    desc: Show available tasks\n    cmds:\n      - task --list\n```",
       "level": 2
     },
     {
       "name": "configuration",
       "type": "configuration",
-      "content": "```yaml\nproject:\n  name: sumd\n  version: 0.1.14\n  env: local\n```",
+      "content": "```yaml\nproject:\n  name: sumd\n  version: 0.1.15\n  env: local\n```",
       "level": 2
     },
     {
@@ -71,13 +71,13 @@
     {
       "name": "# runtime",
       "type": "unknown",
-      "content": "- `click>=8.0`\n- `pyyaml>=6.0`\n- `toml>=0.10.0`",
+      "content": "```text markpact:deps python\nclick>=8.0\npyyaml>=6.0\ntoml>=0.10.0\n```",
       "level": 2
     },
     {
       "name": "deployment",
       "type": "deployment",
-      "content": "```bash\npip install sumd\n\n# development install\npip install -e .[dev]\n```",
+      "content": "```bash markpact:run\npip install sumd\n\n# development install\npip install -e .[dev]\n```",
       "level": 2
     },
     {
@@ -90,6 +90,630 @@
       "name": "release management (`goal.yaml`)",
       "type": "unknown",
       "content": "- **versioning**: `semver`\n- **commits**: `conventional` scope=`statement`\n- **changelog**: `keep-a-changelog`\n- **build strategies**: `python`, `nodejs`, `rust`\n- **version files**: `VERSION`, `pyproject.toml:version`, `sumd/__init__.py:__version__`",
+      "level": 2
+    },
+    {
+      "name": "code analysis",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# `project/analysis.toon.yaml`",
+      "type": "unknown",
+      "content": "```toon markpact:file path=project/analysis.toon.yaml\n# code2llm | 7f 1993L | python:6,shell:1 | 2026-04-18\n# CC̄=9.9 | critical:5/41 | dups:0 | cycles:0\n\nHEALTH[5]:\n  🟡 CC    scan CC=16 (limit:15)\n  🟡 CC    call_tool CC=24 (limit:15)\n  🟡 CC    _parse_toon_file CC=41 (limit:15)\n  🟡 CC    _parse_doql_content CC=17 (limit:15)\n  🟡 CC    generate_sumd_content CC=141 (limit:15)\n\nREFACTOR[1]:\n  1. split 5 high-CC methods  (CC>15)\n\nPIPELINES[17]:\n  [1] Src [validate]: validate → parse_file\n      PURITY: 100% pure\n  [2] Src [export]: export → parse_file\n      PURITY: 100% pure\n  [3] Src [info]: info → parse_file\n      PURITY: 100% pure\n  [4] Src [generate]: generate\n      PURITY: 100% pure\n  [5] Src [extract]: extract → parse_file\n      PURITY: 100% pure\n\nLAYERS:\n  sumd/                           CC̄=9.9    ←in:0  →out:0\n  │ !! generator                 1077L  0C   19m  CC=141    ←1\n  │ !! mcp_server                 321L  0C    5m  CC=24     ←0\n  │ !! cli                        291L  0C    8m  CC=16     ←0\n  │ parser                     224L  4C    9m  CC=9      ←2\n  │ __init__                    25L  0C    0m  CC=0.0    ←0\n  │\n  ./                              CC̄=0.0    ←in:0  →out:0\n  │ project.sh                  35L  0C    0m  CC=0.0    ←0\n  │\n  scripts/                        CC̄=0.0    ←in:0  →out:0\n  │ generate_all_sumd           20L  0C    0m  CC=0.0    ←0\n  │\n\nCOUPLING: no cross-package imports detected\n\nEXTERNAL:\n  validation: run `vallm batch .` → validation.toon\n  duplication: run `redup scan .` → duplication.toon\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/project.toon.yaml`",
+      "type": "unknown",
+      "content": "```toon markpact:file path=project/project.toon.yaml\n# sumd | 41 func | 4f | 2106L | python | 2026-04-18\n\nHEALTH:\n  CC̄=9.9  critical=10 (limit:10)  dup=0  cycles=0\n\nALERTS[18]:\n  !!! cc_exceeded      generate_sumd_content = 141 (limit:15)\n  !!! high_fan_out     generate_sumd_content = 48 (limit:10)\n  !!! cc_exceeded      _parse_toon_file = 41 (limit:15)\n  !!! high_fan_out     scan = 24 (limit:10)\n  !!! high_fan_out     _parse_doql_content = 23 (limit:10)\n  !!! high_fan_out     call_tool = 20 (limit:10)\n  !!  cc_exceeded      call_tool = 24 (limit:15)\n  !!  high_fan_out     _parse_toon_file = 18 (limit:10)\n  !!  high_fan_out     generate = 17 (limit:10)\n  !!  high_fan_out     extract_openapi = 16 (limit:10)\n\nMODULES[7] (top by size):\n  M[sumd/generator.py] 1077L C:0 F:19 CC↑141 D:1 (python)\n  M[sumd/mcp_server.py] 321L C:0 F:5 CC↑24 D:0 (python)\n  M[sumd/cli.py] 291L C:0 F:8 CC↑16 D:0 (python)\n  M[sumd/parser.py] 224L C:4 F:9 CC↑9 D:2 (python)\n  M[project.sh] 35L C:0 F:0 CC↑0 D:0 (shell)\n  M[sumd/__init__.py] 25L C:0 F:0 CC↑0 D:0 (python)\n  M[scripts/generate_all_sumd.py] 20L C:0 F:0 CC↑0 D:0 (python)\n  LANGS: python:6/shell:1\n\nHOTSPOTS[10]:\n  ★ generate_sumd_content fan=48  // Generate SUMD.md content from a project directory.\n\nArgs:\n    proj_dir: Path to \n  ★ scan fan=24  // Scan a workspace directory and generate SUMD.md for every project found.\n\nDetect\n  ★ _parse_doql_content fan=23  // Parse DOQL content from .less or .css file into structured data.\n  ★ call_tool fan=20  // Orchestrates 20 calls\n  ★ _parse_toon_file fan=18  // Parse a single *.testql.toon.yaml file into a scenario dict.\n\nREFACTOR[9]:\n  [1] H/L Split _parse_toon_file (CC=41 → target CC<10)\n  [2] H/L Split generate_sumd_content (CC=141 → target CC<10)\n  [3] H/H Split god module sumd/generator.py (1077L, 0 classes)\n  [4] M/L Split scan (CC=16 → target CC<10)\n  [5] M/L Split call_tool (CC=24 → target CC<10)\n\nEVOLUTION:\n  2026-04-18 CC̄=9.9 crit=10 2106L // Automated analysis\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/evolution.toon.yaml`",
+      "type": "unknown",
+      "content": "```toon markpact:file path=project/evolution.toon.yaml\n# code2llm/evolution | 41 func | 4f | 2026-04-18\n\nNEXT[6] (ranked by impact):\n  [1] !! SPLIT           sumd/generator.py\n      WHY: 1077L, 0 classes, max CC=141\n      EFFORT: ~4h  IMPACT: 151857\n\n  [2] !! SPLIT-FUNC      generate_sumd_content  CC=141  fan=48\n      WHY: CC=141 exceeds 15\n      EFFORT: ~1h  IMPACT: 6768\n\n  [3] !! SPLIT-FUNC      _parse_toon_file  CC=41  fan=18\n      WHY: CC=41 exceeds 15\n      EFFORT: ~1h  IMPACT: 738\n\n  [4] !  SPLIT-FUNC      call_tool  CC=24  fan=20\n      WHY: CC=24 exceeds 15\n      EFFORT: ~1h  IMPACT: 480\n\n  [5] !  SPLIT-FUNC      _parse_doql_content  CC=17  fan=23\n      WHY: CC=17 exceeds 15\n      EFFORT: ~1h  IMPACT: 391\n\n  [6] !  SPLIT-FUNC      scan  CC=16  fan=24\n      WHY: CC=16 exceeds 15\n      EFFORT: ~1h  IMPACT: 384\n\n\nRISKS[1]:\n  ⚠ Splitting sumd/generator.py may break 19 import paths\n\nMETRICS-TARGET:\n  CC̄:          9.9 → ≤5.0\n  max-CC:      141 → ≤20\n  god-modules: 1 → 0\n  high-CC(≥15): 5 → ≤2\n  hub-types:   0 → ≤0\n\nPATTERNS (language parser shared logic):\n  _extract_declarations() in base.py — unified extraction for:\n    - TypeScript: interfaces, types, classes, functions, arrow funcs\n    - PHP: namespaces, traits, classes, functions, includes\n    - Ruby: modules, classes, methods, requires\n    - C++: classes, structs, functions, #includes\n    - C#: classes, interfaces, methods, usings\n    - Java: classes, interfaces, methods, imports\n    - Go: packages, functions, structs\n    - Rust: modules, functions, traits, use statements\n\n  Shared regex patterns per language:\n    - import: language-specific import/require/using patterns\n    - class: class/struct/trait declarations with inheritance\n    - function: function/method signatures with visibility\n    - brace_tracking: for C-family languages ({ })\n    - end_keyword_tracking: for Ruby (module/class/def...end)\n\n  Benefits:\n    - Consistent extraction logic across all languages\n    - Reduced code duplication (~70% reduction in parser LOC)\n    - Easier maintenance: fix once, apply everywhere\n    - Standardized FunctionInfo/ClassInfo models\n\nHISTORY:\n  (first run — no previous data)\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/map.toon.yaml`",
+      "type": "unknown",
+      "content": "```toon markpact:file path=project/map.toon.yaml\n# sumd | 11f 3345L | python:8,css:1,less:1,shell:1 | 2026-04-18\n# stats: 63 func | 5 cls | 11 mod | CC̄=9.9 | critical:17 | cycles:0\n# alerts[5]: CC generate_sumd_content=148; CC _parse_toon_file=41; CC scan=37; CC generate_map_toon=32; CC call_tool=24\n# hotspots[5]: generate_sumd_content fan=31; scaffold fan=30; scan fan=25; generate_map_toon fan=24; lint fan=17\n# evolution: baseline\n# Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods\nM[11]:\n  app.doql.css,129\n  app.doql.less,131\n  project.sh,35\n  scripts/generate_all_sumd.py,21\n  sumd/__init__.py,34\n  sumd/cli.py,713\n  sumd/generator.py,1383\n  sumd/mcp_server.py,322\n  sumd/parser.py,462\n  tests/test_parser.py,103\n  tests/test_statement.py,12\nD:\n  scripts/generate_all_sumd.py:\n  sumd/__init__.py:\n  sumd/cli.py:\n    e: cli,validate,export,info,generate,extract,scan,lint,analyze,scaffold,map_cmd,main\n    cli()\n    validate(file)\n    export(file;format;output)\n    info(file)\n    generate(file;format;output)\n    extract(file;section)\n    scan(workspace;export_json;report;fix;raw;analyze;tools)\n    lint(files;workspace;as_json)\n    analyze(project;tools;force)\n    scaffold(project;output;force;scenario_type)\n    map_cmd(project;output;force;stdout)\n    main()\n  sumd/generator.py:\n    e: _read_toml,extract_pyproject,extract_taskfile,_parse_toon_file,extract_testql_scenarios,extract_openapi,_parse_doql_content,extract_doql,extract_pyqual,extract_python_modules,extract_readme_title,extract_requirements,extract_makefile,extract_goal,extract_env,extract_dockerfile,extract_docker_compose,extract_package_json,_lang_of,_fan_out,_cc_estimate,_try_radon_cc,_analyse_py_module,generate_map_toon,extract_project_analysis,generate_sumd_content\n    _read_toml(path)\n    extract_pyproject(proj_dir)\n    extract_taskfile(proj_dir)\n    _parse_toon_file(f)\n    extract_testql_scenarios(proj_dir)\n    extract_openapi(proj_dir)\n    _parse_doql_content(content)\n    extract_doql(proj_dir)\n    extract_pyqual(proj_dir)\n    extract_python_modules(proj_dir;pkg_name)\n    extract_readme_title(proj_dir)\n    extract_requirements(proj_dir)\n    extract_makefile(proj_dir)\n    extract_goal(proj_dir)\n    extract_env(proj_dir)\n    extract_dockerfile(proj_dir)\n    extract_docker_compose(proj_dir)\n    extract_package_json(proj_dir)\n    _lang_of(path)\n    _fan_out(func_node)\n    _cc_estimate(func_node)\n    _try_radon_cc(src)\n    _analyse_py_module(path)\n    generate_map_toon(proj_dir)\n    extract_project_analysis(proj_dir)\n    generate_sumd_content(proj_dir;return_sources;raw_sources)\n  sumd/mcp_server.py:\n    e: _doc_to_dict,_resolve_path,list_tools,call_tool,main\n    _doc_to_dict(doc)\n    _resolve_path(path)\n    list_tools()\n    call_tool(name;arguments)\n    main()\n  sumd/parser.py:\n    e: SectionType,Section,SUMDDocument,SUMDParser,parse,parse_file,validate,CodeBlockIssue,_validate_yaml_body,_validate_less_css_body,_validate_mermaid_body,_validate_toon_body,_validate_bash_body,_validate_deps_body,validate_codeblocks,validate_markdown,validate_sumd_file\n    SectionType:  # SUMD section types.\n    Section:  # Represents a SUMD section.\n    SUMDDocument:  # Represents a parsed SUMD document.\n    SUMDParser: __init__(0),parse(1),parse_file(1),_parse_header(1),_parse_sections(1),validate(1)  # Parser for SUMD markdown documents.\n    CodeBlockIssue:\n    parse(content)\n    parse_file(path)\n    validate(document)\n    _validate_yaml_body(body;path)\n    _validate_less_css_body(body;path)\n    _validate_mermaid_body(body;path)\n    _validate_toon_body(body;path)\n    _validate_bash_body(body;path)\n    _validate_deps_body(body;path)\n    validate_codeblocks(content;source)\n    validate_markdown(content;source)\n    validate_sumd_file(path)\n  tests/test_parser.py:\n    e: test_parse_basic,test_parse_sections,test_validate_valid_document,test_validate_missing_intent,test_parse_file,test_parser_class\n    test_parse_basic()\n    test_parse_sections()\n    test_validate_valid_document()\n    test_validate_missing_intent()\n    test_parse_file(tmp_path)\n    test_parser_class()\n  tests/test_statement.py:\n    e: test_placeholder,test_import\n    test_placeholder()\n    test_import()\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/duplication.toon.yaml`",
+      "type": "unknown",
+      "content": "```toon markpact:file path=project/duplication.toon.yaml\n# redup/duplication | 1 groups | 6f 1958L | 2026-04-18\n\nSUMMARY:\n  files_scanned: 6\n  total_lines:   1958\n  dup_groups:    1\n  dup_fragments: 2\n  saved_lines:   11\n  scan_ms:       4030\n\nHOTSPOTS[1] (files with most duplication):\n  sumd/parser.py  dup=22L  groups=1  frags=2  (1.1%)\n\nDUPLICATES[1] (ranked by impact):\n  [d1ab1a804f1b435b]   STRU  parse  L=11 N=2 saved=11 sim=1.00\n      sumd/parser.py:188-198  (parse)\n      sumd/parser.py:201-211  (parse_file)\n\nREFACTOR[1] (ranked by priority):\n  [1] ○ extract_function   → sumd/utils/parse.py\n      WHY: 2 occurrences of 11-line block across 1 files — saves 11 lines\n      FILES: sumd/parser.py\n\nQUICK_WINS[1] (low risk, high savings — do first):\n  [1] extract_function   saved=11L  → sumd/utils/parse.py\n      FILES: parser.py\n\nEFFORT_ESTIMATE (total ≈ 0.4h):\n  easy   parse                               saved=11L  ~22min\n\nMETRICS-TARGET:\n  dup_groups:  1 → 0\n  saved_lines: 11 lines recoverable\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/validation.toon.yaml`",
+      "type": "unknown",
+      "content": "```toon markpact:file path=project/validation.toon.yaml\n# vallm batch | 33f | 10✓ 0⚠ 4✗ | 2026-04-18\n\nSUMMARY:\n  scanned: 33  passed: 10 (30.3%)  warnings: 0  errors: 4  unsupported: 19\n\nERRORS[4]{path,score}:\n  sumd/mcp_server.py,0.86\n    issues[4]{rule,severity,message,line}:\n      python.import.resolvable,error,Module 'mcp.server.stdio' not found,20\n      python.import.resolvable,error,Module 'mcp.types' not found,21\n      python.import.resolvable,error,Module 'mcp.server' not found,22\n      python.import.resolvable,error,Module 'toml' not found,225\n  tests/test_parser.py,0.86\n    issues[1]{rule,severity,message,line}:\n      python.import.resolvable,error,Module 'pytest' not found,3\n  sumd/cli.py,0.93\n    issues[2]{rule,severity,message,line}:\n      python.import.resolvable,error,Module 'toml' not found,136\n      python.import.resolvable,error,Module 'toml' not found,82\n  sumd/generator.py,0.94\n    issues[1]{rule,severity,message,line}:\n      python.import.resolvable,error,Module 'toml' not found,55\n\nUNSUPPORTED[4]{bucket,count}:\n  *.md,9\n  *.txt,1\n  *.yml,1\n  other,8\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/compact_flow.mmd`",
+      "type": "unknown",
+      "content": "```mermaid markpact:file path=project/compact_flow.mmd\nflowchart TD\n    sumd__cli[\"sumd.cli<br/>8 funcs\"]\n    sumd__generator[\"sumd.generator<br/>19 funcs\"]\n    sumd__mcp_server[\"sumd.mcp_server<br/>5 funcs\"]\n    sumd__parser[\"sumd.parser<br/>9 funcs\"]\n    sumd__mcp_server ==>|7| sumd__parser\n    sumd__cli ==>|6| sumd__parser\n    sumd__cli -->|1| sumd__generator\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/calls.mmd`",
+      "type": "unknown",
+      "content": "```mermaid markpact:file path=project/calls.mmd\nflowchart LR\n    subgraph sumd__cli\n        sumd__cli__export[\"export\"]\n        sumd__cli__cli[\"cli\"]\n        sumd__cli__extract[\"extract\"]\n        sumd__cli__info[\"info\"]\n        sumd__cli__main[\"main\"]\n        sumd__cli__validate[\"validate\"]\n    end\n    subgraph sumd__generator\n        sumd__generator__extract_makefile[\"extract_makefile\"]\n        sumd__generator__extract_openapi[\"extract_openapi\"]\n        sumd__generator__extract_pyproject[\"extract_pyproject\"]\n        sumd__generator__extract_readme_title[\"extract_readme_title\"]\n        sumd__generator__extract_doql[\"extract_doql\"]\n        sumd__generator___read_toml[\"_read_toml\"]\n        sumd__generator__extract_requirements[\"extract_requirements\"]\n        sumd__generator__extract_testql_scenarios[\"extract_testql_scenarios\"]\n        sumd__generator___parse_toon_file[\"_parse_toon_file\"]\n        sumd__generator__extract_pyqual[\"extract_pyqual\"]\n        sumd__generator__generate_sumd_content[\"generate_sumd_content\"]\n        sumd__generator___parse_doql_content[\"_parse_doql_content\"]\n        sumd__generator__extract_python_modules[\"extract_python_modules\"]\n        sumd__generator__extract_taskfile[\"extract_taskfile\"]\n    end\n    subgraph sumd__mcp_server\n        sumd__mcp_server___doc_to_dict[\"_doc_to_dict\"]\n        sumd__mcp_server___resolve_path[\"_resolve_path\"]\n        sumd__mcp_server__call_tool[\"call_tool\"]\n    end\n    subgraph sumd__parser\n        sumd__parser__validate[\"validate\"]\n        sumd__parser__SUMDParser__parse_file[\"parse_file\"]\n    end\n    sumd__cli__validate --> sumd__parser__SUMDParser__parse_file\n    sumd__cli__validate --> sumd__parser__validate\n    sumd__cli__export --> sumd__parser__SUMDParser__parse_file\n    sumd__cli__info --> sumd__parser__SUMDParser__parse_file\n    sumd__cli__extract --> sumd__parser__SUMDParser__parse_file\n    sumd__cli__main --> sumd__cli__cli\n    sumd__mcp_server__call_tool --> sumd__mcp_server___resolve_path\n    sumd__mcp_server__call_tool --> sumd__parser__SUMDParser__parse_file\n    sumd__mcp_server__call_tool --> sumd__mcp_server___doc_to_dict\n    sumd__mcp_server__call_tool --> sumd__parser__validate\n    sumd__generator__extract_pyproject --> sumd__generator___read_toml\n    sumd__generator__extract_testql_scenarios --> sumd__generator___parse_toon_file\n    sumd__generator__extract_doql --> sumd__generator___parse_doql_content\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_pyproject\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_taskfile\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_testql_scenarios\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_openapi\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_doql\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_pyqual\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_python_modules\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_readme_title\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_requirements\n    sumd__generator__generate_sumd_content --> sumd__generator__extract_makefile\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/flow.mmd`",
+      "type": "unknown",
+      "content": "```mermaid markpact:file path=project/flow.mmd\nflowchart TD\n\n    %% Entry points (blue)\n    classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff\n\n    subgraph CLI\n        sumd__cli__cli[\"cli\"]\n        sumd__cli__validate[\"validate\"]\n        sumd__cli__export[\"export\"]\n        sumd__cli__info[\"info\"]\n        sumd__cli__generate[\"generate\"]\n        sumd__cli__extract[\"extract\"]\n        sumd__cli__scan[\"scan\"]\n        sumd__cli__main[\"main\"]\n    end\n\n    subgraph Core\n        sumd__mcp_server__list_tools[\"list_tools\"]\n        sumd__mcp_server__call_tool[\"call_tool\"]\n        sumd__mcp_server__main[\"main\"]\n        sumd__generator___read_toml[\"_read_toml\"]\n        sumd__generator__extract_pyproject[\"extract_pyproject\"]\n        sumd__generator___parse_toon_file{{_parse_toon_file CC=41}}\n        sumd__generator___parse_doql_content{{_parse_doql_content CC=17}}\n        sumd__generator__generate_sumd_content{{generate_sumd_content CC=141}}\n        sumd__parser__SUMDParser__parse[\"parse\"]\n        sumd__parser__SUMDParser___parse_header[\"_parse_header\"]\n        sumd__parser__SUMDParser___parse_sections[\"_parse_sections\"]\n        sumd__parser__SUMDParser__validate[\"validate\"]\n        sumd__parser__parse[\"parse\"]\n        sumd__parser__parse_file[\"parse_file\"]\n        sumd__parser__validate[\"validate\"]\n    end\n\n    class sumd__cli__cli,sumd__cli__validate,sumd__cli__export,sumd__cli__info,sumd__cli__generate,sumd__cli__extract,sumd__cli__scan,sumd__cli__main,sumd__mcp_server__list_tools,sumd__mcp_server__call_tool entry\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project/context.md`",
+      "type": "unknown",
+      "content": "# System Architecture Analysis",
+      "level": 2
+    },
+    {
+      "name": "overview",
+      "type": "unknown",
+      "content": "- **Project**: /home/tom/github/oqlos/sumd\n- **Primary Language**: python\n- **Languages**: python: 6, shell: 1\n- **Analysis Mode**: static\n- **Total Functions**: 41\n- **Total Classes**: 4\n- **Modules**: 7\n- **Entry Points**: 18",
+      "level": 2
+    },
+    {
+      "name": "architecture by module",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# sumd.generator",
+      "type": "unknown",
+      "content": "- **Functions**: 19\n- **File**: `generator.py`",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser",
+      "type": "unknown",
+      "content": "- **Functions**: 9\n- **Classes**: 4\n- **File**: `parser.py`",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli",
+      "type": "unknown",
+      "content": "- **Functions**: 8\n- **File**: `cli.py`",
+      "level": 2
+    },
+    {
+      "name": "# sumd.mcp_server",
+      "type": "unknown",
+      "content": "- **Functions**: 5\n- **File**: `mcp_server.py`",
+      "level": 2
+    },
+    {
+      "name": "key entry points",
+      "type": "unknown",
+      "content": "Main execution flows into the system:",
+      "level": 2
+    },
+    {
+      "name": "# sumd.mcp_server.call_tool",
+      "type": "unknown",
+      "content": "- **Calls**: server.call_tool, sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, json.dumps, sumd.mcp_server._doc_to_dict, types.TextContent, sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli.scan",
+      "type": "unknown",
+      "content": "> Scan a workspace directory and generate SUMD.md for every project found.\n\nDetects projects by presence of pyproject.toml. Extracts metadata from:\npypr\n- **Calls**: cli.command, click.argument, click.option, click.option, click.option, click.option, workspace.resolve, SUMDParser",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli.generate",
+      "type": "unknown",
+      "content": "> Generate a SUMD document from structured format.\n\nFILE: Path to the structured format file (json/yaml/toml)\n- **Calls**: cli.command, click.argument, click.option, click.option, file.read_text, lines.append, data.get, lines.append",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli.export",
+      "type": "unknown",
+      "content": "> Export a SUMD document to structured format.\n\nFILE: Path to the SUMD markdown file\n- **Calls**: cli.command, click.argument, click.option, click.option, sumd.parser.SUMDParser.parse_file, click.Path, click.Choice, click.Path",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser._parse_header",
+      "type": "unknown",
+      "content": "> Parse the project header (H1).\n\nArgs:\n    lines: List of document lines\n- **Calls**: enumerate, line.startswith, None.strip, header_content.split, None.strip, line.startswith, len, None.strip",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli.validate",
+      "type": "unknown",
+      "content": "> Validate a SUMD document.\n\nFILE: Path to the SUMD markdown file\n- **Calls**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate, click.Path, click.echo, sys.exit",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli.extract",
+      "type": "unknown",
+      "content": "> Extract content from a SUMD document.\n\nFILE: Path to the SUMD markdown file\n- **Calls**: cli.command, click.argument, click.option, sumd.parser.SUMDParser.parse_file, click.Path, click.echo, sys.exit, click.echo",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser._parse_sections",
+      "type": "unknown",
+      "content": "> Parse all sections in the document.\n\nArgs:\n    lines: List of document lines\n- **Calls**: line.startswith, None.strip, sections.append, None.lower, self.SECTION_MAPPING.get, Section, None.strip, sections.append",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli.info",
+      "type": "unknown",
+      "content": "> Display information about a SUMD document.\n\nFILE: Path to the SUMD markdown file\n- **Calls**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, click.echo, click.echo, click.echo, click.Path, click.echo",
+      "level": 2
+    },
+    {
+      "name": "# sumd.mcp_server.list_tools",
+      "type": "unknown",
+      "content": "- **Calls**: server.list_tools, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser.parse",
+      "type": "unknown",
+      "content": "> Parse a SUMD markdown document.\n\nArgs:\n    content: The markdown content to parse\n    \nReturns:\n    SUMDDocument: Parsed document structure\n- **Calls**: SUMDDocument, content.split, self._parse_header, self._parse_sections",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser.validate",
+      "type": "unknown",
+      "content": "> Validate a SUMD document against the specification.\n\nArgs:\n    document: The document to validate\n    \nReturns:\n    List of validation errors (empty i\n- **Calls**: errors.append, errors.append, errors.append, errors.append",
+      "level": 2
+    },
+    {
+      "name": "# sumd.mcp_server.main",
+      "type": "unknown",
+      "content": "- **Calls**: mcp.server.stdio.stdio_server, server.run, server.create_initialization_options",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.parse",
+      "type": "unknown",
+      "content": "> Parse a SUMD markdown document.\n\nArgs:\n    content: The markdown content to parse\n    \nReturns:\n    SUMDDocument: Parsed document structure\n- **Calls**: SUMDParser, parser.parse",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.parse_file",
+      "type": "unknown",
+      "content": "> Parse a SUMD file.\n\nArgs:\n    path: Path to the SUMD markdown file\n    \nReturns:\n    SUMDDocument: Parsed document structure\n- **Calls**: SUMDParser, parser.parse_file",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.validate",
+      "type": "unknown",
+      "content": "> Validate a SUMD document.\n\nArgs:\n    document: The document to validate\n    \nReturns:\n    List of validation errors (empty if valid)\n- **Calls**: SUMDParser, parser.validate",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli.main",
+      "type": "unknown",
+      "content": "> Main entry point for the CLI.\n- **Calls**: sumd.cli.cli",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser.__init__",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "process flows",
+      "type": "unknown",
+      "content": "Key execution flows identified:",
+      "level": 2
+    },
+    {
+      "name": "# flow 1: call_tool",
+      "type": "unknown",
+      "content": "```\ncall_tool [sumd.mcp_server]\n  └─> _resolve_path\n  └─> _doc_to_dict\n  └─ →> parse_file\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 2: scan",
+      "type": "unknown",
+      "content": "```\nscan [sumd.cli]\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 3: generate",
+      "type": "unknown",
+      "content": "```\ngenerate [sumd.cli]\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 4: export",
+      "type": "unknown",
+      "content": "```\nexport [sumd.cli]\n  └─ →> parse_file\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 5: _parse_header",
+      "type": "unknown",
+      "content": "```\n_parse_header [sumd.parser.SUMDParser]\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 6: validate",
+      "type": "unknown",
+      "content": "```\nvalidate [sumd.cli]\n  └─ →> parse_file\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 7: extract",
+      "type": "unknown",
+      "content": "```\nextract [sumd.cli]\n  └─ →> parse_file\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 8: _parse_sections",
+      "type": "unknown",
+      "content": "```\n_parse_sections [sumd.parser.SUMDParser]\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 9: info",
+      "type": "unknown",
+      "content": "```\ninfo [sumd.cli]\n  └─ →> parse_file\n```",
+      "level": 2
+    },
+    {
+      "name": "# flow 10: list_tools",
+      "type": "unknown",
+      "content": "```\nlist_tools [sumd.mcp_server]\n```",
+      "level": 2
+    },
+    {
+      "name": "key classes",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser",
+      "type": "unknown",
+      "content": "> Parser for SUMD markdown documents.\n- **Methods**: 6\n- **Key Methods**: sumd.parser.SUMDParser.__init__, sumd.parser.SUMDParser.parse, sumd.parser.SUMDParser.parse_file, sumd.parser.SUMDParser._parse_header, sumd.parser.SUMDParser._parse_sections, sumd.parser.SUMDParser.validate",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sectiontype",
+      "type": "unknown",
+      "content": "> SUMD section types.\n- **Methods**: 0\n- **Inherits**: Enum",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.section",
+      "type": "unknown",
+      "content": "> Represents a SUMD section.\n- **Methods**: 0",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumddocument",
+      "type": "unknown",
+      "content": "> Represents a parsed SUMD document.\n- **Methods**: 0",
+      "level": 2
+    },
+    {
+      "name": "data transformation functions",
+      "type": "unknown",
+      "content": "Key functions that process and transform data:",
+      "level": 2
+    },
+    {
+      "name": "# sumd.cli.validate",
+      "type": "unknown",
+      "content": "> Validate a SUMD document.\n\nFILE: Path to the SUMD markdown file\n- **Output to**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate",
+      "level": 2
+    },
+    {
+      "name": "# sumd.generator._parse_toon_file",
+      "type": "unknown",
+      "content": "> Parse a single *.testql.toon.yaml file into a scenario dict.\n- **Output to**: f.read_text, content.splitlines, re.findall, content.splitlines, content.splitlines",
+      "level": 2
+    },
+    {
+      "name": "# sumd.generator._parse_doql_content",
+      "type": "unknown",
+      "content": "> Parse DOQL content from .less or .css file into structured data.\n- **Output to**: re.search, re.finditer, re.finditer, re.finditer, re.finditer",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser.parse",
+      "type": "unknown",
+      "content": "> Parse a SUMD markdown document.\n\nArgs:\n    content: The markdown content to parse\n    \nReturns:\n    \n- **Output to**: SUMDDocument, content.split, self._parse_header, self._parse_sections",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser.parse_file",
+      "type": "unknown",
+      "content": "> Parse a SUMD file.\n\nArgs:\n    path: Path to the SUMD markdown file\n    \nReturns:\n    SUMDDocument: P\n- **Output to**: path.read_text, self.parse",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser._parse_header",
+      "type": "unknown",
+      "content": "> Parse the project header (H1).\n\nArgs:\n    lines: List of document lines\n- **Output to**: enumerate, line.startswith, None.strip, header_content.split, None.strip",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser._parse_sections",
+      "type": "unknown",
+      "content": "> Parse all sections in the document.\n\nArgs:\n    lines: List of document lines\n- **Output to**: line.startswith, None.strip, sections.append, None.lower, self.SECTION_MAPPING.get",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.sumdparser.validate",
+      "type": "unknown",
+      "content": "> Validate a SUMD document against the specification.\n\nArgs:\n    document: The document to validate\n  \n- **Output to**: errors.append, errors.append, errors.append, errors.append",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.parse",
+      "type": "unknown",
+      "content": "> Parse a SUMD markdown document.\n\nArgs:\n    content: The markdown content to parse\n    \nReturns:\n    \n- **Output to**: SUMDParser, parser.parse",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.parse_file",
+      "type": "unknown",
+      "content": "> Parse a SUMD file.\n\nArgs:\n    path: Path to the SUMD markdown file\n    \nReturns:\n    SUMDDocument: P\n- **Output to**: SUMDParser, parser.parse_file",
+      "level": 2
+    },
+    {
+      "name": "# sumd.parser.validate",
+      "type": "unknown",
+      "content": "> Validate a SUMD document.\n\nArgs:\n    document: The document to validate\n    \nReturns:\n    List of va\n- **Output to**: SUMDParser, parser.validate",
+      "level": 2
+    },
+    {
+      "name": "public api surface",
+      "type": "unknown",
+      "content": "Functions exposed as public API (no underscore prefix):\n\n- `sumd.generator.generate_sumd_content` - 353 calls\n- `sumd.mcp_server.call_tool` - 64 calls\n- `sumd.cli.scan` - 48 calls\n- `sumd.cli.generate` - 30 calls\n- `sumd.generator.extract_openapi` - 24 calls\n- `sumd.generator.extract_goal` - 24 calls\n- `sumd.generator.extract_dockerfile` - 22 calls\n- `sumd.generator.extract_docker_compose` - 22 calls\n- `sumd.generator.extract_pyproject` - 17 calls\n- `sumd.cli.export` - 16 calls\n- `sumd.generator.extract_package_json` - 15 calls\n- `sumd.cli.validate` - 13 calls\n- `sumd.cli.extract` - 13 calls\n- `sumd.generator.extract_taskfile` - 13 calls\n- `sumd.generator.extract_env` - 13 calls\n- `sumd.generator.extract_testql_scenarios` - 12 calls\n- `sumd.generator.extract_pyqual` - 12 calls\n- `sumd.generator.extract_makefile` - 12 calls\n- `sumd.cli.info` - 11 calls\n- `sumd.generator.extract_requirements` - 9 calls\n- `sumd.mcp_server.list_tools` - 8 calls\n- `sumd.generator.extract_readme_title` - 5 calls\n- `sumd.generator.extract_doql` - 4 calls\n- `sumd.generator.extract_python_modules` - 4 calls\n- `sumd.parser.SUMDParser.parse` - 4 calls\n- `sumd.parser.SUMDParser.validate` - 4 calls\n- `sumd.mcp_server.main` - 3 calls\n- `sumd.cli.cli` - 2 calls\n- `sumd.parser.SUMDParser.parse_file` - 2 calls\n- `sumd.parser.parse` - 2 calls\n- `sumd.parser.parse_file` - 2 calls\n- `sumd.parser.validate` - 2 calls\n- `sumd.cli.main` - 1 calls",
+      "level": 2
+    },
+    {
+      "name": "system interactions",
+      "type": "unknown",
+      "content": "How components interact:\n\n```mermaid\ngraph TD\n    call_tool --> call_tool\n    call_tool --> _resolve_path\n    call_tool --> parse_file\n    call_tool --> dumps\n    call_tool --> _doc_to_dict\n    scan --> command\n    scan --> argument\n    scan --> option\n    generate --> command\n    generate --> argument\n    generate --> option\n    generate --> read_text\n    export --> command\n    export --> argument\n    export --> option\n    export --> parse_file\n    _parse_header --> enumerate\n    _parse_header --> startswith\n    _parse_header --> strip\n    _parse_header --> split\n    validate --> command\n    validate --> argument\n    validate --> parse_file\n    validate --> SUMDParser\n    validate --> validate\n    extract --> command\n    extract --> argument\n    extract --> option\n    extract --> parse_file\n    extract --> Path\n```",
+      "level": 2
+    },
+    {
+      "name": "reverse engineering guidelines",
+      "type": "unknown",
+      "content": "1. **Entry Points**: Start analysis from the entry points listed above\n2. **Core Logic**: Focus on classes with many methods\n3. **Data Flow**: Follow data transformation functions\n4. **Process Flows**: Use the flow diagrams for execution paths\n5. **API Surface**: Public API functions reveal the interface",
+      "level": 2
+    },
+    {
+      "name": "context for llm",
+      "type": "unknown",
+      "content": "Maintain the identified architectural patterns and public API surface when suggesting changes.",
+      "level": 2
+    },
+    {
+      "name": "# `project/readme.md`",
+      "type": "unknown",
+      "content": "# code2llm - Generated Analysis Files\n\nThis directory contains the complete analysis of your project generated by `code2llm`. Each file serves a specific purpose for understanding, refactoring, and documenting your codebase.",
+      "level": 2
+    },
+    {
+      "name": "📁 generated files overview",
+      "type": "unknown",
+      "content": "When you run `code2llm ./ -f all`, the following files are created:",
+      "level": 2
+    },
+    {
+      "name": "# 🎯 core analysis files",
+      "type": "unknown",
+      "content": "| File | Format | Purpose | Key Insights |\n|------|--------|---------|--------------|\n| `evolution.toon.yaml` | **YAML** | **📋 Refactoring queue** - Prioritized improvements | 0 refactoring actions needed |\n| `map.toon.yaml` | **YAML** | **🗺️ Structural map + project header** - Modules, imports, exports, signatures, stats, alerts, hotspots, trend | Project architecture overview |",
+      "level": 2
+    },
+    {
+      "name": "# 🤖 llm-ready documentation",
+      "type": "unknown",
+      "content": "| File | Format | Purpose | Use Case |\n|------|--------|---------|----------|\n| `prompt.txt` | **Text** | **📝 Ready-to-send prompt** - Lists all files with instructions | Attach to LLM conversation as context guide |\n| `context.md` | **Markdown** | **📖 LLM narrative** - Architecture summary | Paste into ChatGPT/Claude for code analysis |",
+      "level": 2
+    },
+    {
+      "name": "# 📊 visualizations",
+      "type": "unknown",
+      "content": "| File | Format | Purpose | Description |\n|------|--------|---------|-------------|\n| `flow.mmd` | **Mermaid** | **🔄 Control flow diagram** | Function call paths with complexity styling |\n| `calls.mmd` | **Mermaid** | **📞 Call graph** | Function dependencies (edges only) |\n| `compact_flow.mmd` | **Mermaid** | **📦 Module overview** | Aggregated module-level view |",
+      "level": 2
+    },
+    {
+      "name": "🚀 quick start commands",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# basic analysis",
+      "type": "unknown",
+      "content": "```bash\n# Quick health check (TOON format only)\ncode2llm ./ -f toon\n\n# Generate all formats (what created these files)\ncode2llm ./ -f all\n\n# LLM-ready context only\ncode2llm ./ -f context\n```",
+      "level": 2
+    },
+    {
+      "name": "# performance options",
+      "type": "unknown",
+      "content": "```bash\n# Fast analysis for large projects\ncode2llm ./ -f toon --strategy quick\n\n# Memory-limited analysis\ncode2llm ./ -f all --max-memory 500\n\n# Skip PNG generation (faster)\ncode2llm ./ -f all --no-png\n```",
+      "level": 2
+    },
+    {
+      "name": "# refactoring focus",
+      "type": "unknown",
+      "content": "```bash\n# Get refactoring recommendations\ncode2llm ./ -f evolution\n\n# Focus on specific code smells\ncode2llm ./ -f toon --refactor --smell god_function\n\n# Data flow analysis\ncode2llm ./ -f flow --data-flow\n```",
+      "level": 2
+    },
+    {
+      "name": "📖 understanding each file",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# `analysis.toon` - health diagnostics",
+      "type": "unknown",
+      "content": "**Purpose**: Quick overview of code health issues\n**Key sections**:\n- **HEALTH**: Critical issues (🔴) and warnings (🟡)\n- **REFACTOR**: Prioritized refactoring actions\n- **COUPLING**: Module dependencies and potential cycles\n- **LAYERS**: Package complexity metrics\n- **FUNCTIONS**: High-complexity functions (CC ≥ 10)\n- **CLASSES**: Complex classes needing attention\n\n**Example usage**:\n```bash\n# View health issues\ncat analysis.toon | head -30\n\n# Check refactoring priorities\ngrep \"REFACTOR\" analysis.toon\n```",
+      "level": 2
+    },
+    {
+      "name": "# `evolution.toon.yaml` - refactoring queue",
+      "type": "unknown",
+      "content": "**Purpose**: Step-by-step refactoring plan\n**Key sections**:\n- **NEXT**: Immediate actions to take\n- **RISKS**: Potential breaking changes\n- **METRICS-TARGET**: Success criteria\n\n**Example usage**:\n```bash\n# Get refactoring plan\ncat evolution.toon.yaml\n\n# Track progress\ngrep \"NEXT\" evolution.toon.yaml\n```",
+      "level": 2
+    },
+    {
+      "name": "# `flow.toon` - legacy data flow analysis",
+      "type": "unknown",
+      "content": "**Purpose**: Understand data movement through the system (legacy / explicit opt-in)\n**Key sections**:\n- **PIPELINES**: Data processing chains\n- **CONTRACTS**: Function input/output contracts\n- **SIDE_EFFECTS**: Functions with external impacts\n\n**Example usage**:\n```bash\n# Find data pipelines\ngrep \"PIPELINES\" flow.toon\n\n# Identify side effects\ngrep \"SIDE_EFFECTS\" flow.toon\n```",
+      "level": 2
+    },
+    {
+      "name": "# `map.toon.yaml` - structural map + project header",
+      "type": "unknown",
+      "content": "**Purpose**: High-level architecture overview plus compact project header\n**Key sections**:\n- **MODULES**: All modules with basic stats\n- **IMPORTS**: Dependency relationships\n- **EXPORTS**: Public API surface and signatures\n- **HEADER**: Stats, alerts, hotspots, evolution trend\n\n**Example usage**:\n```bash\n# See project structure\ncat map.toon.yaml | head -50\n\n# Find public APIs\ngrep \"SIGNATURES\" map.toon.yaml\n```",
+      "level": 2
+    },
+    {
+      "name": "# `project.toon.yaml` - compact analysis view",
+      "type": "unknown",
+      "content": "**Purpose**: Compact module view generated from project.yaml data\n**Status**: Legacy view generated on demand from unified project.yaml\n\n**Example usage**:\n```bash\n# View compact project structure\ncat project.toon.yaml | head -30\n\n# Find largest files\ngrep -E \"^  .*[0-9]{3,}$\" project.toon.yaml | sort -t',' -k2 -n -r | head -10\n```",
+      "level": 2
+    },
+    {
+      "name": "# `prompt.txt` - ready-to-send llm prompt",
+      "type": "unknown",
+      "content": "**Purpose**: Pre-formatted prompt listing all generated files for LLM conversation\n**Generation**: Written when `code2llm` runs with a source path and requests `-f all` (including `--no-chunk`) or `code2logic`\n**Contents**:\n- **Files section**: Lists all existing generated files with descriptions, including `project.toon.yaml` when generated by `-f all`\n- **Source files section**: Highlights important source files such as `cli_exports/orchestrator.py`\n- **Missing section**: Shows which files weren't generated (if any)\n- **Task section**: Refactoring brief with concrete execution instructions, not just analysis\n- **Priority Order section**: State-dependent refactoring priorities, starting with blockers and then architecture cleanup\n- **Requirements section**: Guidelines for suggested changes\n\n**Example usage**:\n```bash\n# View the prompt\ncat prompt.txt\n\n# Copy to clipboard and paste into ChatGPT/Claude\ncat prompt.txt | pbcopy  # macOS\ncat prompt.txt | xclip -sel clip  # Linux\n```",
+      "level": 2
+    },
+    {
+      "name": "# `context.md` - llm narrative",
+      "type": "unknown",
+      "content": "**Purpose**: Ready-to-paste context for AI assistants\n**Key sections**:\n- **Overview**: Project statistics\n- **Architecture**: Module breakdown\n- **Entry Points**: Public interfaces\n- **Patterns**: Design patterns detected\n\n**Example usage**:\n```bash\n# Copy to clipboard for LLM\ncat context.md | pbcopy  # macOS\ncat context.md | xclip -sel clip  # Linux\n\n# Use with Claude/ChatGPT for code analysis\n```",
+      "level": 2
+    },
+    {
+      "name": "# visualization files (`*.mmd`, `*.png`)",
+      "type": "unknown",
+      "content": "**Purpose**: Visual understanding of code structure\n**Files**:\n- `flow.mmd` - Detailed control flow with complexity colors\n- `calls.mmd` - Simple call graph\n- `compact_flow.mmd` - High-level module view\n- `*.png` - Pre-rendered images\n\n**Example usage**:\n```bash\n# View diagrams\nopen flow.png  # macOS\nxdg-open flow.png  # Linux\n\n# Edit in Mermaid Live Editor\n# Copy content of .mmd files to https://mermaid.live\n```",
+      "level": 2
+    },
+    {
+      "name": "🔍 common analysis patterns",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# 1. code health assessment",
+      "type": "unknown",
+      "content": "```bash\n# Quick health check\ncode2llm ./ -f toon\ncat analysis.toon | grep -E \"(HEALTH|REFACTOR)\"\n```",
+      "level": 2
+    },
+    {
+      "name": "# 2. refactoring planning",
+      "type": "unknown",
+      "content": "```bash\n# Get refactoring queue\ncode2llm ./ -f evolution\ncat evolution.toon.yaml\n\n# Focus on specific issues\ncode2llm ./ -f toon --refactor --smell god_function\n```",
+      "level": 2
+    },
+    {
+      "name": "# 3. llm assistance",
+      "type": "unknown",
+      "content": "```bash\n# Generate context for AI\ncode2llm ./ -f context\ncat context.md\n\n# Use with Claude: \"Based on this context, help me refactor the god modules\"\n```",
+      "level": 2
+    },
+    {
+      "name": "# 4. team documentation",
+      "type": "unknown",
+      "content": "```bash\n# Generate all docs for team\ncode2llm ./ -f all -o ./docs/\n\n# Create visual diagrams\nopen docs/flow.png\n```",
+      "level": 2
+    },
+    {
+      "name": "📊 interpreting metrics",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# complexity metrics (cc)",
+      "type": "unknown",
+      "content": "- **🔴 Critical (≥5.0)**: Immediate refactoring needed\n- **🟠 High (3.0-4.9)**: Consider refactoring\n- **🟡 Medium (1.5-2.9)**: Monitor complexity\n- **🟢 Low (0.1-1.4)**: Acceptable\n- **⚪ Basic (0.0)**: Simple functions",
+      "level": 2
+    },
+    {
+      "name": "# module health",
+      "type": "unknown",
+      "content": "- **GOD Module**: Too large (>500 lines, >20 methods)\n- **HUB**: High fan-out (calls many modules)\n- **FAN-IN**: High incoming dependencies\n- **CYCLES**: Circular dependencies",
+      "level": 2
+    },
+    {
+      "name": "# data flow indicators",
+      "type": "unknown",
+      "content": "- **PIPELINE**: Sequential data processing\n- **CONTRACT**: Clear input/output specification\n- **SIDE_EFFECT**: External state modification",
+      "level": 2
+    },
+    {
+      "name": "🛠️ integration examples",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# ci/cd pipeline",
+      "type": "unknown",
+      "content": "```bash\n#!/bin/bash\n# Analyze code quality in CI\ncode2llm ./ -f toon -o ./analysis\nif grep -q \"🔴 GOD\" ./analysis/analysis.toon; then\n    echo \"❌ God modules detected\"\n    exit 1\nfi\n```",
+      "level": 2
+    },
+    {
+      "name": "# pre-commit hook",
+      "type": "unknown",
+      "content": "```bash\n#!/bin/sh\n# .git/hooks/pre-commit\ncode2llm ./ -f toon -o ./temp_analysis\nif grep -q \"🔴\" ./temp_analysis/analysis.toon; then\n    echo \"⚠️  Critical issues found. Review before committing.\"\nfi\nrm -rf ./temp_analysis\n```",
+      "level": 2
+    },
+    {
+      "name": "# documentation generation",
+      "type": "unknown",
+      "content": "```bash\n# Generate docs for README\ncode2llm ./ -f context -o ./docs/\necho \"## Architecture\" >> README.md\ncat docs/context.md >> README.md\n```",
+      "level": 2
+    },
+    {
+      "name": "📚 next steps",
+      "type": "unknown",
+      "content": "1. **Review `analysis.toon`** - Identify critical issues\n2. **Check `evolution.toon.yaml`** - Plan refactoring priorities\n3. **Use `context.md`** - Get LLM assistance for complex changes\n4. **Reference visualizations** - Understand system architecture\n5. **Track progress** - Re-run analysis after changes",
+      "level": 2
+    },
+    {
+      "name": "🔧 advanced usage",
+      "type": "unknown",
+      "content": "",
+      "level": 2
+    },
+    {
+      "name": "# custom analysis",
+      "type": "unknown",
+      "content": "```bash\n# Deep analysis with all insights\ncode2llm ./ -m hybrid -f all --max-depth 15 -v\n\n# Performance-optimized\ncode2llm ./ -m static -f toon --strategy quick\n\n# Refactoring-focused\ncode2llm ./ -f toon,evolution --refactor\n```",
+      "level": 2
+    },
+    {
+      "name": "# output customization",
+      "type": "unknown",
+      "content": "```bash\n# Separate output directories\ncode2llm ./ -f all -o ./analysis-$(date +%Y%m%d)\n\n# Split YAML into multiple files\ncode2llm ./ -f yaml --split-output\n\n# Separate orphaned functions\ncode2llm ./ -f yaml --separate-orphans\n```\n\n---\n\n**Generated by**: `code2llm ./ -f all --readme`  \n**Analysis Date**: 2026-04-18  \n**Total Functions**: 41  \n**Total Classes**: 4  \n**Modules**: 7  \n\nFor more information about code2llm, visit: https://github.com/tom-sapletta/code2llm",
+      "level": 2
+    },
+    {
+      "name": "# `project/prompt.txt`",
+      "type": "unknown",
+      "content": "```text markpact:file path=project/prompt.txt\nYou are an AI assistant helping me understand and improve a codebase.\nUse the attached/generated files as the authoritative context.\nYour goal is to refactor the project based on these files, not just summarize it.\n\nwe are in project path: .\n\nFiles for analysis:\n\nNote: project/validation.toon.yaml and project/duplication.toon.yaml are generated by external tools (vallm and redup)\n- project/analysis.toon.yaml  (Health diagnostics - complexity metrics, god modules, coupling issues, refactoring priorities) [1KB]\n- project/map.toon.yaml  (Structural map - files, sizes, imports, exports, signatures, project header) [2KB]\n- project/evolution.toon.yaml  (Refactoring queue - ranked actions by impact/effort, risks, metrics targets, history) [2KB]\n- project/project.toon.yaml  (Compact project overview - generated from project.yaml data) [1KB]\n- project/context.md  (LLM narrative - architecture summary and project context) [10KB]\n\nMissing files (not generated in this run):\n- project/README.md\n\nTask:\n- Treat this prompt as a refactoring brief: identify the highest-priority changes and prepare concrete edits.\n- Use the file set to decide whether the first pass should focus on correctness, duplication, complexity reduction, or architecture cleanup.\n- If you can safely implement the refactor, do it; otherwise give an exact file-by-file change plan and test plan.\n- Use analysis.toon.yaml to locate high-CC functions and god modules that should be split first.\n- Keep module boundaries intact and update imports/exports according to map.toon.yaml.\n- Use evolution.toon.yaml as the execution backlog and work from the top-ranked items.\n- Keep project.toon.yaml aligned with the refactored architecture.\n\nPriority Order:\nP1 — Split or simplify the highest-CC / god modules identified in analysis.toon.yaml.\nP1 — Preserve module boundaries and update imports/exports according to map.toon.yaml.\nP2 — Keep the compact project overview in project.toon.yaml aligned with the refactor.\nP2 — Execute the highest-impact items from evolution.toon.yaml in order of benefit/risk.\n\nFocus Areas for Analysis:\n1. **Code Health Analysis** - Review complexity metrics, god modules, coupling issues from analysis.toon.yaml\n2. **Structural Map** - Use map.toon.yaml to inspect imports, exports, signatures, and the project header\n3. **Refactoring Priorities** - Examine ranked refactoring actions and risk assessment from evolution.toon.yaml\n4. **Project Overview** - Review the compact project overview from project.toon.yaml\n\nAnalysis Strategy:\n- Start with analysis.toon.yaml for health metrics, then map.toon.yaml for structure and signatures\n- Review evolution.toon.yaml for action priorities and next steps\n- Compare the compact project overview in project.toon.yaml with the main analysis files\n\nConstraints:\n- Prefer minimal, incremental changes.\n- Maintain full backward compatibility.\n- Base recommendations on concrete metrics from the provided files.\n- If uncertain, ask clarifying questions.\n```",
       "level": 2
     }
   ]

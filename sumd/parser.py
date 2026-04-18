@@ -222,3 +222,240 @@ def validate(document: SUMDDocument) -> List[str]:
     """
     parser = SUMDParser()
     return parser.validate(document)
+
+
+# ---------------------------------------------------------------------------
+# Codeblock format validators
+# ---------------------------------------------------------------------------
+
+_CODEBLOCK_RE = re.compile(
+    r"^```(?P<lang>\w+)(?:[ \t]+(?P<meta>[^\n]*))?$\n(?P<body>[\s\S]*?)\n^```[ \t]*$",
+    re.MULTILINE,
+)
+
+_MARKPACT_META_RE = re.compile(r"markpact:(?P<kind>\w+)(?:[ \t]+(?P<attrs>.*))?")
+
+
+@dataclass
+class CodeBlockIssue:
+    line: int
+    lang: str
+    kind: str        # 'error' | 'warning'
+    message: str
+    meta: str = ""
+
+
+def _validate_yaml_body(body: str, path: str) -> list[str]:
+    """Check YAML body is parseable."""
+    try:
+        import yaml
+        yaml.safe_load(body)
+        return []
+    except Exception as e:
+        return [f"invalid YAML in {path}: {e}"]
+
+
+def _validate_less_css_body(body: str, path: str) -> list[str]:
+    """Basic sanity: balanced braces."""
+    opens = body.count("{")
+    closes = body.count("}")
+    if opens != closes:
+        return [f"unbalanced braces in {path}: {opens} open vs {closes} close"]
+    return []
+
+
+def _validate_mermaid_body(body: str, path: str) -> list[str]:
+    """Check mermaid block starts with a valid diagram type."""
+    first = body.strip().split("\n")[0].strip()
+    valid_starts = ("flowchart", "graph", "sequenceDiagram", "classDiagram",
+                    "stateDiagram", "erDiagram", "gantt", "pie", "journey")
+    if not any(first.startswith(s) for s in valid_starts):
+        return [f"mermaid block in {path} has unknown diagram type: {first!r}"]
+    return []
+
+
+def _validate_toon_body(body: str, path: str) -> list[str]:
+    """Check toon block has at least one recognised section header."""
+    headers = re.findall(r"^[A-Z_]+(?:\[.*?\])?(?:\{.*?\})?:", body, re.MULTILINE)
+    if not headers:
+        return [f"toon block in {path} has no section headers (e.g. HEALTH, ALERTS, MODULES)"]
+    return []
+
+
+def _validate_bash_body(body: str, path: str) -> list[str]:
+    """Check bash block is non-empty and doesn't contain obvious placeholders."""
+    if not body.strip():
+        return [f"empty bash block in {path}"]
+    if "<YOUR_" in body or "TODO" in body:
+        return [f"unresolved placeholder in bash block at {path}"]
+    return []
+
+
+def _validate_deps_body(body: str, path: str) -> list[str]:
+    """Each line of a deps block should be a valid pip requirement or empty."""
+    issues = []
+    for i, line in enumerate(body.splitlines(), 1):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        # PEP 508 lookalike: name with optional extras/version
+        if not re.match(r"^[A-Za-z0-9_\-\.]+", line):
+            issues.append(f"deps line {i} in {path} looks invalid: {line!r}")
+    return issues
+
+
+_LANG_VALIDATORS = {
+    "yaml":    _validate_yaml_body,
+    "less":    _validate_less_css_body,
+    "css":     _validate_less_css_body,
+    "mermaid": _validate_mermaid_body,
+    "toon":    _validate_toon_body,
+    "bash":    _validate_bash_body,
+    "text":    _validate_deps_body,   # markpact:deps python
+}
+
+_VALID_MARKPACT_KINDS = {"file", "deps", "run", "test", "bootstrap", "publish"}
+_MARKPACT_REQUIRED_ATTRS = {"file": "path"}
+
+
+def validate_codeblocks(content: str, source: str = "SUMD.md") -> list[CodeBlockIssue]:
+    """Validate all fenced code blocks in *content*.
+
+    Checks:
+    - markpact annotation syntax (kind, required attrs)
+    - language-specific body format (yaml parseable, braces balanced, etc.)
+    - non-empty bodies
+    """
+    issues: list[CodeBlockIssue] = []
+
+    for m in _CODEBLOCK_RE.finditer(content):
+        lang = (m.group("lang") or "").strip()
+        meta = (m.group("meta") or "").strip()
+        body = (m.group("body") or "").strip()
+        line_no = content[: m.start()].count("\n") + 1
+        ctx = f"{source}:{line_no}"
+
+        # ── markpact annotation checks ──────────────────────────────────
+        mp = _MARKPACT_META_RE.search(meta)
+        if mp:
+            kind = mp.group("kind")
+            attrs = mp.group("attrs") or ""
+            if kind not in _VALID_MARKPACT_KINDS:
+                issues.append(CodeBlockIssue(line_no, lang, "error",
+                    f"unknown markpact kind {kind!r} (valid: {', '.join(sorted(_VALID_MARKPACT_KINDS))})", meta))
+            req_attr = _MARKPACT_REQUIRED_ATTRS.get(kind)
+            if req_attr and f"{req_attr}=" not in attrs:
+                issues.append(CodeBlockIssue(line_no, lang, "error",
+                    f"markpact:{kind} requires {req_attr}=... but got: {attrs!r}", meta))
+
+        # ── body emptiness ──────────────────────────────────────────────
+        if not body:
+            issues.append(CodeBlockIssue(line_no, lang, "warning",
+                f"empty code block (lang={lang!r})", meta))
+            continue
+
+        # ── language-specific body validation ───────────────────────────
+        validator = _LANG_VALIDATORS.get(lang)
+        if validator:
+            for msg in validator(body, ctx):
+                issues.append(CodeBlockIssue(line_no, lang, "error", msg, meta))
+
+    return issues
+
+
+# ---------------------------------------------------------------------------
+# Markdown structure validators
+# ---------------------------------------------------------------------------
+
+_REQUIRED_H2 = {"metadata", "intent", "architecture",
+                 "workflows", "dependencies", "deployment"}
+_RECOMMENDED_H2 = {"interfaces"}  # present in API projects but not required
+
+_METADATA_FIELDS = {"name", "version"}  # required metadata bullet keys
+
+
+def validate_markdown(content: str, source: str = "SUMD.md") -> list[str]:
+    """Validate SUMD markdown structure.
+
+    Checks:
+    - H1 title present
+    - Required H2 sections present
+    - Metadata section has name and version bullets
+    - No broken markdown links [text]() with empty href
+    - No unclosed fenced code blocks
+    """
+    issues: list[str] = []
+
+    lines = content.splitlines()
+
+    # H1 check
+    h1_lines = [l for l in lines if re.match(r"^# [^#]", l)]
+    if not h1_lines:
+        issues.append(f"{source}: missing H1 title")
+
+    # H2 sections
+    found_h2 = {re.sub(r"`.*?`", "", l[3:]).strip().lower()
+                for l in lines if l.startswith("## ")}
+    for req in _REQUIRED_H2:
+        if not any(req in h for h in found_h2):
+            issues.append(f"{source}: missing required section '## {req.title()}'")
+
+    # Metadata bullets
+    in_meta = False
+    meta_found: set[str] = set()
+    for l in lines:
+        if l.startswith("## Metadata"):
+            in_meta = True
+            continue
+        if in_meta and l.startswith("## "):
+            break
+        if in_meta:
+            m = re.match(r"- \*\*(\w+)\*\*:", l)
+            if m:
+                meta_found.add(m.group(1).lower())
+    for req in _METADATA_FIELDS:
+        if req not in meta_found:
+            issues.append(f"{source}: metadata section missing '**{req}**' field")
+
+    # Unclosed fenced blocks
+    fence_depth = 0
+    for i, l in enumerate(lines, 1):
+        if re.match(r"^```", l):
+            fence_depth = 1 - fence_depth  # toggle
+    if fence_depth:
+        issues.append(f"{source}: unclosed fenced code block (odd number of ``` markers)")
+
+    # Empty markdown links
+    empty_links = re.findall(r"\[([^\]]+)\]\(\s*\)", content)
+    for text in empty_links:
+        issues.append(f"{source}: empty link href for [{text}]()")
+
+    return issues
+
+
+# ---------------------------------------------------------------------------
+# Combined validator
+# ---------------------------------------------------------------------------
+
+def validate_sumd_file(path: Path) -> dict:
+    """Run all validators on a SUMD.md file.
+
+    Returns:
+        {
+          "source": str,
+          "markdown": list[str],        # structural issues
+          "codeblocks": list[CodeBlockIssue],  # format issues
+          "ok": bool,
+        }
+    """
+    content = path.read_text(encoding="utf-8")
+    source = path.name
+    md_issues = validate_markdown(content, source)
+    cb_issues = validate_codeblocks(content, source)
+    return {
+        "source": str(path),
+        "markdown": md_issues,
+        "codeblocks": cb_issues,
+        "ok": not md_issues and not any(c.kind == "error" for c in cb_issues),
+    }
+

@@ -12,6 +12,10 @@ from sumd.parser import (
     parse,
     parse_file,
     validate,
+    validate_codeblocks,
+    validate_markdown,
+    validate_sumd_file,
+    CodeBlockIssue,
 )
 from sumd.generator import generate_sumd_content
 
@@ -21,5 +25,9 @@ __all__ = [
     "parse",
     "parse_file",
     "validate",
+    "validate_codeblocks",
+    "validate_markdown",
+    "validate_sumd_file",
+    "CodeBlockIssue",
     "generate_sumd_content",
 ]

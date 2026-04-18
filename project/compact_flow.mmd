@@ -1,0 +1,8 @@
+flowchart TD
+    sumd__cli["sumd.cli<br/>8 funcs"]
+    sumd__generator["sumd.generator<br/>19 funcs"]
+    sumd__mcp_server["sumd.mcp_server<br/>5 funcs"]
+    sumd__parser["sumd.parser<br/>9 funcs"]
+    sumd__mcp_server ==>|7| sumd__parser
+    sumd__cli ==>|6| sumd__parser
+    sumd__cli -->|1| sumd__generator

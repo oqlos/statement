@@ -1,4 +1,4 @@
-# Dokumentacja SUMD — integracja z testql, doql, taskfile
+# SUMD — dokumentacja użytkowania
 
 ## Przegląd ekosystemu
 
@@ -11,316 +11,248 @@ SUMD jest częścią trójwarstwowego ekosystemu narzędzi:
 | Automatyzacja | `taskfile` | Task runner, deploy, CI/CD |
 | Testy | `testql` | Testowanie interfejsów API, GUI, CLI |
 
+---
+
 ## Instalacja
 
 ```bash
-pip install sumd doql testql taskfile
+pip install sumd
 ```
 
-## Szybki start — `sumd scan`
+---
 
-Komenda `scan` automatycznie generuje `SUMD.md` dla każdego projektu w workspace (wykrywa projekty po obecności `pyproject.toml`).
+## Komendy CLI
+
+### `sumd scan` — generowanie SUMD.md
+
+Skanuje workspace, wykrywa projekty Python (po obecności `pyproject.toml`) i generuje `SUMD.md`.
 
 ```bash
-# Wygeneruj SUMD.md dla wszystkich projektów (pomija projekty z istniejącym plikiem)
-sumd scan /home/tom/github/oqlos
+sumd scan .                    # pomiń projekty z istniejącym plikiem
+sumd scan . --fix              # nadpisz istniejące pliki
+sumd scan . --fix --no-raw     # tryb strukturalny zamiast surowych code bloków
+sumd scan . --fix --report summary.json
+sumd scan . --fix --analyze    # + uruchom code2llm, redup, vallm
+sumd scan . --fix --analyze --tools code2llm,redup
+```
 
-# Nadpisz istniejące pliki
+**Co jest osadzane w SUMD.md:**
+
+| Źródło | Sposób osadzenia | markpact kind |
+|--------|-----------------|---------------|
+| `pyproject.toml` | parsowany (wersja, deps, entry points) | — |
+| `Taskfile.yml` | surowy YAML | `markpact:file` |
+| `openapi.yaml` | pełna spec + endpointy jako sekcje | `markpact:file` |
+| `testql-scenarios/**/*.testql.toon.yaml` | surowy toon | `markpact:file` |
+| `app.doql.less` / `.css` | surowy Less/CSS | `markpact:file` |
+| `pyqual.yaml` | surowy YAML | `markpact:file` |
+| `goal.yaml` | sekcja intent | — |
+| `.env.example` | lista zmiennych | — |
+| `Dockerfile` / `docker-compose.*.yml` | lista plików | — |
+| `src/**/*.py` moduły | lista nazw | — |
+| `project/analysis.toon.yaml` | statyczna analiza kodu (CC, pipelines) | `markpact:file` |
+| `project/project.toon.yaml` | topologia projektu | `markpact:file` |
+| `project/evolution.toon.yaml` | historia commitów | `markpact:file` |
+| `project/map.toon.yaml` | mapa zależności modułów | `markpact:file` |
+| `project/duplication.toon.yaml` | raport duplikacji kodu | `markpact:file` |
+| `project/validation.toon.yaml` | wyniki walidacji vallm | `markpact:file` |
+| `project/compact_flow.mmd` | diagram przepływu wywołań | `markpact:file` |
+| `project/calls.mmd` | pełny call graph | `markpact:file` |
+| `project/flow.mmd` | diagram przepływu | `markpact:file` |
+| `project/context.md` | analiza architektury (code2llm) | inline markdown |
+| `project/README.md` | opis wyników analizy | inline markdown |
+| `project/prompt.txt` | prompt użyty przez code2llm | `markpact:file` |
+
+**Nie osadzane:** `*.png`, `index.html`, `refactor-progress.txt`, `project/testql-scenarios/`.
+
+Folder `project/` jest generowany przez `sumd analyze` (narzędzia `code2llm`, `redup`, `vallm`).
+
+---
+
+### `sumd lint` — walidacja SUMD.md
+
+```bash
+sumd lint SUMD.md
+sumd lint --workspace .
+sumd lint --workspace . --json
+```
+
+Walidatory sprawdzają:
+
+- **Markdown**: H1, wymagane sekcje `## Metadata/Intent/Architecture/Workflows/Dependencies/Deployment`, pola `name`+`version`, niezamknięte fenced blocki
+- **`toon`**: obecność nagłówków sekcji (`CONFIG[...]`, `API[...]` itp.)
+- **`yaml`**: poprawność parsowania przez PyYAML
+- **`mermaid`**: prawidłowy typ diagramu
+- **`less`/`css`**: zbilansowane nawiasy klamrowe
+- **`bash`**: brak placeholderów `<YOUR_...>` i TODO
+- **`text`** (deps): poprawny format nazw pakietów pip
+
+---
+
+### `sumd scaffold` — generowanie szkieletów testql
+
+#### Dlaczego `sumd scan` nie generuje testql automatycznie?
+
+`sumd scan` tylko **czyta** istniejące pliki testql i osadza je w SUMD.md.
+Nie może ich generować, ponieważ scenariusze testql kodują **oczekiwane zachowanie biznesowe** —
+asercje, warunki brzegowe, logikę domenową — której sumd nie zna.
+
+`sumd scaffold` generuje **szkielet strukturalny** (endpointy, nazwy plików, konfigurację bazy)
+ze specyfikacji OpenAPI. Asercje i logika domenowa muszą być uzupełnione przez człowieka lub LLM.
+
+```bash
+sumd scaffold ./my-project                          # wszystkie scenariusze z openapi.yaml
+sumd scaffold ./my-project --type smoke             # tylko smoke testy (GET /health itp.)
+sumd scaffold ./my-project --type crud              # scenariusze per zasób
+sumd scaffold ./my-project --force                  # nadpisz istniejące pliki
+sumd scaffold ./my-project --output ./my-scenarios/ # inny katalog wyjściowy
+```
+
+**Przepływ pracy scaffold → scan → testql:**
+
+```bash
+# 1. Wygeneruj szkielety ze spec OpenAPI
+sumd scaffold ./oqlos
+# → tworzy oqlos/testql-scenarios/smoke-health.testql.toon.yaml
+# → tworzy oqlos/testql-scenarios/api-execution.testql.toon.yaml
+# → ...
+
+# 2. Uzupełnij asercje (każdy plik ma sekcję # ASSERT[0] z TODO)
+vim oqlos/testql-scenarios/api-execution.testql.toon.yaml
+
+# 3. Osadź w SUMD.md
 sumd scan . --fix
 
-# Tryb strukturalny (konwersja źródeł do Markdown zamiast surowych code bloków)
-sumd scan . --fix --no-raw
+# 4. Waliduj
+sumd lint --workspace .
 
-# Wygeneruj raport JSON
-sumd scan . --fix --report summary.json
+# 5. Uruchom testy
+testql run oqlos/testql-scenarios/
 ```
 
-### Tryby renderowania: `--raw` vs `--no-raw`
+**Przykład wygenerowanego pliku** (`api-execution.testql.toon.yaml`):
 
-| Opcja | Zachowanie |
-|-------|-----------|
-| `--raw` *(domyślnie)* | Pliki źródłowe (`app.doql.less`, `openapi.yaml`, `pyqual.yaml`, testql scenarios) są wklejone jako surowe fenced code blocki |
-| `--no-raw` | Pliki źródłowe są konwertowane do strukturalnego Markdown (tabele, listy, bullet points) |
+```toon
+# SCENARIO: api-execution.testql.toon.yaml — api execution
+# TYPE: api
+# VERSION: 1.0
+# GENERATED: true
 
-Surowy tryb jest zalecany dla LLM context injection — zachowuje oryginalną składnię bez strat.
+# ── Konfiguracja ──────────────────────────────────────
+CONFIG[1]{key, value}:
+  base_path,  http://localhost:8101
 
-### 1. Utwórz `SUMD.md` dla swojego projektu
-
-```bash
-# Skopiuj przykładowy szablon
-cp examples/SUMD.md SUMD.md
-```
-
-Plik `SUMD.md` powinien zawierać sekcje:
-- `## Metadata` — wersja, autor, stos technologiczny
-- `## Intent` — cel i zakres projektu
-- `## Architecture` — diagram i opis architektury
-- `## Interfaces` — API, CLI, DOQL queries, testql scenarios
-- `## Workflows` — pipeline build/test/deploy (taskfile)
-- `## Configuration` — konfiguracja środowisk
-- `## Dependencies` — zależności Python i zewnętrzne
-- `## Deployment` — instrukcje wdrożenia
-
-### 2. Walidacja dokumentu
-
-```bash
-sumd validate SUMD.md
-```
-
-### 3. Eksport do formatów strukturalnych
-
-```bash
-# Do JSON (dla API, LLM context injection)
-sumd export SUMD.md --format json --output sumd.json
-
-# Do YAML (dla konfiguracji)
-sumd export SUMD.md --format yaml --output sumd.yaml
-
-# Do TOML
-sumd export SUMD.md --format toml --output sumd.toml
-```
-
-### 4. Generowanie SUMD z formatu strukturalnego
-
-```bash
-sumd generate sumd.json --format json --output SUMD.md
-sumd generate sumd.yaml --format yaml --output SUMD.md
+# ── Wywołania API ─────────────────────────────────────
+API[3]{method, endpoint, status}:
+  POST,   /api/v1/execution/run,     200
+  GET,    /api/v1/execution/status,  200
+  DELETE, /api/v1/execution/{id},    200
+# ── Asercje ───────────────────────────────────────────
+# ASSERT[0]{field, op, expected}:
+#   TODO: fill in assertions
 ```
 
 ---
 
-## Integracja z `doql`
+### `sumd analyze` — analiza statyczna kodu
 
-DOQL (Declarative Object Query Language) umożliwia opisanie operacji na danych bezpośrednio w dokumencie SUMD w sekcji `## Interfaces`.
+Uruchamia narzędzia `code2llm`, `redup`, `vallm` i zapisuje wyniki w `project/`.
+Pliki z `project/` są automatycznie osadzane w SUMD.md przy kolejnym `sumd scan --fix`.
 
-### Przykład zapytań w SUMD
-
-````markdown
-## Interfaces
-
-### DOQL Queries
-
-```doql
-# Lista aktywnych użytkowników
-SELECT id, name, email FROM users WHERE active = true ORDER BY name
-
-# Statystyki zamówień
-SELECT COUNT(*), SUM(total) FROM orders WHERE created_at > '2026-01-01'
+```bash
+sumd analyze ./my-project
+sumd analyze ./my-project --tools code2llm,redup
+sumd analyze ./my-project --force    # wymuś reinstalację narzędzi
 ```
-````
 
-### Python API — parsowanie sekcji DOQL
+| Narzędzie | Co robi | Generuje |
+|-----------|---------|----------|
+| `code2llm` | Analiza architektury, modułów, call graph | `context.md`, `analysis.toon.yaml`, `*.mmd` |
+| `redup` | Wykrywanie duplikacji kodu | `duplication.toon.yaml` |
+| `vallm` | Walidacja kodu przez LLM | `validation.toon.yaml` |
+
+---
+
+## Dlaczego SUMD.md nie wystarczy do odtworzenia projektu przez LLM?
+
+SUMD.md zawiera **specyfikację i kontekst**, ale nie **kod źródłowy**.
+
+### ✅ Co jest (pozwala odtworzyć strukturę):
+
+- Pełna specyfikacja OpenAPI (endpointy, schematy)
+- Scenariusze testql (kontrakt zachowania API)
+- Taskfile (workflow CI/CD)
+- Zależności Python
+- Architektura modułów, call-graph (`project/`)
+- Historia commitów, topologia projektu
+
+### ❌ Czego brakuje (implementacja):
+
+| Brak | Dlaczego to problem |
+|------|---------------------|
+| **Kod źródłowy `.py`** | Tylko nazwy modułów — bez ciał funkcji |
+| **Docstringi / sygnatury typów** | `analysis.toon.yaml` podaje CC i nazwy, nie kod |
+| **Testy jednostkowe** (`tests/`) | Tylko scenariusze testql, nie pytest |
+| **Logika interpreter/parser** | Złożone algorytmy nieosiągalne z diagramów |
+| **Modele danych** | Brak definicji Pydantic/dataclass |
+| **Komentarze w kodzie** | Tracone przy listowaniu modułów |
+
+### Czego brakuje w specyfikacji SUMD:
+
+1. **Sekcja `## Source`** — osadzenie kluczowych modułów źródłowych (top N wg CC z `analysis.toon.yaml`)
+2. **`markpact:test` dla `tests/`** — testy jednostkowe jako kontrakt niższego poziomu
+3. **Sygnatury publicznego API** — `__all__`, stubs typów, definicje Pydantic schemas
+4. **`markpact:file` dla `.env.example`** — teraz tylko listowany, nie osadzony jako blok kodu
+5. **Diagram sekwencji** — brak sequence diagram dla kluczowych przepływów (jest tylko call-graph)
+6. **Pinowane wersje zależności** — `requirements.txt` z pełnymi pinami
+
+---
+
+## Format `.testql.toon.yaml`
+
+```toon
+# SCENARIO: nazwa.testql.toon.yaml — opis
+# TYPE: api|smoke|crud|e2e|gui
+# VERSION: 1.0
+# GENERATED: true|false
+
+CONFIG[N]{key, value}:
+  base_path,  http://localhost:8080
+
+API[N]{method, endpoint, status}:
+  GET,    /api/v1/users,      200
+  POST,   /api/v1/users,      201  # create - create new user
+  DELETE, /api/v1/users/{id}, 204
+
+ASSERT[N]{field, op, expected}:
+  body.items, !=, null
+  body.count, >=, 0
+
+PERFORMANCE[N]{metric, threshold}:
+  response_time, <500ms
+```
+
+Sekcje opcjonalne: `NAVIGATE[N]` (GUI), `GUI[N]` (akcje przeglądarki), `SETUP[N]`, `TEARDOWN[N]`.
+
+---
+
+## Python API
 
 ```python
-from sumd import parse_file
-
-doc = parse_file("SUMD.md")
-
-# Znajdź sekcję Interfaces
-interfaces = next(
-    (s for s in doc.sections if s.type.value == "interfaces"),
-    None
-)
-if interfaces:
-    print(interfaces.content)
-```
-
----
-
-## Integracja z `testql`
-
-TestQL definiuje scenariusze testowe interfejsów. Scenariusze są dokumentowane w SUMD i uruchamiane przez CLI testql.
-
-### Przykład scenariuszy w SUMD
-
-````markdown
-## Interfaces
-
-### testql Scenarios
-
-```testql
-scenario: health_check
-  GET /health
-  status: 200
-  body.status: "ok"
-
-scenario: list_products
-  GET /products
-  status: 200
-  body.items: array
-```
-````
-
-### Uruchamianie testów
-
-```bash
-# Uruchom scenariusze opisane w SUMD
-testql run testql-scenarios/
-
-# Raport JSON
-testql run testql-scenarios/ --report json --output test-results.json
-
-# Walidacja względem OpenAPI spec
-testql validate openapi.yaml --scenarios testql-scenarios/
-```
-
-### Przykładowy plik scenariusza (`testql-scenarios/products.testql.yaml`)
-
-```yaml
-scenario: list_products
-  request:
-    method: GET
-    path: /products
-  expect:
-    status: 200
-    body:
-      items:
-        type: array
-```
-
----
-
-## Integracja z `taskfile`
-
-Pakiet `taskfile` zarządza automatyzacją: build, test, deploy, CI/CD. Workflows są dokumentowane w sekcji `## Workflows` w SUMD.
-
-### Przykładowy `Taskfile.yml`
-
-```yaml
-version: "3"
-
-vars:
-  APP_NAME: myapp
-  PYTHON: python3
-
-tasks:
-  build:
-    desc: "Zainstaluj zależności"
-    cmds:
-      - pip install -e ".[dev]"
-
-  test:
-    desc: "Uruchom testy (testql + pytest)"
-    cmds:
-      - testql run testql-scenarios/
-      - pytest tests/ -v
-
-  validate-sumd:
-    desc: "Waliduj dokumentację SUMD"
-    cmds:
-      - sumd validate SUMD.md
-
-  export-docs:
-    desc: "Eksportuj SUMD do JSON i YAML"
-    cmds:
-      - sumd export SUMD.md --format json --output sumd.json
-      - sumd export SUMD.md --format yaml --output sumd.yaml
-
-  deploy:
-    desc: "Wdróż aplikację"
-    cmds:
-      - taskfile deploy --env {{.ENV | default "staging"}}
-    vars:
-      ENV: "{{.ENV}}"
-
-  ci:
-    desc: "Wygeneruj konfiguracje CI/CD"
-    cmds:
-      - taskfile cigen --target github --output .github/workflows/ci.yml
-      - taskfile cigen --target gitlab --output .gitlab-ci.yml
-```
-
-### Python API taskfile
-
-```python
-from taskfile import TaskfileRunner, TaskfileConfig
-
-runner = TaskfileRunner("Taskfile.yml")
-
-# Uruchom zadanie
-runner.run("build")
-runner.run("test")
-
-# Deploy do środowiska
-runner.run("deploy", env={"ENV": "staging"})
-```
-
----
-
-## Pełny przykład projektu
-
-Struktura plików dla projektu używającego całego ekosystemu:
-
-```
-myapp/
-├── SUMD.md                    # Opis projektu (sumd)
-├── sumd.json                  # Eksport do JSON
-├── Taskfile.yml               # Automatyzacja (taskfile)
-├── openapi.yaml               # Specyfikacja API
-├── app.doql                   # Deklaracje danych (doql)
-├── testql-scenarios/          # Scenariusze testowe (testql)
-│   ├── health.testql.yaml
-│   └── products.testql.yaml
-├── myapp/
-│   └── __init__.py
-└── tests/
-    └── test_myapp.py
-```
-
-### Przepływ pracy
-
-```bash
-# 1. Waliduj dokumentację
-sumd validate SUMD.md
-
-# 2. Uruchom testy
-taskfile run test
-
-# 3. Eksportuj docs
-taskfile run export-docs
-
-# 4. Wdróż
-taskfile run deploy ENV=staging
-```
-
----
-
-## Generowanie przykładów programowo
-
-```python
-from sumd import parse_file
-import json
+from sumd import parse, parse_file
+from sumd.parser import validate_sumd_file
+from pathlib import Path
 
 # Parsuj SUMD.md
 doc = parse_file("SUMD.md")
+print(doc.project_name, doc.description)
+for s in doc.sections:
+    print(s.name, s.type.value)
 
-# Eksportuj do JSON
-data = {
-    "project_name": doc.project_name,
-    "description": doc.description,
-    "sections": [
-        {
-            "name": s.name,
-            "type": s.type.value,
-            "content": s.content,
-            "level": s.level,
-        }
-        for s in doc.sections
-    ],
-}
-
-with open("sumd.json", "w") as f:
-    json.dump(data, f, indent=2, ensure_ascii=False)
-
-print(f"Wygenerowano sumd.json dla projektu: {doc.project_name}")
-print(f"Liczba sekcji: {len(doc.sections)}")
-for section in doc.sections:
-    print(f"  - {section.name} ({section.type.value})")
+# Waliduj plik
+result = validate_sumd_file(Path("SUMD.md"))
+# result = {"source": "SUMD.md", "markdown": [...], "codeblocks": [...], "ok": True}
+if not result["ok"]:
+    for issue in result["markdown"] + result["codeblocks"]:
+        print(issue)
 ```
-
----
-
-## Pliki przykładowe
-
-- [examples/SUMD.md](../examples/SUMD.md) — przykładowy dokument SUMD
-- [examples/sumd.json](../examples/sumd.json) — przykładowy eksport JSON

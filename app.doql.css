@@ -1,6 +1,6 @@
 app {
   name: "sumd";
-  version: "0.1.11";
+  version: "0.1.15";
 }
 
 interface[type="cli"] {

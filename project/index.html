@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>code2llm Analysis Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --border: #475569;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #eab308;
+            --error: #ef4444;
+        }
+        
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f8fafc;
+                --surface: #ffffff;
+                --surface-hover: #f1f5f9;
+                --border: #e2e8f0;
+                --text: #1e293b;
+                --text-muted: #64748b;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .search {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .search input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            color: var(--text);
+            font-size: 0.875rem;
+            outline: none;
+        }
+        
+        .search input:focus {
+            border-color: var(--accent);
+        }
+        
+        .search input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        
+        .file-group {
+            margin-bottom: 1rem;
+        }
+        
+        .file-group-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 0.875rem;
+        }
+        
+        .file-item:hover {
+            background: var(--surface-hover);
+        }
+        
+        .file-item.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .file-item.active .file-meta {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .file-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .file-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        
+        .empty-state {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        /* Main content */
+        .content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .content-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .content-title h2 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .content-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            color: var(--text);
+            font-size: 0.875rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.15s;
+        }
+        
+        .btn:hover {
+            background: var(--border);
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        
+        .content-body {
+            flex: 1;
+            overflow: auto;
+            padding: 1.5rem;
+        }
+        
+        .welcome {
+            max-width: 600px;
+            margin: 2rem auto;
+            text-align: center;
+        }
+        
+        .welcome h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .welcome p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        pre {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        /* Markdown rendered content styles */
+        .markdown-content {
+            line-height: 1.6;
+            max-width: 100%;
+        }
+        
+        .markdown-content h1, .markdown-content h2, .markdown-content h3,
+        .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .markdown-content h1 { font-size: 1.75rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+        .markdown-content h2 { font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+        .markdown-content h3 { font-size: 1.25rem; }
+        .markdown-content h4 { font-size: 1.1rem; }
+        
+        .markdown-content p {
+            margin-bottom: 1rem;
+        }
+        
+        .markdown-content ul, .markdown-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+        
+        .markdown-content li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .markdown-content code {
+            background: var(--surface);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875em;
+        }
+        
+        .markdown-content pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .markdown-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            margin-left: 0;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+        
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .markdown-content th, .markdown-content td {
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        
+        .markdown-content th {
+            background: var(--surface);
+            font-weight: 600;
+        }
+        
+        .markdown-content tr:nth-child(even) {
+            background: var(--surface-hover);
+        }
+        
+        .markdown-content a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .markdown-content a:hover {
+            text-decoration: underline;
+        }
+        
+        .markdown-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+        }
+        
+        .markdown-content hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1.5rem 0;
+        }
+        
+        /* Mermaid diagram styles */
+        .mermaid-content {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .mermaid-content .mermaid {
+            background: transparent;
+        }
+        
+        /* Image preview styles */
+        .image-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .image-preview img {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                max-height: 40vh;
+            }
+            
+            .file-list {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 0.25rem;
+                padding: 0.5rem;
+            }
+            
+            .file-group {
+                display: flex;
+                flex-direction: row;
+                margin: 0;
+            }
+            
+            .file-group-title {
+                display: none;
+            }
+            
+            .file-item {
+                flex-direction: column;
+                min-width: 80px;
+                padding: 0.5rem;
+                text-align: center;
+            }
+            
+            .file-info {
+                display: none;
+            }
+            
+            .file-size {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="header">
+                <h1>🔍 code2llm</h1>
+                <p>Analysis Results Browser</p>
+            </div>
+            <div class="search">
+                <input type="text" id="search" placeholder="Search files..." oninput="filterFiles(this.value)">
+            </div>
+            <div class="file-list" id="fileList">
+                <!-- Files will be rendered here -->
+            </div>
+        </aside>
+        
+        <main class="content">
+            <div class="content-header">
+                <div class="content-title">
+                    <span id="contentIcon">📁</span>
+                    <h2 id="contentTitle">Welcome</h2>
+                </div>
+                <div class="content-actions" id="contentActions">
+                    <!-- Actions will be rendered here -->
+                </div>
+            </div>
+            <div class="content-body" id="contentBody">
+                <div class="welcome">
+                    <h2>Analysis Results</h2>
+                    <p>Select a file from the sidebar to view its contents. This interface works on GitHub Pages without any server required.</p>
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Stats will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize mermaid
+        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+        
+        const files = [{"name": "calls.png", "rel_path": "calls.png", "path": "calls.png", "size": "132.0KB", "icon": "🖼️", "type": "image", "type_name": "Image", "content": "[Binary file]", "is_subdir": false}, {"name": "compact_flow.png", "rel_path": "compact_flow.png", "path": "compact_flow.png", "size": "13.2KB", "icon": "🖼️", "type": "image", "type_name": "Image", "content": "[Binary file]", "is_subdir": false}, {"name": "flow.png", "rel_path": "flow.png", "path": "flow.png", "size": "17.0KB", "icon": "🖼️", "type": "image", "type_name": "Image", "content": "[Binary file]", "is_subdir": false}, {"name": "README.md", "rel_path": "README.md", "path": "README.md", "size": "9.3KB", "icon": "📝", "type": "markdown", "type_name": "Markdown", "content": "# code2llm - Generated Analysis Files\n\nThis directory contains the complete analysis of your project generated by `code2llm`. Each file serves a specific purpose for understanding, refactoring, and documenting your codebase.\n\n## 📁 Generated Files Overview\n\nWhen you run `code2llm ./ -f all`, the following files are created:\n\n### 🎯 Core Analysis Files\n\n| File | Format | Purpose | Key Insights |\n|------|--------|---------|--------------|\n| `evolution.toon.yaml` | **YAML** | **📋 Refactoring queue** - Prioritized improvements | 0 refactoring actions needed |\n| `map.toon.yaml` | **YAML** | **🗺️ Structural map + project header** - Modules, imports, exports, signatures, stats, alerts, hotspots, trend | Project architecture overview |\n\n### 🤖 LLM-Ready Documentation\n\n| File | Format | Purpose | Use Case |\n|------|--------|---------|----------|\n| `prompt.txt` | **Text** | **📝 Ready-to-send prompt** - Lists all files with instructions | Attach to LLM conversation as context guide |\n| `context.md` | **Markdown** | **📖 LLM narrative** - Architecture summary | Paste into ChatGPT/Claude for code analysis |\n\n### 📊 Visualizations\n\n| File | Format | Purpose | Description |\n|------|--------|---------|-------------|\n| `flow.mmd` | **Mermaid** | **🔄 Control flow diagram** | Function call paths with complexity styling |\n| `calls.mmd` | **Mermaid** | **📞 Call graph** | Function dependencies (edges only) |\n| `compact_flow.mmd` | **Mermaid** | **📦 Module overview** | Aggregated module-level view |\n\n## 🚀 Quick Start Commands\n\n### Basic Analysis\n```bash\n# Quick health check (TOON format only)\ncode2llm ./ -f toon\n\n# Generate all formats (what created these files)\ncode2llm ./ -f all\n\n# LLM-ready context only\ncode2llm ./ -f context\n```\n\n### Performance Options\n```bash\n# Fast analysis for large projects\ncode2llm ./ -f toon --strategy quick\n\n# Memory-limited analysis\ncode2llm ./ -f all --max-memory 500\n\n# Skip PNG generation (faster)\ncode2llm ./ -f all --no-png\n```\n\n### Refactoring Focus\n```bash\n# Get refactoring recommendations\ncode2llm ./ -f evolution\n\n# Focus on specific code smells\ncode2llm ./ -f toon --refactor --smell god_function\n\n# Data flow analysis\ncode2llm ./ -f flow --data-flow\n```\n\n## 📖 Understanding Each File\n\n### `analysis.toon` - Health Diagnostics\n**Purpose**: Quick overview of code health issues\n**Key sections**:\n- **HEALTH**: Critical issues (🔴) and warnings (🟡)\n- **REFACTOR**: Prioritized refactoring actions\n- **COUPLING**: Module dependencies and potential cycles\n- **LAYERS**: Package complexity metrics\n- **FUNCTIONS**: High-complexity functions (CC ≥ 10)\n- **CLASSES**: Complex classes needing attention\n\n**Example usage**:\n```bash\n# View health issues\ncat analysis.toon | head -30\n\n# Check refactoring priorities\ngrep \"REFACTOR\" analysis.toon\n```\n\n### `evolution.toon.yaml` - Refactoring Queue\n**Purpose**: Step-by-step refactoring plan\n**Key sections**:\n- **NEXT**: Immediate actions to take\n- **RISKS**: Potential breaking changes\n- **METRICS-TARGET**: Success criteria\n\n**Example usage**:\n```bash\n# Get refactoring plan\ncat evolution.toon.yaml\n\n# Track progress\ngrep \"NEXT\" evolution.toon.yaml\n```\n\n### `flow.toon` - Legacy Data Flow Analysis\n**Purpose**: Understand data movement through the system (legacy / explicit opt-in)\n**Key sections**:\n- **PIPELINES**: Data processing chains\n- **CONTRACTS**: Function input/output contracts\n- **SIDE_EFFECTS**: Functions with external impacts\n\n**Example usage**:\n```bash\n# Find data pipelines\ngrep \"PIPELINES\" flow.toon\n\n# Identify side effects\ngrep \"SIDE_EFFECTS\" flow.toon\n```\n\n### `map.toon.yaml` - Structural Map + Project Header\n**Purpose**: High-level architecture overview plus compact project header\n**Key sections**:\n- **MODULES**: All modules with basic stats\n- **IMPORTS**: Dependency relationships\n- **EXPORTS**: Public API surface and signatures\n- **HEADER**: Stats, alerts, hotspots, evolution trend\n\n**Example usage**:\n```bash\n# See project structure\ncat map.toon.yaml | head -50\n\n# Find public APIs\ngrep \"SIGNATURES\" map.toon.yaml\n```\n\n### `project.toon.yaml` - Compact Analysis View\n**Purpose**: Compact module view generated from project.yaml data\n**Status**: Legacy view generated on demand from unified project.yaml\n\n**Example usage**:\n```bash\n# View compact project structure\ncat project.toon.yaml | head -30\n\n# Find largest files\ngrep -E \"^  .*[0-9]{3,}$\" project.toon.yaml | sort -t',' -k2 -n -r | head -10\n```\n\n### `prompt.txt` - Ready-to-Send LLM Prompt\n**Purpose**: Pre-formatted prompt listing all generated files for LLM conversation\n**Generation**: Written when `code2llm` runs with a source path and requests `-f all` (including `--no-chunk`) or `code2logic`\n**Contents**:\n- **Files section**: Lists all existing generated files with descriptions, including `project.toon.yaml` when generated by `-f all`\n- **Source files section**: Highlights important source files such as `cli_exports/orchestrator.py`\n- **Missing section**: Shows which files weren't generated (if any)\n- **Task section**: Refactoring brief with concrete execution instructions, not just analysis\n- **Priority Order section**: State-dependent refactoring priorities, starting with blockers and then architecture cleanup\n- **Requirements section**: Guidelines for suggested changes\n\n**Example usage**:\n```bash\n# View the prompt\ncat prompt.txt\n\n# Copy to clipboard and paste into ChatGPT/Claude\ncat prompt.txt | pbcopy  # macOS\ncat prompt.txt | xclip -sel clip  # Linux\n```\n\n### `context.md` - LLM Narrative\n**Purpose**: Ready-to-paste context for AI assistants\n**Key sections**:\n- **Overview**: Project statistics\n- **Architecture**: Module breakdown\n- **Entry Points**: Public interfaces\n- **Patterns**: Design patterns detected\n\n**Example usage**:\n```bash\n# Copy to clipboard for LLM\ncat context.md | pbcopy  # macOS\ncat context.md | xclip -sel clip  # Linux\n\n# Use with Claude/ChatGPT for code analysis\n```\n\n### Visualization Files (`*.mmd`, `*.png`)\n**Purpose**: Visual understanding of code structure\n**Files**:\n- `flow.mmd` - Detailed control flow with complexity colors\n- `calls.mmd` - Simple call graph\n- `compact_flow.mmd` - High-level module view\n- `*.png` - Pre-rendered images\n\n**Example usage**:\n```bash\n# View diagrams\nopen flow.png  # macOS\nxdg-open flow.png  # Linux\n\n# Edit in Mermaid Live Editor\n# Copy content of .mmd files to https://mermaid.live\n```\n\n## 🔍 Common Analysis Patterns\n\n### 1. Code Health Assessment\n```bash\n# Quick health check\ncode2llm ./ -f toon\ncat analysis.toon | grep -E \"(HEALTH|REFACTOR)\"\n```\n\n### 2. Refactoring Planning\n```bash\n# Get refactoring queue\ncode2llm ./ -f evolution\ncat evolution.toon.yaml\n\n# Focus on specific issues\ncode2llm ./ -f toon --refactor --smell god_function\n```\n\n### 3. LLM Assistance\n```bash\n# Generate context for AI\ncode2llm ./ -f context\ncat context.md\n\n# Use with Claude: \"Based on this context, help me refactor the god modules\"\n```\n\n### 4. Team Documentation\n```bash\n# Generate all docs for team\ncode2llm ./ -f all -o ./docs/\n\n# Create visual diagrams\nopen docs/flow.png\n```\n\n## 📊 Interpreting Metrics\n\n### Complexity Metrics (CC)\n- **🔴 Critical (≥5.0)**: Immediate refactoring needed\n- **🟠 High (3.0-4.9)**: Consider refactoring\n- **🟡 Medium (1.5-2.9)**: Monitor complexity\n- **🟢 Low (0.1-1.4)**: Acceptable\n- **⚪ Basic (0.0)**: Simple functions\n\n### Module Health\n- **GOD Module**: Too large (>500 lines, >20 methods)\n- **HUB**: High fan-out (calls many modules)\n- **FAN-IN**: High incoming dependencies\n- **CYCLES**: Circular dependencies\n\n### Data Flow Indicators\n- **PIPELINE**: Sequential data processing\n- **CONTRACT**: Clear input/output specification\n- **SIDE_EFFECT**: External state modification\n\n## 🛠️ Integration Examples\n\n### CI/CD Pipeline\n```bash\n#!/bin/bash\n# Analyze code quality in CI\ncode2llm ./ -f toon -o ./analysis\nif grep -q \"🔴 GOD\" ./analysis/analysis.toon; then\n    echo \"❌ God modules detected\"\n    exit 1\nfi\n```\n\n### Pre-commit Hook\n```bash\n#!/bin/sh\n# .git/hooks/pre-commit\ncode2llm ./ -f toon -o ./temp_analysis\nif grep -q \"🔴\" ./temp_analysis/analysis.toon; then\n    echo \"⚠️  Critical issues found. Review before committing.\"\nfi\nrm -rf ./temp_analysis\n```\n\n### Documentation Generation\n```bash\n# Generate docs for README\ncode2llm ./ -f context -o ./docs/\necho \"## Architecture\" >> README.md\ncat docs/context.md >> README.md\n```\n\n## 📚 Next Steps\n\n1. **Review `analysis.toon`** - Identify critical issues\n2. **Check `evolution.toon.yaml`** - Plan refactoring priorities\n3. **Use `context.md`** - Get LLM assistance for complex changes\n4. **Reference visualizations** - Understand system architecture\n5. **Track progress** - Re-run analysis after changes\n\n## 🔧 Advanced Usage\n\n### Custom Analysis\n```bash\n# Deep analysis with all insights\ncode2llm ./ -m hybrid -f all --max-depth 15 -v\n\n# Performance-optimized\ncode2llm ./ -m static -f toon --strategy quick\n\n# Refactoring-focused\ncode2llm ./ -f toon,evolution --refactor\n```\n\n### Output Customization\n```bash\n# Separate output directories\ncode2llm ./ -f all -o ./analysis-$(date +%Y%m%d)\n\n# Split YAML into multiple files\ncode2llm ./ -f yaml --split-output\n\n# Separate orphaned functions\ncode2llm ./ -f yaml --separate-orphans\n```\n\n---\n\n**Generated by**: `code2llm ./ -f all --readme`  \n**Analysis Date**: 2026-04-18  \n**Total Functions**: 41  \n**Total Classes**: 4  \n**Modules**: 7  \n\nFor more information about code2llm, visit: https://github.com/tom-sapletta/code2llm\n", "is_subdir": false}, {"name": "context.md", "rel_path": "context.md", "path": "context.md", "size": "10.5KB", "icon": "📝", "type": "markdown", "type_name": "Markdown", "content": "# System Architecture Analysis\n\n## Overview\n\n- **Project**: /home/tom/github/oqlos/sumd\n- **Primary Language**: python\n- **Languages**: python: 6, shell: 1\n- **Analysis Mode**: static\n- **Total Functions**: 41\n- **Total Classes**: 4\n- **Modules**: 7\n- **Entry Points**: 18\n\n## Architecture by Module\n\n### sumd.generator\n- **Functions**: 19\n- **File**: `generator.py`\n\n### sumd.parser\n- **Functions**: 9\n- **Classes**: 4\n- **File**: `parser.py`\n\n### sumd.cli\n- **Functions**: 8\n- **File**: `cli.py`\n\n### sumd.mcp_server\n- **Functions**: 5\n- **File**: `mcp_server.py`\n\n## Key Entry Points\n\nMain execution flows into the system:\n\n### sumd.mcp_server.call_tool\n- **Calls**: server.call_tool, sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, json.dumps, sumd.mcp_server._doc_to_dict, types.TextContent, sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file\n\n### sumd.cli.scan\n> Scan a workspace directory and generate SUMD.md for every project found.\n\nDetects projects by presence of pyproject.toml. Extracts metadata from:\npypr\n- **Calls**: cli.command, click.argument, click.option, click.option, click.option, click.option, workspace.resolve, SUMDParser\n\n### sumd.cli.generate\n> Generate a SUMD document from structured format.\n\nFILE: Path to the structured format file (json/yaml/toml)\n- **Calls**: cli.command, click.argument, click.option, click.option, file.read_text, lines.append, data.get, lines.append\n\n### sumd.cli.export\n> Export a SUMD document to structured format.\n\nFILE: Path to the SUMD markdown file\n- **Calls**: cli.command, click.argument, click.option, click.option, sumd.parser.SUMDParser.parse_file, click.Path, click.Choice, click.Path\n\n### sumd.parser.SUMDParser._parse_header\n> Parse the project header (H1).\n\nArgs:\n    lines: List of document lines\n- **Calls**: enumerate, line.startswith, None.strip, header_content.split, None.strip, line.startswith, len, None.strip\n\n### sumd.cli.validate\n> Validate a SUMD document.\n\nFILE: Path to the SUMD markdown file\n- **Calls**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate, click.Path, click.echo, sys.exit\n\n### sumd.cli.extract\n> Extract content from a SUMD document.\n\nFILE: Path to the SUMD markdown file\n- **Calls**: cli.command, click.argument, click.option, sumd.parser.SUMDParser.parse_file, click.Path, click.echo, sys.exit, click.echo\n\n### sumd.parser.SUMDParser._parse_sections\n> Parse all sections in the document.\n\nArgs:\n    lines: List of document lines\n- **Calls**: line.startswith, None.strip, sections.append, None.lower, self.SECTION_MAPPING.get, Section, None.strip, sections.append\n\n### sumd.cli.info\n> Display information about a SUMD document.\n\nFILE: Path to the SUMD markdown file\n- **Calls**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, click.echo, click.echo, click.echo, click.Path, click.echo\n\n### sumd.mcp_server.list_tools\n- **Calls**: server.list_tools, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool\n\n### sumd.parser.SUMDParser.parse\n> Parse a SUMD markdown document.\n\nArgs:\n    content: The markdown content to parse\n    \nReturns:\n    SUMDDocument: Parsed document structure\n- **Calls**: SUMDDocument, content.split, self._parse_header, self._parse_sections\n\n### sumd.parser.SUMDParser.validate\n> Validate a SUMD document against the specification.\n\nArgs:\n    document: The document to validate\n    \nReturns:\n    List of validation errors (empty i\n- **Calls**: errors.append, errors.append, errors.append, errors.append\n\n### sumd.mcp_server.main\n- **Calls**: mcp.server.stdio.stdio_server, server.run, server.create_initialization_options\n\n### sumd.parser.parse\n> Parse a SUMD markdown document.\n\nArgs:\n    content: The markdown content to parse\n    \nReturns:\n    SUMDDocument: Parsed document structure\n- **Calls**: SUMDParser, parser.parse\n\n### sumd.parser.parse_file\n> Parse a SUMD file.\n\nArgs:\n    path: Path to the SUMD markdown file\n    \nReturns:\n    SUMDDocument: Parsed document structure\n- **Calls**: SUMDParser, parser.parse_file\n\n### sumd.parser.validate\n> Validate a SUMD document.\n\nArgs:\n    document: The document to validate\n    \nReturns:\n    List of validation errors (empty if valid)\n- **Calls**: SUMDParser, parser.validate\n\n### sumd.cli.main\n> Main entry point for the CLI.\n- **Calls**: sumd.cli.cli\n\n### sumd.parser.SUMDParser.__init__\n\n## Process Flows\n\nKey execution flows identified:\n\n### Flow 1: call_tool\n```\ncall_tool [sumd.mcp_server]\n  └─> _resolve_path\n  └─> _doc_to_dict\n  └─ →> parse_file\n```\n\n### Flow 2: scan\n```\nscan [sumd.cli]\n```\n\n### Flow 3: generate\n```\ngenerate [sumd.cli]\n```\n\n### Flow 4: export\n```\nexport [sumd.cli]\n  └─ →> parse_file\n```\n\n### Flow 5: _parse_header\n```\n_parse_header [sumd.parser.SUMDParser]\n```\n\n### Flow 6: validate\n```\nvalidate [sumd.cli]\n  └─ →> parse_file\n```\n\n### Flow 7: extract\n```\nextract [sumd.cli]\n  └─ →> parse_file\n```\n\n### Flow 8: _parse_sections\n```\n_parse_sections [sumd.parser.SUMDParser]\n```\n\n### Flow 9: info\n```\ninfo [sumd.cli]\n  └─ →> parse_file\n```\n\n### Flow 10: list_tools\n```\nlist_tools [sumd.mcp_server]\n```\n\n## Key Classes\n\n### sumd.parser.SUMDParser\n> Parser for SUMD markdown documents.\n- **Methods**: 6\n- **Key Methods**: sumd.parser.SUMDParser.__init__, sumd.parser.SUMDParser.parse, sumd.parser.SUMDParser.parse_file, sumd.parser.SUMDParser._parse_header, sumd.parser.SUMDParser._parse_sections, sumd.parser.SUMDParser.validate\n\n### sumd.parser.SectionType\n> SUMD section types.\n- **Methods**: 0\n- **Inherits**: Enum\n\n### sumd.parser.Section\n> Represents a SUMD section.\n- **Methods**: 0\n\n### sumd.parser.SUMDDocument\n> Represents a parsed SUMD document.\n- **Methods**: 0\n\n## Data Transformation Functions\n\nKey functions that process and transform data:\n\n### sumd.cli.validate\n> Validate a SUMD document.\n\nFILE: Path to the SUMD markdown file\n- **Output to**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate\n\n### sumd.generator._parse_toon_file\n> Parse a single *.testql.toon.yaml file into a scenario dict.\n- **Output to**: f.read_text, content.splitlines, re.findall, content.splitlines, content.splitlines\n\n### sumd.generator._parse_doql_content\n> Parse DOQL content from .less or .css file into structured data.\n- **Output to**: re.search, re.finditer, re.finditer, re.finditer, re.finditer\n\n### sumd.parser.SUMDParser.parse\n> Parse a SUMD markdown document.\n\nArgs:\n    content: The markdown content to parse\n    \nReturns:\n    \n- **Output to**: SUMDDocument, content.split, self._parse_header, self._parse_sections\n\n### sumd.parser.SUMDParser.parse_file\n> Parse a SUMD file.\n\nArgs:\n    path: Path to the SUMD markdown file\n    \nReturns:\n    SUMDDocument: P\n- **Output to**: path.read_text, self.parse\n\n### sumd.parser.SUMDParser._parse_header\n> Parse the project header (H1).\n\nArgs:\n    lines: List of document lines\n- **Output to**: enumerate, line.startswith, None.strip, header_content.split, None.strip\n\n### sumd.parser.SUMDParser._parse_sections\n> Parse all sections in the document.\n\nArgs:\n    lines: List of document lines\n- **Output to**: line.startswith, None.strip, sections.append, None.lower, self.SECTION_MAPPING.get\n\n### sumd.parser.SUMDParser.validate\n> Validate a SUMD document against the specification.\n\nArgs:\n    document: The document to validate\n  \n- **Output to**: errors.append, errors.append, errors.append, errors.append\n\n### sumd.parser.parse\n> Parse a SUMD markdown document.\n\nArgs:\n    content: The markdown content to parse\n    \nReturns:\n    \n- **Output to**: SUMDParser, parser.parse\n\n### sumd.parser.parse_file\n> Parse a SUMD file.\n\nArgs:\n    path: Path to the SUMD markdown file\n    \nReturns:\n    SUMDDocument: P\n- **Output to**: SUMDParser, parser.parse_file\n\n### sumd.parser.validate\n> Validate a SUMD document.\n\nArgs:\n    document: The document to validate\n    \nReturns:\n    List of va\n- **Output to**: SUMDParser, parser.validate\n\n## Public API Surface\n\nFunctions exposed as public API (no underscore prefix):\n\n- `sumd.generator.generate_sumd_content` - 353 calls\n- `sumd.mcp_server.call_tool` - 64 calls\n- `sumd.cli.scan` - 48 calls\n- `sumd.cli.generate` - 30 calls\n- `sumd.generator.extract_openapi` - 24 calls\n- `sumd.generator.extract_goal` - 24 calls\n- `sumd.generator.extract_dockerfile` - 22 calls\n- `sumd.generator.extract_docker_compose` - 22 calls\n- `sumd.generator.extract_pyproject` - 17 calls\n- `sumd.cli.export` - 16 calls\n- `sumd.generator.extract_package_json` - 15 calls\n- `sumd.cli.validate` - 13 calls\n- `sumd.cli.extract` - 13 calls\n- `sumd.generator.extract_taskfile` - 13 calls\n- `sumd.generator.extract_env` - 13 calls\n- `sumd.generator.extract_testql_scenarios` - 12 calls\n- `sumd.generator.extract_pyqual` - 12 calls\n- `sumd.generator.extract_makefile` - 12 calls\n- `sumd.cli.info` - 11 calls\n- `sumd.generator.extract_requirements` - 9 calls\n- `sumd.mcp_server.list_tools` - 8 calls\n- `sumd.generator.extract_readme_title` - 5 calls\n- `sumd.generator.extract_doql` - 4 calls\n- `sumd.generator.extract_python_modules` - 4 calls\n- `sumd.parser.SUMDParser.parse` - 4 calls\n- `sumd.parser.SUMDParser.validate` - 4 calls\n- `sumd.mcp_server.main` - 3 calls\n- `sumd.cli.cli` - 2 calls\n- `sumd.parser.SUMDParser.parse_file` - 2 calls\n- `sumd.parser.parse` - 2 calls\n- `sumd.parser.parse_file` - 2 calls\n- `sumd.parser.validate` - 2 calls\n- `sumd.cli.main` - 1 calls\n\n## System Interactions\n\nHow components interact:\n\n```mermaid\ngraph TD\n    call_tool --> call_tool\n    call_tool --> _resolve_path\n    call_tool --> parse_file\n    call_tool --> dumps\n    call_tool --> _doc_to_dict\n    scan --> command\n    scan --> argument\n    scan --> option\n    generate --> command\n    generate --> argument\n    generate --> option\n    generate --> read_text\n    export --> command\n    export --> argument\n    export --> option\n    export --> parse_file\n    _parse_header --> enumerate\n    _parse_header --> startswith\n    _parse_header --> strip\n    _parse_header --> split\n    validate --> command\n    validate --> argument\n    validate --> parse_file\n    validate --> SUMDParser\n    validate --> validate\n    extract --> command\n    extract --> argument\n    extract --> option\n    extract --> parse_file\n    extract --> Path\n```\n\n## Reverse Engineering Guidelines\n\n1. **Entry Points**: Start analysis from the entry points listed above\n2. **Core Logic**: Focus on classes with many methods\n3. **Data Flow**: Follow data transformation functions\n4. **Process Flows**: Use the flow diagrams for execution paths\n5. **API Surface**: Public API functions reveal the interface\n\n## Context for LLM\n\nMaintain the identified architectural patterns and public API surface when suggesting changes.", "is_subdir": false}, {"name": "calls.mmd", "rel_path": "calls.mmd", "path": "calls.mmd", "size": "3.1KB", "icon": "📈", "type": "mermaid", "type_name": "Mermaid", "content": "flowchart LR\n    subgraph sumd__cli\n        sumd__cli__export[&quot;export&quot;]\n        sumd__cli__cli[&quot;cli&quot;]\n        sumd__cli__extract[&quot;extract&quot;]\n        sumd__cli__info[&quot;info&quot;]\n        sumd__cli__main[&quot;main&quot;]\n        sumd__cli__validate[&quot;validate&quot;]\n    end\n    subgraph sumd__generator\n        sumd__generator__extract_makefile[&quot;extract_makefile&quot;]\n        sumd__generator__extract_openapi[&quot;extract_openapi&quot;]\n        sumd__generator__extract_pyproject[&quot;extract_pyproject&quot;]\n        sumd__generator__extract_readme_title[&quot;extract_readme_title&quot;]\n        sumd__generator__extract_doql[&quot;extract_doql&quot;]\n        sumd__generator___read_toml[&quot;_read_toml&quot;]\n        sumd__generator__extract_requirements[&quot;extract_requirements&quot;]\n        sumd__generator__extract_testql_scenarios[&quot;extract_testql_scenarios&quot;]\n        sumd__generator___parse_toon_file[&quot;_parse_toon_file&quot;]\n        sumd__generator__extract_pyqual[&quot;extract_pyqual&quot;]\n        sumd__generator__generate_sumd_content[&quot;generate_sumd_content&quot;]\n        sumd__generator___parse_doql_content[&quot;_parse_doql_content&quot;]\n        sumd__generator__extract_python_modules[&quot;extract_python_modules&quot;]\n        sumd__generator__extract_taskfile[&quot;extract_taskfile&quot;]\n    end\n    subgraph sumd__mcp_server\n        sumd__mcp_server___doc_to_dict[&quot;_doc_to_dict&quot;]\n        sumd__mcp_server___resolve_path[&quot;_resolve_path&quot;]\n        sumd__mcp_server__call_tool[&quot;call_tool&quot;]\n    end\n    subgraph sumd__parser\n        sumd__parser__validate[&quot;validate&quot;]\n        sumd__parser__SUMDParser__parse_file[&quot;parse_file&quot;]\n    end\n    sumd__cli__validate --&gt; sumd__parser__SUMDParser__parse_file\n    sumd__cli__validate --&gt; sumd__parser__validate\n    sumd__cli__export --&gt; sumd__parser__SUMDParser__parse_file\n    sumd__cli__info --&gt; sumd__parser__SUMDParser__parse_file\n    sumd__cli__extract --&gt; sumd__parser__SUMDParser__parse_file\n    sumd__cli__main --&gt; sumd__cli__cli\n    sumd__mcp_server__call_tool --&gt; sumd__mcp_server___resolve_path\n    sumd__mcp_server__call_tool --&gt; sumd__parser__SUMDParser__parse_file\n    sumd__mcp_server__call_tool --&gt; sumd__mcp_server___doc_to_dict\n    sumd__mcp_server__call_tool --&gt; sumd__parser__validate\n    sumd__generator__extract_pyproject --&gt; sumd__generator___read_toml\n    sumd__generator__extract_testql_scenarios --&gt; sumd__generator___parse_toon_file\n    sumd__generator__extract_doql --&gt; sumd__generator___parse_doql_content\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_pyproject\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_taskfile\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_testql_scenarios\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_openapi\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_doql\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_pyqual\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_python_modules\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_readme_title\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_requirements\n    sumd__generator__generate_sumd_content --&gt; sumd__generator__extract_makefile\n", "is_subdir": false}, {"name": "compact_flow.mmd", "rel_path": "compact_flow.mmd", "path": "compact_flow.mmd", "size": "310B", "icon": "📈", "type": "mermaid", "type_name": "Mermaid", "content": "flowchart TD\n    sumd__cli[&quot;sumd.cli&lt;br/&gt;8 funcs&quot;]\n    sumd__generator[&quot;sumd.generator&lt;br/&gt;19 funcs&quot;]\n    sumd__mcp_server[&quot;sumd.mcp_server&lt;br/&gt;5 funcs&quot;]\n    sumd__parser[&quot;sumd.parser&lt;br/&gt;9 funcs&quot;]\n    sumd__mcp_server ==&gt;|7| sumd__parser\n    sumd__cli ==&gt;|6| sumd__parser\n    sumd__cli --&gt;|1| sumd__generator\n", "is_subdir": false}, {"name": "flow.mmd", "rel_path": "flow.mmd", "path": "flow.mmd", "size": "1.5KB", "icon": "📈", "type": "mermaid", "type_name": "Mermaid", "content": "flowchart TD\n\n    %% Entry points (blue)\n    classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff\n\n    subgraph CLI\n        sumd__cli__cli[&quot;cli&quot;]\n        sumd__cli__validate[&quot;validate&quot;]\n        sumd__cli__export[&quot;export&quot;]\n        sumd__cli__info[&quot;info&quot;]\n        sumd__cli__generate[&quot;generate&quot;]\n        sumd__cli__extract[&quot;extract&quot;]\n        sumd__cli__scan[&quot;scan&quot;]\n        sumd__cli__main[&quot;main&quot;]\n    end\n\n    subgraph Core\n        sumd__mcp_server__list_tools[&quot;list_tools&quot;]\n        sumd__mcp_server__call_tool[&quot;call_tool&quot;]\n        sumd__mcp_server__main[&quot;main&quot;]\n        sumd__generator___read_toml[&quot;_read_toml&quot;]\n        sumd__generator__extract_pyproject[&quot;extract_pyproject&quot;]\n        sumd__generator___parse_toon_file{{_parse_toon_file CC=41}}\n        sumd__generator___parse_doql_content{{_parse_doql_content CC=17}}\n        sumd__generator__generate_sumd_content{{generate_sumd_content CC=141}}\n        sumd__parser__SUMDParser__parse[&quot;parse&quot;]\n        sumd__parser__SUMDParser___parse_header[&quot;_parse_header&quot;]\n        sumd__parser__SUMDParser___parse_sections[&quot;_parse_sections&quot;]\n        sumd__parser__SUMDParser__validate[&quot;validate&quot;]\n        sumd__parser__parse[&quot;parse&quot;]\n        sumd__parser__parse_file[&quot;parse_file&quot;]\n        sumd__parser__validate[&quot;validate&quot;]\n    end\n\n    class sumd__cli__cli,sumd__cli__validate,sumd__cli__export,sumd__cli__info,sumd__cli__generate,sumd__cli__extract,sumd__cli__scan,sumd__cli__main,sumd__mcp_server__list_tools,sumd__mcp_server__call_tool entry\n", "is_subdir": false}, {"name": "prompt.txt", "rel_path": "prompt.txt", "path": "prompt.txt", "size": "2.9KB", "icon": "📄", "type": "text", "type_name": "Text", "content": "You are an AI assistant helping me understand and improve a codebase.\nUse the attached/generated files as the authoritative context.\nYour goal is to refactor the project based on these files, not just summarize it.\n\nwe are in project path: .\n\nFiles for analysis:\n\nNote: project/validation.toon.yaml and project/duplication.toon.yaml are generated by external tools (vallm and redup)\n- project/analysis.toon.yaml  (Health diagnostics - complexity metrics, god modules, coupling issues, refactoring priorities) [1KB]\n- project/map.toon.yaml  (Structural map - files, sizes, imports, exports, signatures, project header) [2KB]\n- project/evolution.toon.yaml  (Refactoring queue - ranked actions by impact/effort, risks, metrics targets, history) [2KB]\n- project/project.toon.yaml  (Compact project overview - generated from project.yaml data) [1KB]\n- project/context.md  (LLM narrative - architecture summary and project context) [10KB]\n\nMissing files (not generated in this run):\n- project/README.md\n\nTask:\n- Treat this prompt as a refactoring brief: identify the highest-priority changes and prepare concrete edits.\n- Use the file set to decide whether the first pass should focus on correctness, duplication, complexity reduction, or architecture cleanup.\n- If you can safely implement the refactor, do it; otherwise give an exact file-by-file change plan and test plan.\n- Use analysis.toon.yaml to locate high-CC functions and god modules that should be split first.\n- Keep module boundaries intact and update imports/exports according to map.toon.yaml.\n- Use evolution.toon.yaml as the execution backlog and work from the top-ranked items.\n- Keep project.toon.yaml aligned with the refactored architecture.\n\nPriority Order:\nP1 — Split or simplify the highest-CC / god modules identified in analysis.toon.yaml.\nP1 — Preserve module boundaries and update imports/exports according to map.toon.yaml.\nP2 — Keep the compact project overview in project.toon.yaml aligned with the refactor.\nP2 — Execute the highest-impact items from evolution.toon.yaml in order of benefit/risk.\n\nFocus Areas for Analysis:\n1. **Code Health Analysis** - Review complexity metrics, god modules, coupling issues from analysis.toon.yaml\n2. **Structural Map** - Use map.toon.yaml to inspect imports, exports, signatures, and the project header\n3. **Refactoring Priorities** - Examine ranked refactoring actions and risk assessment from evolution.toon.yaml\n4. **Project Overview** - Review the compact project overview from project.toon.yaml\n\nAnalysis Strategy:\n- Start with analysis.toon.yaml for health metrics, then map.toon.yaml for structure and signatures\n- Review evolution.toon.yaml for action priorities and next steps\n- Compare the compact project overview in project.toon.yaml with the main analysis files\n\nConstraints:\n- Prefer minimal, incremental changes.\n- Maintain full backward compatibility.\n- Base recommendations on concrete metrics from the provided files.\n- If uncertain, ask clarifying questions.\n", "is_subdir": false}, {"name": "analysis.toon.yaml", "rel_path": "analysis.toon.yaml", "path": "analysis.toon.yaml", "size": "1.5KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# code2llm | 7f 1993L | python:6,shell:1 | 2026-04-18\n# CC̄=9.9 | critical:5/41 | dups:0 | cycles:0\n\nHEALTH[5]:\n  🟡 CC    scan CC=16 (limit:15)\n  🟡 CC    call_tool CC=24 (limit:15)\n  🟡 CC    _parse_toon_file CC=41 (limit:15)\n  🟡 CC    _parse_doql_content CC=17 (limit:15)\n  🟡 CC    generate_sumd_content CC=141 (limit:15)\n\nREFACTOR[1]:\n  1. split 5 high-CC methods  (CC&gt;15)\n\nPIPELINES[17]:\n  [1] Src [validate]: validate → parse_file\n      PURITY: 100% pure\n  [2] Src [export]: export → parse_file\n      PURITY: 100% pure\n  [3] Src [info]: info → parse_file\n      PURITY: 100% pure\n  [4] Src [generate]: generate\n      PURITY: 100% pure\n  [5] Src [extract]: extract → parse_file\n      PURITY: 100% pure\n\nLAYERS:\n  sumd/                           CC̄=9.9    ←in:0  →out:0\n  │ !! generator                 1077L  0C   19m  CC=141    ←1\n  │ !! mcp_server                 321L  0C    5m  CC=24     ←0\n  │ !! cli                        291L  0C    8m  CC=16     ←0\n  │ parser                     224L  4C    9m  CC=9      ←2\n  │ __init__                    25L  0C    0m  CC=0.0    ←0\n  │\n  ./                              CC̄=0.0    ←in:0  →out:0\n  │ project.sh                  35L  0C    0m  CC=0.0    ←0\n  │\n  scripts/                        CC̄=0.0    ←in:0  →out:0\n  │ generate_all_sumd           20L  0C    0m  CC=0.0    ←0\n  │\n\nCOUPLING: no cross-package imports detected\n\nEXTERNAL:\n  validation: run `vallm batch .` → validation.toon\n  duplication: run `redup scan .` → duplication.toon\n", "is_subdir": false}, {"name": "evolution.toon.yaml", "rel_path": "evolution.toon.yaml", "path": "evolution.toon.yaml", "size": "2.1KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# code2llm/evolution | 41 func | 4f | 2026-04-18\n\nNEXT[6] (ranked by impact):\n  [1] !! SPLIT           sumd/generator.py\n      WHY: 1077L, 0 classes, max CC=141\n      EFFORT: ~4h  IMPACT: 151857\n\n  [2] !! SPLIT-FUNC      generate_sumd_content  CC=141  fan=48\n      WHY: CC=141 exceeds 15\n      EFFORT: ~1h  IMPACT: 6768\n\n  [3] !! SPLIT-FUNC      _parse_toon_file  CC=41  fan=18\n      WHY: CC=41 exceeds 15\n      EFFORT: ~1h  IMPACT: 738\n\n  [4] !  SPLIT-FUNC      call_tool  CC=24  fan=20\n      WHY: CC=24 exceeds 15\n      EFFORT: ~1h  IMPACT: 480\n\n  [5] !  SPLIT-FUNC      _parse_doql_content  CC=17  fan=23\n      WHY: CC=17 exceeds 15\n      EFFORT: ~1h  IMPACT: 391\n\n  [6] !  SPLIT-FUNC      scan  CC=16  fan=24\n      WHY: CC=16 exceeds 15\n      EFFORT: ~1h  IMPACT: 384\n\n\nRISKS[1]:\n  ⚠ Splitting sumd/generator.py may break 19 import paths\n\nMETRICS-TARGET:\n  CC̄:          9.9 → ≤5.0\n  max-CC:      141 → ≤20\n  god-modules: 1 → 0\n  high-CC(≥15): 5 → ≤2\n  hub-types:   0 → ≤0\n\nPATTERNS (language parser shared logic):\n  _extract_declarations() in base.py — unified extraction for:\n    - TypeScript: interfaces, types, classes, functions, arrow funcs\n    - PHP: namespaces, traits, classes, functions, includes\n    - Ruby: modules, classes, methods, requires\n    - C++: classes, structs, functions, #includes\n    - C#: classes, interfaces, methods, usings\n    - Java: classes, interfaces, methods, imports\n    - Go: packages, functions, structs\n    - Rust: modules, functions, traits, use statements\n\n  Shared regex patterns per language:\n    - import: language-specific import/require/using patterns\n    - class: class/struct/trait declarations with inheritance\n    - function: function/method signatures with visibility\n    - brace_tracking: for C-family languages ({ })\n    - end_keyword_tracking: for Ruby (module/class/def...end)\n\n  Benefits:\n    - Consistent extraction logic across all languages\n    - Reduced code duplication (~70% reduction in parser LOC)\n    - Easier maintenance: fix once, apply everywhere\n    - Standardized FunctionInfo/ClassInfo models\n\nHISTORY:\n  (first run — no previous data)\n", "is_subdir": false}, {"name": "map.toon.yaml", "rel_path": "map.toon.yaml", "path": "map.toon.yaml", "size": "2.6KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# sumd | 7f 1993L | shell:1,python:6 | 2026-04-18\n# stats: 41 func | 0 cls | 7 mod | CC̄=9.9 | critical:5 | cycles:0\n# alerts[5]: CC generate_sumd_content=141; fan-out generate_sumd_content=48; CC _parse_toon_file=41; fan-out scan=24; fan-out _parse_doql_content=23\n# hotspots[5]: generate_sumd_content fan=48; scan fan=24; _parse_doql_content fan=23; call_tool fan=20; _parse_toon_file fan=18\n# evolution: baseline\n# Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods\nM[7]:\n  project.sh,35\n  scripts/generate_all_sumd.py,20\n  sumd/__init__.py,25\n  sumd/cli.py,291\n  sumd/generator.py,1077\n  sumd/mcp_server.py,321\n  sumd/parser.py,224\nD:\n  sumd/generator.py:\n    e: _read_toml,extract_pyproject,extract_taskfile,_parse_toon_file,extract_testql_scenarios,extract_openapi,_parse_doql_content,extract_doql,extract_pyqual,extract_python_modules,extract_readme_title,extract_requirements,extract_makefile,extract_goal,extract_env,extract_dockerfile,extract_docker_compose,extract_package_json,generate_sumd_content\n    _read_toml(path)\n    extract_pyproject(proj_dir)\n    extract_taskfile(proj_dir)\n    _parse_toon_file(f)\n    extract_testql_scenarios(proj_dir)\n    extract_openapi(proj_dir)\n    _parse_doql_content(content)\n    extract_doql(proj_dir)\n    extract_pyqual(proj_dir)\n    extract_python_modules(proj_dir;pkg_name)\n    extract_readme_title(proj_dir)\n    extract_requirements(proj_dir)\n    extract_makefile(proj_dir)\n    extract_goal(proj_dir)\n    extract_env(proj_dir)\n    extract_dockerfile(proj_dir)\n    extract_docker_compose(proj_dir)\n    extract_package_json(proj_dir)\n    generate_sumd_content(proj_dir;return_sources;raw_sources)\n  sumd/mcp_server.py:\n    e: _doc_to_dict,_resolve_path,list_tools,call_tool,main\n    _doc_to_dict(doc)\n    _resolve_path(path)\n    list_tools()\n    call_tool(name;arguments)\n    main()\n  sumd/cli.py:\n    e: cli,validate,export,info,generate,extract,scan,main\n    cli()\n    validate(file)\n    export(file;format;output)\n    info(file)\n    generate(file;format;output)\n    extract(file;section)\n    scan(workspace;export_json;report;fix;raw)\n    main()\n  sumd/parser.py:\n    e: SectionType,Section,SUMDDocument,SUMDParser,parse,parse_file,validate\n    SectionType(Enum):  # SUMD section types...\n    Section:  # Represents a SUMD section...\n    SUMDDocument:  # Represents a parsed SUMD document...\n    SUMDParser: __init__(0),parse(1),parse_file(1),_parse_header(1),_parse_sections(1),validate(1)  # Parser for SUMD markdown documents...\n    parse(content)\n    parse_file(path)\n    validate(document)\n  project.sh:\n  sumd/__init__.py:\n  scripts/generate_all_sumd.py:\n", "is_subdir": false}, {"name": "project.toon.yaml", "rel_path": "project.toon.yaml", "path": "project.toon.yaml", "size": "1.9KB", "icon": "⚙️", "type": "yaml", "type_name": "YAML", "content": "# sumd | 41 func | 4f | 2106L | python | 2026-04-18\n\nHEALTH:\n  CC̄=9.9  critical=10 (limit:10)  dup=0  cycles=0\n\nALERTS[18]:\n  !!! cc_exceeded      generate_sumd_content = 141 (limit:15)\n  !!! high_fan_out     generate_sumd_content = 48 (limit:10)\n  !!! cc_exceeded      _parse_toon_file = 41 (limit:15)\n  !!! high_fan_out     scan = 24 (limit:10)\n  !!! high_fan_out     _parse_doql_content = 23 (limit:10)\n  !!! high_fan_out     call_tool = 20 (limit:10)\n  !!  cc_exceeded      call_tool = 24 (limit:15)\n  !!  high_fan_out     _parse_toon_file = 18 (limit:10)\n  !!  high_fan_out     generate = 17 (limit:10)\n  !!  high_fan_out     extract_openapi = 16 (limit:10)\n\nMODULES[7] (top by size):\n  M[sumd/generator.py] 1077L C:0 F:19 CC↑141 D:1 (python)\n  M[sumd/mcp_server.py] 321L C:0 F:5 CC↑24 D:0 (python)\n  M[sumd/cli.py] 291L C:0 F:8 CC↑16 D:0 (python)\n  M[sumd/parser.py] 224L C:4 F:9 CC↑9 D:2 (python)\n  M[project.sh] 35L C:0 F:0 CC↑0 D:0 (shell)\n  M[sumd/__init__.py] 25L C:0 F:0 CC↑0 D:0 (python)\n  M[scripts/generate_all_sumd.py] 20L C:0 F:0 CC↑0 D:0 (python)\n  LANGS: python:6/shell:1\n\nHOTSPOTS[10]:\n  ★ generate_sumd_content fan=48  // Generate SUMD.md content from a project directory.\n\nArgs:\n    proj_dir: Path to \n  ★ scan fan=24  // Scan a workspace directory and generate SUMD.md for every project found.\n\nDetect\n  ★ _parse_doql_content fan=23  // Parse DOQL content from .less or .css file into structured data.\n  ★ call_tool fan=20  // Orchestrates 20 calls\n  ★ _parse_toon_file fan=18  // Parse a single *.testql.toon.yaml file into a scenario dict.\n\nREFACTOR[9]:\n  [1] H/L Split _parse_toon_file (CC=41 → target CC&lt;10)\n  [2] H/L Split generate_sumd_content (CC=141 → target CC&lt;10)\n  [3] H/H Split god module sumd/generator.py (1077L, 0 classes)\n  [4] M/L Split scan (CC=16 → target CC&lt;10)\n  [5] M/L Split call_tool (CC=24 → target CC&lt;10)\n\nEVOLUTION:\n  2026-04-18 CC̄=9.9 crit=10 2106L // Automated analysis\n", "is_subdir": false}];
+        let currentFile = null;
+
+        function renderFileList(filter = '') {
+            const list = document.getElementById('fileList');
+            const filtered = files.filter(f => 
+                f.name.toLowerCase().includes(filter.toLowerCase()) ||
+                f.path.toLowerCase().includes(filter.toLowerCase())
+            );
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty-state">No files found</div>';
+                return;
+            }
+            
+            // Group by type
+            const groups = {};
+            for (const file of filtered) {
+                const type = file.type_name;
+                if (!groups[type]) groups[type] = [];
+                groups[type].push(file);
+            }
+            
+            let html = '';
+            for (const [typeName, groupFiles] of Object.entries(groups)) {
+                html += `
+                    <div class="file-group">
+                        <div class="file-group-title">${typeName} Files (${groupFiles.length})</div>
+                        ${groupFiles.map(f => `
+                            <div class="file-item ${currentFile?.name === f.name ? 'active' : ''}" 
+                                 onclick="selectFile('${f.name}')">
+                                <span class="file-icon">${f.icon}</span>
+                                <div class="file-info">
+                                    <div class="file-name">${f.name}</div>
+                                    <div class="file-meta">${f.path}</div>
+                                </div>
+                                <span class="file-size">${f.size}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html;
+        }
+
+        function selectFile(name) {
+            const file = files.find(f => f.name === name);
+            if (!file) return;
+            
+            currentFile = file;
+            
+            document.getElementById('contentIcon').textContent = file.icon;
+            document.getElementById('contentTitle').textContent = file.name;
+            
+            // Actions
+            const actions = document.getElementById('contentActions');
+            actions.innerHTML = `
+                <a href="${file.rel_path}" download class="btn">⬇ Download</a>
+                <a href="${file.rel_path}" target="_blank" class="btn btn-primary">↗ Open Raw</a>
+            `;
+            
+            // Content
+            const body = document.getElementById('contentBody');
+            if (file.type === 'markdown') {
+                // Render markdown as HTML using marked.js
+                body.innerHTML = `<div class="markdown-content">${marked.parse(file.content)}</div>`;
+            } else if (file.type === 'html') {
+                // For HTML files, show in iframe for safety
+                body.innerHTML = `<iframe src="${file.rel_path}" style="width:100%;height:100%;border:none;border-radius:0.5rem;"></iframe>`;
+            } else if (file.type === 'image') {
+                // For images, display the actual image
+                body.innerHTML = `<div class="image-preview"><img src="${file.rel_path}" alt="${file.name}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:0.5rem;"></div>`;
+            } else if (file.type === 'mermaid') {
+                // Render mermaid diagram
+                const diagramId = 'mermaid-diagram-' + Date.now();
+                body.innerHTML = `<div class="mermaid-content"><pre class="mermaid" id="${diagramId}">${file.content}</pre></div>`;
+                // Initialize mermaid on the new element
+                setTimeout(() => {
+                    mermaid.init(undefined, document.getElementById(diagramId));
+                }, 0);
+            } else if (file.type === 'json') {
+                try {
+                    const json = JSON.parse(file.content.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
+                    const formatted = JSON.stringify(json, null, 2);
+                    body.innerHTML = `<pre><code class="language-json">${formatted.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                    hljs.highlightElement(body.querySelector('code'));
+                } catch {
+                    body.innerHTML = `<pre>${file.content}</pre>`;
+                }
+            } else if (file.type === 'yaml') {
+                // YAML with syntax highlighting
+                body.innerHTML = `<pre><code class="language-yaml">${file.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                hljs.highlightElement(body.querySelector('code'));
+            } else if (file.type === 'toon') {
+                // TOON with simple highlighting (use ini as closest match for key: value format)
+                body.innerHTML = `<pre><code class="language-ini">${file.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                hljs.highlightElement(body.querySelector('code'));
+            } else if (file.type === 'code') {
+                // Code files with auto-highlighting
+                body.innerHTML = `<pre><code>${file.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                hljs.highlightElement(body.querySelector('code'));
+            } else {
+                body.innerHTML = `<pre>${file.content}</pre>`;
+            }
+            
+            renderFileList(document.getElementById('search').value);
+        }
+
+        function filterFiles(query) {
+            renderFileList(query);
+        }
+
+        function renderStats() {
+            const stats = {};
+            for (const f of files) {
+                stats[f.type_name] = (stats[f.type_name] || 0) + 1;
+            }
+            
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = Object.entries(stats)
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, count]) => `
+                    <div class="stat-card">
+                        <div class="stat-value">${count}</div>
+                        <div class="stat-label">${type}</div>
+                    </div>
+                `).join('');
+        }
+
+        // Initialize
+        renderStats();
+        renderFileList();
+        
+        // Select first file if available
+        if (files.length > 0) {
+            selectFile(files[0].name);
+        }
+    </script>
+</body>
+</html>
