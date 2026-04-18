@@ -1,5 +1,6 @@
 """SUMD CLI - Command-line interface for SUMD operations."""
 
+import json
 import sys
 from pathlib import Path
 from typing import Optional
@@ -7,6 +8,7 @@ from typing import Optional
 import click
 
 from sumd.parser import SUMDParser, parse_file
+from sumd.generator import generate_sumd_content
 
 
 @click.group()
@@ -183,6 +185,100 @@ def extract(file: Path, section: str):
     except Exception as e:
         click.echo(f"❌ Error extracting content: {e}", err=True)
         sys.exit(1)
+
+
+@cli.command()
+@click.argument("workspace", type=click.Path(exists=True, path_type=Path), default=".")
+@click.option("--export-json/--no-export-json", default=True, help="Also export sumd.json per project")
+@click.option("--report", type=click.Path(path_type=Path), default=None, help="Save JSON summary report to file")
+@click.option("--fix/--no-fix", default=False, help="Overwrite existing SUMD.md even if already present")
+def scan(workspace: Path, export_json: bool, report: Optional[Path], fix: bool):
+    """Scan a workspace directory and generate SUMD.md for every project found.
+
+    Detects projects by presence of pyproject.toml. Extracts metadata from:
+    pyproject.toml, Taskfile.yml, testql-scenarios/, openapi.yaml,
+    app.doql.less, pyqual.yaml, and Python source modules.
+
+    WORKSPACE: Root directory containing project subdirectories (default: current dir)
+    """
+    workspace = workspace.resolve()
+    parser_inst = SUMDParser()
+    results: dict = {}
+    total = ok_count = skip_count = fail_count = 0
+
+    project_dirs = sorted(
+        d for d in workspace.iterdir()
+        if d.is_dir() and not d.name.startswith(".") and (d / "pyproject.toml").exists()
+    )
+
+    if not project_dirs:
+        click.echo(f"⚠️  No projects found in {workspace} (looking for directories with pyproject.toml)")
+        sys.exit(1)
+
+    click.echo(f"\n🔍 Scanning {len(project_dirs)} projects in {workspace}\n")
+    click.echo(f"{'Project':<20} {'Status':<10} {'Sections':<10} {'Sources'}")
+    click.echo("─" * 70)
+
+    for proj_dir in project_dirs:
+        total += 1
+        sumd_path = proj_dir / "SUMD.md"
+
+        if sumd_path.exists() and not fix:
+            skip_count += 1
+            click.echo(f"  {'~'} {proj_dir.name:<18} {'skip':<10} {'–':<10} already exists (use --fix to overwrite)")
+            results[proj_dir.name] = {"status": "SKIP", "path": str(sumd_path)}
+            continue
+
+        try:
+            content, sources = generate_sumd_content(proj_dir, return_sources=True)
+            sumd_path.write_text(content, encoding="utf-8")
+
+            doc = parse_file(sumd_path)
+            errors = parser_inst.validate(doc)
+
+            if errors:
+                fail_count += 1
+                results[proj_dir.name] = {"status": "INVALID", "errors": errors, "path": str(sumd_path)}
+                click.echo(f"  ❌ {proj_dir.name:<18} {'invalid':<10} {len(doc.sections):<10} {', '.join(sources)}")
+                for e in errors:
+                    click.echo(f"       ↳ {e}")
+            else:
+                ok_count += 1
+                results[proj_dir.name] = {
+                    "status": "OK",
+                    "project_name": doc.project_name,
+                    "sections": len(doc.sections),
+                    "sources": sources,
+                    "path": str(sumd_path),
+                }
+                sources_str = ", ".join(sources)
+                click.echo(f"  ✅ {proj_dir.name:<18} {'ok':<10} {len(doc.sections):<10} {sources_str}")
+
+            if export_json:
+                json_path = proj_dir / "sumd.json"
+                data = {
+                    "project_name": doc.project_name,
+                    "description": doc.description,
+                    "sections": [
+                        {"name": s.name, "type": s.type.value, "content": s.content, "level": s.level}
+                        for s in doc.sections
+                    ],
+                }
+                json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+        except Exception as exc:
+            fail_count += 1
+            results[proj_dir.name] = {"status": "ERROR", "error": str(exc)}
+            click.echo(f"  ❌ {proj_dir.name:<18} {'error':<10} {'–':<10} {exc}")
+
+    click.echo("─" * 70)
+    click.echo(f"\n📊 Summary: {total} projects | ✅ {ok_count} ok | ⏭ {skip_count} skipped | ❌ {fail_count} failed\n")
+
+    if report:
+        report.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
+        click.echo(f"📄 Report saved to {report}")
+
+    sys.exit(0 if fail_count == 0 else 1)
 
 
 def main():

@@ -152,8 +152,8 @@ def extract_openapi(proj_dir: Path) -> dict[str, Any]:
         for path, methods in paths.items():
             if not isinstance(methods, dict):
                 continue
-            # skip base_url prefixed duplicates
-            if path.startswith("http"):
+            # skip absolute-URL duplicate entries in openapi.yaml
+            if "://" in path:
                 continue
             for method, spec in methods.items():
                 if method not in ("get", "post", "put", "delete", "patch"):
