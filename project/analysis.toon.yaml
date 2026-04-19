@@ -1,4 +1,4 @@
-# code2llm | 28f 5127L | python:26,shell:2 | 2026-04-19
+# code2llm | 28f 5130L | python:26,shell:2 | 2026-04-19
 # CC̄=4.6 | critical:2/191 | dups:0 | cycles:0
 
 HEALTH[3]:
@@ -31,7 +31,7 @@ LAYERS:
   │ mcp_server                 358L  0C   12m  CC=5      ←0
   │ pipeline                   318L  1C    8m  CC=11     ←0
   │ toon_parser                173L  0C    8m  CC=9      ←1
-  │ __init__                   100L  0C    0m  CC=0.0    ←0
+  │ __init__                   103L  0C    0m  CC=0.0    ←0
   │ base                        93L  2C    2m  CC=1      ←0
   │ refactor_analysis           68L  1C    2m  CC=3      ←0
   │ metadata                    51L  1C    2m  CC=5      ←0
@@ -46,8 +46,8 @@ LAYERS:
   │ deployment                  23L  1C    2m  CC=1      ←0
   │ architecture                23L  1C    2m  CC=1      ←0
   │ quality                     21L  1C    2m  CC=1      ←0
-  │ extras                      21L  1C    2m  CC=2      ←0
   │ workflows                   21L  1C    2m  CC=2      ←0
+  │ extras                      21L  1C    2m  CC=2      ←0
   │ configuration               21L  1C    2m  CC=1      ←0
   │ generator                   15L  0C    0m  CC=0.0    ←0
   │

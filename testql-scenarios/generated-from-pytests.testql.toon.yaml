@@ -1,0 +1,13 @@
+# SCENARIO: Auto-generated from Python Tests
+# TYPE: integration
+# GENERATED: true
+
+LOG[8]{message}:
+  "Test: TestExtractEnv_test_captures_inline_comment"
+  "Test: TestExtractRequirements_test_parses_requirements_txt"
+  "Test: test_captures_inline_comment"
+  "Test: test_parses_requirements_txt"
+  "Test: TestExtractEnv_test_captures_inline_comment"
+  "Test: TestExtractRequirements_test_parses_requirements_txt"
+  "Test: test_captures_inline_comment"
+  "Test: test_parses_requirements_txt"

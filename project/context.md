@@ -93,15 +93,15 @@
 - **Classes**: 1
 - **File**: `source_snippets.py`
 
-### sumd.sections.extras
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `extras.py`
-
 ### sumd.sections.workflows
 - **Functions**: 2
 - **Classes**: 1
 - **File**: `workflows.py`
+
+### sumd.sections.extras
+- **Functions**: 2
+- **Classes**: 1
+- **File**: `extras.py`
 
 ### sumd.sections.api_stubs
 - **Functions**: 2
@@ -368,13 +368,13 @@ Usage:
 - **Methods**: 2
 - **Key Methods**: sumd.sections.source_snippets.SourceSnippetsSection.should_render, sumd.sections.source_snippets.SourceSnippetsSection.render
 
-### sumd.sections.extras.ExtrasSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.extras.ExtrasSection.should_render, sumd.sections.extras.ExtrasSection.render
-
 ### sumd.sections.workflows.WorkflowsSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.workflows.WorkflowsSection.should_render, sumd.sections.workflows.WorkflowsSection.render
+
+### sumd.sections.extras.ExtrasSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.extras.ExtrasSection.should_render, sumd.sections.extras.ExtrasSection.render
 
 ### sumd.sections.api_stubs.ApiStubsSection
 - **Methods**: 2
@@ -472,6 +472,12 @@ FILE: Path to the SUMD markdown file
 > Parse DOQL content from .less or .css file into structured data.
 - **Output to**: re.search, re.finditer, sumd.extractor._parse_doql_interfaces, None.splitlines, dict
 
+### sumd.mcp_server._tool_parse_sumd
+- **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, types.TextContent, json.dumps, sumd.mcp_server._doc_to_dict
+
+### sumd.mcp_server._tool_validate_sumd
+- **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate, json.dumps
+
 ### sumd.renderer._render_architecture_doql_parsed
 > Render parsed DOQL blocks into L (mutates in place).
 - **Output to**: sumd.renderer._render_doql_app, sumd.renderer._render_doql_entities, sumd.renderer._render_doql_interfaces, sumd.renderer._render_doql_integrations
@@ -490,12 +496,6 @@ FILE: Path to the SUMD markdown file
 ### sumd.renderer._parse_calls_toon
 > Parse calls.toon.yaml text into structured dict for rendering.
 - **Output to**: content.splitlines, sumd.renderer._parse_calls_header, sumd.renderer._parse_calls_hubs
-
-### sumd.mcp_server._tool_parse_sumd
-- **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, types.TextContent, json.dumps, sumd.mcp_server._doc_to_dict
-
-### sumd.mcp_server._tool_validate_sumd
-- **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate, json.dumps
 
 ### sumd.parser.SUMDParser.parse
 > Parse a SUMD markdown document.

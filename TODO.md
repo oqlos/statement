@@ -1,7 +1,7 @@
 # sumd — TODO
 
 > **Auto-derived from metrics** — CC hotspots from `ast` analysis, coverage gaps from `coverage.json`.
-> Last updated: 2026-04-19 (v0.2.0-rc1)
+> Last updated: 2026-04-19 (v0.3.3)
 > Manual items in **P0** and **Manual backlog** sections survive regeneration.
 
 ---
@@ -119,3 +119,6 @@ These items improve autonomy of the dev process; not blocking release.
 - ✅ Single `.venv` — dual-venv split eliminated
 - ✅ 88 unit tests, 37% branch+statement coverage
 - ✅ Published to PyPI: https://pypi.org/project/sumd/0.2.0rc1/
+- ✅ SUMR `refactor` profile expanded to 9 sections (v0.3.3)
+- ✅ `sumd/sections/__init__.py` section registry
+- ✅ README AI cost tracking removed; version badge updated to 0.3.3

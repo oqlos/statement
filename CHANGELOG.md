@@ -7,13 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.3] - 2026-04-19
+## [0.3.4] - 2026-04-19
 
 ### Docs
+- Update CHANGELOG.md
 - Update README.md
+- Update SUMR.md
+- Update TODO.md
+- Update project/context.md
+
+### Test
+- Update testql-scenarios/generated-cli-tests.testql.toon.yaml
+- Update testql-scenarios/generated-from-pytests.testql.toon.yaml
 
 ### Other
+- Update project/analysis.toon.yaml
+- Update project/duplication.toon.yaml
+- Update project/map.toon.yaml
+- Update project/validation.toon.yaml
 - Update sumd/sections/__init__.py
+- Update sumd/sections/call_graph.py
+- Update sumd/sections/quality.py
+- Update sumd/sections/workflows.py
+
+## [0.3.3] - 2026-04-19
+
+### Added
+- SUMR `refactor` profile: 9 analysis sections — `workflows`, `quality`, `call_graph`, `test_contracts`, `api`, `cli`, `architecture`, `data_flow`, `dependencies`
+- `sumd/sections/__init__.py` — section registry for profile dispatch
+
+### Docs
+- Removed AI cost tracking badges from README
+- README updated to reflect v0.3.3 refactor profile capabilities
 
 ## [0.3.2] - 2026-04-19
 

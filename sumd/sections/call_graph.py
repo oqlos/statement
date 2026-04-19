@@ -15,7 +15,7 @@ from sumd.sections.base import RenderContext, Section
 class CallGraphSection:
     name = "call_graph"
     level = 2
-    profiles = frozenset({"rich"})
+    profiles = frozenset({"rich", "refactor"})
 
     def should_render(self, ctx: RenderContext) -> bool:
         return any("calls.toon" in e.get("file", "") for e in ctx.project_analysis)

@@ -90,11 +90,13 @@ PROFILES: dict[str, set[str]] = {
     "refactor": {
         "metadata",
         "architecture",
-        "quality",
+        "workflows",       # task commands — how to verify nothing is broken
+        "quality",         # pytest coverage + lint results — safe refactor zones
         "dependencies",
         "source_snippets",
+        "call_graph",      # HUBS table — which functions are too central
         "refactor_analysis",
-        "test_contracts",
+        "test_contracts",  # what the system guarantees — regression baseline
     },
 }
 

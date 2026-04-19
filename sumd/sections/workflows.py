@@ -9,7 +9,7 @@ from sumd.sections.base import RenderContext, Section
 class WorkflowsSection:
     name = "workflows"
     level = 2
-    profiles = frozenset({"minimal", "light", "rich"})
+    profiles = frozenset({"minimal", "light", "rich", "refactor"})
 
     def should_render(self, ctx: RenderContext) -> bool:
         return bool(ctx.tasks or ctx.doql.get("workflows"))

@@ -9,7 +9,7 @@ from sumd.sections.base import RenderContext, Section
 class QualitySection:
     name = "quality"
     level = 2
-    profiles = frozenset({"light", "rich"})
+    profiles = frozenset({"light", "rich", "refactor"})
 
     def should_render(self, ctx: RenderContext) -> bool:
         return bool(ctx.pyqual)
