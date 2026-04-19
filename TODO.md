@@ -1,168 +1,121 @@
-# sumd — TODO & Refactoring Priorities
+# sumd — TODO
 
-Generated: 2026-04-19 (updated for v0.2.0-rc1)
-
----
-
-## ✅ Done in v0.2.0-rc1
-
-- `sumr` CLI command + `refactor` profile → `SUMR.md`
-- Single `.venv` (removed dual-venv split)
-- 88 unit tests, 37% branch+statement coverage
-- `task doctor` smoke-test (5 checks)
-- pyqual publish stage (twine-publish, when: metrics_pass)
-- Published to PyPI: https://pypi.org/project/sumd/0.2.0rc1/
+> **Auto-derived from metrics** — CC hotspots from `ast` analysis, coverage gaps from `coverage.json`.
+> Last updated: 2026-04-19 (v0.2.0-rc1)
+> Manual items in **P0** and **Manual backlog** sections survive regeneration.
 
 ---
 
-## P0 — 0.2.0 stable release blockers
+## P0 — Stable release blockers (manual, v0.2.0)
 
-- [ ] Raise test coverage to ≥ 50% before 0.2.0 stable
-- [ ] Add `sumd/__main__.py` to support `python -m sumd` invocation
-- [ ] Real testql CLI scenario file (`sumd-cli.testql.toon.yaml`) replacing smoke placeholder
+- [ ] Raise test coverage to ≥ 50% before tagging 0.2.0 stable
+- [ ] Add `sumd/__main__.py` to support `python -m sumd`
+- [ ] Real testql CLI scenario file (`sumd-cli.testql.toon.yaml`) instead of smoke placeholder
 - [ ] Validate rc1 on CI before promoting to 0.2.0 stable
 
 ---
 
-## P1 — Split generator.py (architecture)
+## CC hotspots (auto — functions with CC ≥ 10)
 
-`sumd/generator.py` is 1444 lines with 0 classes. Extract into focused modules:
+| CC | File | Function | Action |
+|----|------|----------|--------|
+| 15 | `sumd/renderer.py` | `_parse_calls_hubs` | Split hub detection from formatting |
+| 14 | `sumd/renderer.py` | `_collect_pkg_sources` | Extract `_scan_sources()` helper |
+| 13 | `sumd/parser.py` | `validate_codeblocks` | Split: `_check_fence_format()`, `_check_markpact_kind()` |
+| 12 | `sumd/renderer.py` | `_render_test_contracts` | Split by contract type (smoke / crud / api) |
+| 12 | `sumd/extractor.py` | `extract_openapi` | Extract `_parse_paths()`, `_build_endpoint()` |
+| 12 | `sumd/extractor.py` | `extract_dockerfile` | Separate stage detection from content rendering |
+| 10 | `sumd/renderer.py` | `_render_extras` | Extract per-format renderers |
+| 10 | `sumd/renderer.py` | `_render_deployment_docker` | Split multi-compose logic |
+| 10 | `sumd/extractor.py` | `generate_map_toon` | Split: `_collect_map_files()`, `_render_map_detail()` |
+| 10 | `sumd/extractor.py` | `extract_taskfile` | Extract task-type classifiers |
+| 10 | `sumd/extractor.py` | `_collect_map_files` | Already a sub-function — revisit call sites |
+| 10 | `sumd/extractor.py` | `_analyse_py_top_classes` | Split parsing from formatting |
+| 10 | `sumd/cli.py` | `_scan_one_project` | Extract profile dispatch |
 
-### 1a. `sumd/extractor.py`
-Move all `extract_*` functions from `generator.py`:
-- `extract_pyproject`, `extract_taskfile`, `extract_doql`, `extract_openapi`
-- `extract_dockerfile`, `extract_docker_compose`, `extract_env_example`
-- `extract_pyqual`, `extract_goal`, `extract_project_analysis`
-- `extract_testql_scenarios`, `_analyse_py_module`
+Target: CC ≤ 10 for all functions. Current average (production code): ~4.6.
 
-Keep `generator.py` as a re-export shim:
+---
+
+## Coverage gaps (auto — modules < 60% covered)
+
+| Coverage | Missing lines | Module |
+|----------|--------------|--------|
+| 0% | 103 | `sumd/mcp_server.py` |
+| 0% | 486 | `sumd/cli.py` |
+| 14% | 91 | `sumd/toon_parser.py` |
+| 36% | 303 | `sumd/extractor.py` |
+| 36% | 417 | `sumd/renderer.py` |
+
+### Action plan
+
+- **`cli.py` (0%)** — add `tests/test_dogfood.py` integration tests (see P1) + CLI unit tests via `click.testing.CliRunner`
+- **`mcp_server.py` (0%)** — add `tests/test_mcp_server.py`; at minimum test tool registration and that `main()` doesn't crash
+- **`toon_parser.py` (14%)** — add `tests/test_toon_parser.py` covering each `_parse_toon_block_*` function
+- **`extractor.py` (36%)** — extend `test_extractor.py` with edge-case fixtures (missing files, empty files, malformed YAML)
+- **`renderer.py` (36%)** — add `tests/test_renderer.py` parametrised over section fixtures
+
+---
+
+## P1 — Integration / dogfood tests (high ROI)
+
+Add `tests/test_dogfood.py` — tests that scan the sumd project itself:
+
 ```python
-from sumd.extractor import *  # noqa: F401,F403
+def test_sumd_scans_itself():
+    # sumd scan . --fix --profile rich must exit 0 and produce valid SUMD.md
+    ...
+
+def test_sumd_scans_all_profiles():
+    for profile in ['minimal', 'light', 'rich']:
+        # each profile must exit 0
+        ...
+
+def test_sumr_generates_sumr_md():
+    # sumr . must produce SUMR.md with expected sections
+    ...
 ```
 
-### 1b. `sumd/renderer.py`
-Move all `_render_*` functions + `generate_sumd_content`:
-- `_render_architecture`, `_render_interfaces`, `_render_workflows`
-- `_render_quality`, `_render_dependencies`, `_render_deployment`
-- `_render_extras`, `_render_code_analysis`
-- `generate_sumd_content`
-
-### 1c. `sumd/toon_parser.py`
-Move toon-specific parsing out of `generator.py`:
-- `_parse_toon_file`, all `_parse_toon_block_*` helpers
-- `_parse_doql_content` and its sub-functions
+These catch full-pipeline regressions not visible via unit tests.
 
 ---
 
-## P2 — Reduce remaining high-CC functions
+## P2 — mcp_server.py tests
 
-Current hotspots (CC > 15):
+`sumd/mcp_server.py` — 103 lines, 0% coverage, no tests anywhere.
 
-| Function | File | CC | Action |
-|---|---|---|---|
-| `generate_sumd_content` | generator.py | 33 | Delegate remaining branches to renderer |
-| `generate_map_toon` | generator.py | 26 | Split: `_collect_map_files()`, `_render_map_detail()` |
-| `_render_interfaces` | generator.py | 25 | Split HTTP vs DOQL vs Async interface rendering |
-| `_render_architecture` | generator.py | 19 | Extract `_render_arch_modules()`, `_render_arch_entry()` |
-| `scan` | cli.py | 26 | Split: `_detect_projects()`, `_scan_one_project()`, `_print_scan_summary()` |
-| `analyze` | cli.py | 18 | Extract `_run_code2llm()`, `_collect_analysis_files()` |
-| `scaffold` | cli.py | 18 | Split: `_scaffold_testql()`, `_scaffold_doql()` |
-| `validate_markdown` | parser.py | 17 | Split: `_check_required_sections()`, `_check_section_order()` |
-| `_parse_doql_content` | generator.py | 13 | Split: `_parse_doql_entities()`, `_parse_doql_workflows()` |
-
-Target: all functions CC ≤ 10.
-
----
-
-## P3 — Source & test embedding in SUMD.md
-
-SUMD.md currently covers structure, API, config, testql. Missing:
-
-### 3a. Source module embedding
-Add `## Source` section — top-N modules by CC as `markpact:file` blocks.
-
-In `generator.py`, add `extract_source_modules(proj_dir, max_modules=5)`:
 ```python
-# scan src/ for .py files, sort by CC desc, embed top-N
-```
+# tests/test_mcp_server.py
+def test_mcp_tools_registered():
+    ...
 
-Control via config in `pyproject.toml` `[tool.sumd]`:
-```toml
-source_embed_max = 5
-source_embed_threshold_cc = 10
-```
-
-### 3b. Unit test embedding
-Add `## Tests` section — embed `tests/*.py` as `markpact:file` blocks.
-
-Add `extract_tests(proj_dir)` in extractor:
-```python
-# scan tests/ or test_*.py, embed all test files
-```
-
-This allows LLM recovery of business logic from tests (currently unrecoverable from SUMD.md alone).
-
----
-
-## P4 — testql scenarios for sumd CLI
-
-`testql-scenarios/smoke-generic.testql.toon.yaml` is a placeholder. Replace with real CLI assertions.
-
-### 4a. Add `sumd-cli.testql.toon.yaml`
-Test actual CLI commands:
-```yaml
-- NAVIGATE: cd /tmp/test-sumd-project && sumd scaffold .
-  ASSERT: exit_code == 0
-  ASSERT: file_exists testql-scenarios/smoke-generic.testql.toon.yaml
-
-- NAVIGATE: sumd scan . --fix
-  ASSERT: exit_code == 0
-  ASSERT: stdout contains "✅"
-
-- NAVIGATE: sumd lint --workspace .
-  ASSERT: exit_code == 0
-```
-
-### 4b. Add `sumd-generate.testql.toon.yaml`
-Test `sumd generate` on the sumd project itself (dog-fooding):
-```yaml
-- NAVIGATE: sumd generate ./sumd
-  ASSERT: exit_code == 0
-  ASSERT: file_exists sumd/SUMD.md
-  ASSERT: file_contains sumd/SUMD.md "## Architecture"
+def test_mcp_main_no_crash():
+    ...
 ```
 
 ---
 
-## P5 — parser.py: validate_markdown coverage
+## P3 — Autonomization backlog (manual)
 
-`validate_markdown` (CC=17) does NOT check:
-- `## Source` section (once added in P3)
-- `## Tests` section (once added in P3)
-- TOC correctness (anchors match actual headings)
-- `markpact:file` block paths exist on disk
+These items improve autonomy of the dev process; not blocking release.
 
-Add these validators to `parser.py` after P3 is implemented.
+- **Coverage ratchet**: `sumd scan . --update-gates` — only raises `coverage_min`, never lowers it
+- **Pre-commit hook**: `task install:hooks` → `.git/hooks/pre-commit` runs `sumd scan . --fix --profile light` on every commit touching `.py` files
+- **TODO auto-regeneration**: `sumd scan . --todo` generates this file from live metrics (CC + coverage + duplication)
 
 ---
 
-## P6 — mcp_server.py review
+## ✅ Done (reference)
 
-`sumd/mcp_server.py` exists but is not covered by tests or testql scenarios. Add:
-- Unit test: `tests/test_mcp_server.py`
-- Verify MCP tool registration matches CLI commands
-
----
-
-## Done (reference)
-
-- ✅ `generate_sumd_content` CC 148 → ~33 (8 `_render_*` helpers)
-- ✅ `_parse_toon_file` CC 41 → ~5 (6 `_parse_toon_block_*` helpers)
-- ✅ `extract_doql()` — `app.doql.less` only, no CSS merge
-- ✅ `extract_openapi()` — deduplicates `://` paths
-- ✅ TOC auto-generated in all SUMD.md
-- ✅ `_PROJECT_ANALYSIS_FILES` = `[project.toon.yaml, calls.yaml]`
-- ✅ `sumd scaffold ./sumd` → `testql-scenarios/smoke-generic.testql.toon.yaml`
-- ✅ All 6 projects: 0 lint errors, scan ✅
-- ✅ SUMR.md header updated: "refactorization" instead of "documentation"
-- ✅ SUMD.md and SUMR.md regenerated with latest project metadata
+- ✅ `generate_sumd_content` refactored: CC 33 → 1, fan-out 34 → 2 via `RenderPipeline`
+- ✅ `generator.py` → 18-line shim re-exporting `extractor.py` and `renderer.py`
+- ✅ `sumd/extractor.py`, `sumd/renderer.py`, `sumd/toon_parser.py` extracted
+- ✅ `sumd/sections/` package: 15 section classes across 3 profile tiers
+- ✅ `SourceSnippetsSection`, `ApiStubsSection`, `TestContractsSection`, `CallGraphSection`, `EnvironmentSection` added
+- ✅ `refactor` profile → `SUMR.md` (AI-aware refactorization report)
+- ✅ `sumr` CLI command
+- ✅ `task doctor` smoke-test (5 checks)
+- ✅ pyqual publish stage (twine-publish, when: metrics_pass)
+- ✅ Single `.venv` — dual-venv split eliminated
+- ✅ 88 unit tests, 37% branch+statement coverage
+- ✅ Published to PyPI: https://pypi.org/project/sumd/0.2.0rc1/

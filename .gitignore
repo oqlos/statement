@@ -7,6 +7,8 @@ test-results.json
 .idea
 report.html
 .vscode
+code2llm_output/
+.benchmarks/
 .ruff_cache
 coverage.json
 # C extensions
