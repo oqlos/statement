@@ -1,0 +1,90 @@
+# Taskfile.yml — sumd with automatic venv verification
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  APP_NAME: sumd
+  DOQL_OUTPUT: app.doql.less
+  DOQL_CMD: "{{if eq OS \"windows\"}}doql.exe{{else}}doql{{end}}"
+  VENV_PY: "{{.PWD}}/.venv/bin/python"
+  VENV_PIP: "{{.PWD}}/.venv/bin/pip"
+
+# Internal tasks for verification (prefix with _)
+tasks:
+  _verify-venv:
+    internal: true
+    cmds:
+      - |
+        if [ ! -f "{{.VENV_PY}}" ]; then
+          echo "❌ venv not found. Run: ./scripts/bootstrap.sh"
+          exit 1
+        fi
+    silent: true
+
+  _verify-deps:
+    internal: true
+    deps: [_verify-venv]
+    cmds:
+      - |
+        if ! {{.VENV_PY}} -c "import pyqual" 2>/dev/null; then
+          echo "❌ pyqual not installed. Run: task install"
+          exit 1
+        fi
+    silent: true
+
+  # All public tasks depend on verification
+  install:
+    desc: Install Python dependencies (editable)
+    cmds:
+      - "{{.VENV_PIP}} install -e .[dev]"
+
+  quality:
+    desc: Run pyqual quality pipeline
+    deps: [_verify-deps]
+    cmds:
+      - "{{.VENV_PY}} -m pyqual run"
+
+  quality:fix:
+    desc: Run pyqual with auto-fix
+    deps: [_verify-deps]
+    cmds:
+      - "{{.VENV_PY}} -m pyqual run --fix"
+
+  test:
+    desc: Run pytest suite
+    deps: [_verify-venv]
+    cmds:
+      - "{{.VENV_PY}} -m pytest -q"
+
+  lint:
+    desc: Run ruff lint check
+    deps: [_verify-venv]
+    cmds:
+      - "{{.VENV_PY}} -m ruff check ."
+
+  fmt:
+    desc: Auto-format with ruff
+    deps: [_verify-venv]
+    cmds:
+      - "{{.VENV_PY}} -m ruff format ."
+
+  sumd:
+    desc: Generate SUMD.md
+    deps: [_verify-venv]
+    cmds:
+      - "{{.VENV_PY}} -m sumd.cli scan ."
+
+  sumr:
+    desc: Generate SUMR.md
+    deps: [_verify-venv]
+    cmds:
+      - "{{.VENV_PY}} -m sumd.cli scan . --profile refactor"
+
+  check:
+    desc: Full pre-commit check (lint + test + quality)
+    deps: [_verify-deps]
+    cmds:
+      - task: lint
+      - task: test
+      - task: quality

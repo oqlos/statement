@@ -24,19 +24,19 @@ tasks:
       - "{{.VENV_PIP}} install -e .[dev]"
 
   quality:
-    desc: Run pyqual quality pipeline (uses pyqual.yaml)
+    desc: Run pyqual quality pipeline (uses pyqual.yaml from cwd)
     cmds:
-      - "{{.VENV_PY}} -m pyqual run -c pyqual.yaml"
+      - "{{.VENV_PY}} -m pyqual run"
 
   quality:fix:
-    desc: Run pyqual with auto-fix (uses pyqual.yaml)
+    desc: Run pyqual with auto-fix (uses pyqual.yaml from cwd)
     cmds:
-      - "{{.VENV_PY}} -m pyqual run -c pyqual.yaml --fix"
+      - "{{.VENV_PY}} -m pyqual run --fix"
 
   quality:report:
-    desc: Generate pyqual quality report (uses pyqual.yaml)
+    desc: Generate pyqual quality report (uses pyqual.yaml from cwd)
     cmds:
-      - "{{.VENV_PY}} -m pyqual report -c pyqual.yaml"
+      - "{{.VENV_PY}} -m pyqual report"
 
   test:
     desc: Run pytest suite

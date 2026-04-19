@@ -1,0 +1,33 @@
+repos:
+  - repo: local
+    hooks:
+      - id: verify-venv
+        name: Verify venv exists
+        entry: .venv/bin/python --version
+        language: system
+        pass_filenames: false
+        always_run: true
+        
+      - id: verify-pyqual
+        name: Verify pyqual installed
+        entry: .venv/bin/python -c "import pyqual; print('pyqual OK')"
+        language: system
+        pass_filenames: false
+        always_run: true
+        files: pyproject.toml|pyqual.yaml
+        
+      - id: taskfile-syntax
+        name: Verify Taskfile.yml syntax
+        entry: task --dry
+        language: system
+        pass_filenames: false
+        always_run: true
+        files: Taskfile.yml
+        
+      - id: sumd-generation
+        name: Test SUMD generation
+        entry: .venv/bin/python -m sumd.cli scan . --dry-run
+        language: system
+        pass_filenames: false
+        always_run: true
+        files: sumd/.*|pyproject.toml|Taskfile.yml
