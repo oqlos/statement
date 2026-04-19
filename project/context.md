@@ -4,11 +4,11 @@
 
 - **Project**: /home/tom/github/oqlos/sumd
 - **Primary Language**: python
-- **Languages**: python: 27, shell: 2
+- **Languages**: python: 26, shell: 2
 - **Analysis Mode**: static
-- **Total Functions**: 188
+- **Total Functions**: 191
 - **Total Classes**: 23
-- **Modules**: 29
+- **Modules**: 28
 - **Entry Points**: 77
 
 ## Architecture by Module
@@ -18,7 +18,7 @@
 - **File**: `renderer.py`
 
 ### sumd.extractor
-- **Functions**: 32
+- **Functions**: 33
 - **File**: `extractor.py`
 
 ### sumd.cli
@@ -39,7 +39,7 @@
 - **File**: `toon_parser.py`
 
 ### sumd.pipeline
-- **Functions**: 6
+- **Functions**: 8
 - **Classes**: 1
 - **File**: `pipeline.py`
 
@@ -93,15 +93,15 @@
 - **Classes**: 1
 - **File**: `source_snippets.py`
 
-### sumd.sections.workflows
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `workflows.py`
-
 ### sumd.sections.extras
 - **Functions**: 2
 - **Classes**: 1
 - **File**: `extras.py`
+
+### sumd.sections.workflows
+- **Functions**: 2
+- **Classes**: 1
+- **File**: `workflows.py`
 
 ### sumd.sections.api_stubs
 - **Functions**: 2
@@ -368,13 +368,13 @@ Usage:
 - **Methods**: 2
 - **Key Methods**: sumd.sections.source_snippets.SourceSnippetsSection.should_render, sumd.sections.source_snippets.SourceSnippetsSection.render
 
-### sumd.sections.workflows.WorkflowsSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.workflows.WorkflowsSection.should_render, sumd.sections.workflows.WorkflowsSection.render
-
 ### sumd.sections.extras.ExtrasSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.extras.ExtrasSection.should_render, sumd.sections.extras.ExtrasSection.render
+
+### sumd.sections.workflows.WorkflowsSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.workflows.WorkflowsSection.should_render, sumd.sections.workflows.WorkflowsSection.render
 
 ### sumd.sections.api_stubs.ApiStubsSection
 - **Methods**: 2
@@ -438,22 +438,6 @@ Key functions that process and transform data:
 > Parse a single *.testql.toon.yaml file into a scenario dict.
 - **Output to**: f.read_text, content.splitlines, re.search, str, _match
 
-### sumd.extractor._parse_doql_entities
-> Parse entity blocks from DOQL content.
-- **Output to**: re.finditer, dict, m.group, entities.append, re.findall
-
-### sumd.extractor._parse_doql_interfaces
-> Parse interface and integration blocks from DOQL content.
-- **Output to**: re.finditer, dict, m.group, entry.update, interfaces.append
-
-### sumd.extractor._parse_doql_workflows
-> Parse workflow blocks from DOQL content, deduplicated by name.
-- **Output to**: re.finditer, list, re.search, m.group, re.findall
-
-### sumd.extractor._parse_doql_content
-> Parse DOQL content from .less or .css file into structured data.
-- **Output to**: re.search, re.finditer, sumd.extractor._parse_doql_interfaces, None.splitlines, dict
-
 ### sumd.cli.validate
 > Validate a SUMD document.
 
@@ -472,11 +456,21 @@ FILE: Path to the SUMD markdown file
 > Run a single analysis tool subprocess. Returns True on success.
 - **Output to**: subprocess.run, click.echo, exe.exists, click.echo, str
 
-### sumd.mcp_server._tool_parse_sumd
-- **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, types.TextContent, json.dumps, sumd.mcp_server._doc_to_dict
+### sumd.extractor._parse_doql_entities
+> Parse entity blocks from DOQL content.
+- **Output to**: re.finditer, dict, m.group, entities.append, re.findall
 
-### sumd.mcp_server._tool_validate_sumd
-- **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate, json.dumps
+### sumd.extractor._parse_doql_interfaces
+> Parse interface and integration blocks from DOQL content.
+- **Output to**: re.finditer, dict, m.group, entry.update, interfaces.append
+
+### sumd.extractor._parse_doql_workflows
+> Parse workflow blocks from DOQL content, deduplicated by name.
+- **Output to**: re.finditer, list, re.search, m.group, re.findall
+
+### sumd.extractor._parse_doql_content
+> Parse DOQL content from .less or .css file into structured data.
+- **Output to**: re.search, re.finditer, sumd.extractor._parse_doql_interfaces, None.splitlines, dict
 
 ### sumd.renderer._render_architecture_doql_parsed
 > Render parsed DOQL blocks into L (mutates in place).
@@ -496,6 +490,12 @@ FILE: Path to the SUMD markdown file
 ### sumd.renderer._parse_calls_toon
 > Parse calls.toon.yaml text into structured dict for rendering.
 - **Output to**: content.splitlines, sumd.renderer._parse_calls_header, sumd.renderer._parse_calls_hubs
+
+### sumd.mcp_server._tool_parse_sumd
+- **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, types.TextContent, json.dumps, sumd.mcp_server._doc_to_dict
+
+### sumd.mcp_server._tool_validate_sumd
+- **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate, json.dumps
 
 ### sumd.parser.SUMDParser.parse
 > Parse a SUMD markdown document.
@@ -544,10 +544,10 @@ Functions exposed as public API (no underscore prefix):
 - `sumd.cli.export` - 16 calls
 - `sumd.extractor.extract_package_json` - 15 calls
 - `sumd.sections.metadata.MetadataSection.render` - 14 calls
-- `sumd.extractor.extract_taskfile` - 13 calls
-- `sumd.extractor.extract_env` - 13 calls
 - `sumd.cli.validate` - 13 calls
 - `sumd.cli.extract` - 13 calls
+- `sumd.extractor.extract_taskfile` - 13 calls
+- `sumd.extractor.extract_env` - 13 calls
 - `sumd.toon_parser.extract_testql_scenarios` - 12 calls
 - `sumd.extractor.extract_pyqual` - 12 calls
 - `sumd.extractor.extract_makefile` - 12 calls

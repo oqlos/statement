@@ -1,40 +1,74 @@
-# sumd | 27f 4233L | shell:1,python:26 | 2026-04-19
-# stats: 177 func | 0 cls | 27 mod | CC̄=4.7 | critical:1 | cycles:0
-# alerts[5]: fan-out RenderPipeline._collect=20; fan-out scaffold=19; fan-out analyze=17; fan-out generate=17; fan-out scan=17
-# hotspots[5]: RenderPipeline._collect fan=20; scaffold fan=19; generate fan=17; scan fan=17; analyze fan=17
-# evolution: CC̄ 4.7→4.7 (flat 0.0)
+# sumd | 28f 5127L | shell:2,python:26 | 2026-04-19
+# stats: 191 func | 0 cls | 28 mod | CC̄=4.6 | critical:2 | cycles:0
+# alerts[5]: fan-out RenderPipeline._collect=22; fan-out scaffold=19; fan-out analyze=17; fan-out generate=17; fan-out scan=17
+# hotspots[5]: RenderPipeline._collect fan=22; scaffold fan=19; generate fan=17; scan fan=17; analyze fan=17
+# evolution: CC̄ 4.5→4.6 (regressed +0.1)
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
-M[27]:
+M[28]:
   project.sh,35
-  scripts/generate_all_sumd.py,20
+  scripts/bootstrap.sh,69
   sumd/__init__.py,33
-  sumd/cli.py,820
-  sumd/extractor.py,761
+  sumd/cli.py,1090
+  sumd/extractor.py,886
   sumd/generator.py,15
-  sumd/mcp_server.py,322
-  sumd/parser.py,489
-  sumd/pipeline.py,205
-  sumd/renderer.py,873
-  sumd/sections/__init__.py,70
-  sumd/sections/api_stubs.py,24
-  sumd/sections/architecture.py,20
-  sumd/sections/base.py,91
-  sumd/sections/call_graph.py,26
-  sumd/sections/code_analysis.py,22
-  sumd/sections/configuration.py,20
-  sumd/sections/dependencies.py,24
-  sumd/sections/deployment.py,22
-  sumd/sections/environment.py,23
-  sumd/sections/extras.py,20
-  sumd/sections/interfaces.py,20
-  sumd/sections/metadata.py,47
-  sumd/sections/quality.py,20
-  sumd/sections/source_snippets.py,25
-  sumd/sections/workflows.py,20
-  sumd/toon_parser.py,166
+  sumd/mcp_server.py,358
+  sumd/parser.py,543
+  sumd/pipeline.py,318
+  sumd/renderer.py,989
+  sumd/sections/__init__.py,100
+  sumd/sections/api_stubs.py,25
+  sumd/sections/architecture.py,23
+  sumd/sections/base.py,93
+  sumd/sections/call_graph.py,27
+  sumd/sections/code_analysis.py,25
+  sumd/sections/configuration.py,21
+  sumd/sections/dependencies.py,26
+  sumd/sections/deployment.py,23
+  sumd/sections/environment.py,24
+  sumd/sections/extras.py,21
+  sumd/sections/interfaces.py,23
+  sumd/sections/metadata.py,51
+  sumd/sections/quality.py,21
+  sumd/sections/refactor_analysis.py,68
+  sumd/sections/source_snippets.py,26
+  sumd/sections/workflows.py,21
+  sumd/toon_parser.py,173
 D:
+  sumd/cli.py:
+    e: cli,validate,export,info,generate,extract,_detect_projects,_run_analysis_tools,_export_sumd_json,_render_write_validate,_scan_one_project,scan,lint,_lint_collect_paths,_lint_print_result,_setup_tools_venv,_run_code2llm_formats,_run_tool_subprocess,analyze,_api_scenario_template,_scaffold_write,_scaffold_smoke_scenario,_scaffold_crud_scenarios,_scaffold_from_openapi,_scaffold_generic,scaffold,map_cmd,main,main_sumr
+    cli()
+    validate(file)
+    export(file;format;output)
+    info(file)
+    generate(file;format;output)
+    extract(file;section)
+    _detect_projects(workspace;max_depth)
+    _run_analysis_tools(proj_dir;tool_list;skip_tools)
+    _export_sumd_json(proj_dir;doc)
+    _render_write_validate(proj_dir;sumd_path;raw;profile)
+    _scan_one_project(proj_dir;fix;raw;export_json;run_analyze;tool_list;parser_inst;profile)
+    scan(workspace;export_json;report;fix;raw;analyze;tools;profile;depth)
+    lint(files;workspace;as_json)
+    _lint_collect_paths(files;workspace)
+    _lint_print_result(path;r)
+    _setup_tools_venv(venv_dir;tool_list;force)
+    _run_code2llm_formats(bin_dir;project;project_output)
+    _run_tool_subprocess(bin_dir;tool;cmd_args)
+    analyze(project;tools;force)
+    _api_scenario_template(name;scenario_type;endpoints_block;base_path)
+    _scaffold_write(path;content;force;generated;skipped)
+    _scaffold_smoke_scenario(paths;base;out_dir;force;generated;skipped)
+    _scaffold_crud_scenarios(groups;base;out_dir;force;generated;skipped)
+    _scaffold_from_openapi(spec;out_dir;scenario_type;force;generated;skipped)
+    _scaffold_generic(out_dir;force;generated;skipped)
+    scaffold(project;output;force;scenario_type)
+    map_cmd(project;output;force;stdout)
+    main()
+    main_sumr()
   sumd/renderer.py:
-    e: _render_architecture,_render_doql_app,_render_doql_entities,_render_doql_interfaces,_render_doql_integrations,_render_architecture_doql_parsed,_render_interfaces,_render_interfaces_openapi,_render_testql_raw,_render_testql_endpoint,_render_testql_extras,_render_testql_one_structured,_render_interfaces_testql,_render_workflows,_render_quality,_render_dependencies,_render_deployment_install,_render_deployment_reqs,_render_deployment_docker,_render_deployment,_render_extras,_render_code_analysis,_render_source_snippets,_render_api_stubs,_render_test_contracts,_parse_calls_header,_parse_calls_hubs,_parse_calls_toon,_render_call_graph,_collect_pkg_sources,_collect_infra_sources,_collect_sources,_render_metadata_section,_render_configuration_section,_render_env_section,_render_goal_section,_inject_toc,generate_sumd_content
+    e: _render_architecture_doql_section,_render_architecture_modules,_render_architecture,_render_doql_app,_render_doql_entities,_render_doql_interfaces,_render_doql_integrations,_render_architecture_doql_parsed,_render_interfaces,_render_interfaces_openapi,_render_testql_raw,_render_testql_endpoint,_render_testql_extras,_render_testql_one_structured,_render_interfaces_testql,_render_workflows_doql,_render_workflows_taskfile,_render_workflows,_render_quality_raw,_render_quality_parsed,_render_quality,_render_deps_runtime,_render_deps_dev,_render_dependencies,_render_deployment_install,_render_deployment_reqs,_render_deployment_docker,_render_deployment,_render_extras,_render_code_analysis,_render_source_snippets,_render_api_stubs,_render_test_contracts,_parse_calls_header,_parse_calls_hubs,_parse_calls_toon,_render_call_graph,_collect_pkg_sources,_collect_infra_sources,_collect_sources,_render_metadata_section,_render_configuration_section,_render_env_section,_render_goal_section,_inject_toc,generate_sumd_content
+    _render_architecture_doql_section(doql;proj_dir;raw_sources;L)
+    _render_architecture_modules(modules;name;L)
     _render_architecture(doql;modules;name;proj_dir;raw_sources)
     _render_doql_app(doql;L)
     _render_doql_entities(doql;L)
@@ -48,8 +82,14 @@ D:
     _render_testql_extras(sc;L)
     _render_testql_one_structured(sc;L)
     _render_interfaces_testql(scenarios;proj_dir;raw_sources;L)
+    _render_workflows_doql(doql;L)
+    _render_workflows_taskfile(tasks;proj_dir;raw_sources;L)
     _render_workflows(doql;tasks;proj_dir;raw_sources)
+    _render_quality_raw(proj_dir;L)
+    _render_quality_parsed(pyqual;L)
     _render_quality(pyqual;proj_dir;raw_sources)
+    _render_deps_runtime(deps;node_deps;L)
+    _render_deps_dev(dev_deps;node_dev;L)
     _render_dependencies(deps;dev_deps;pkg_json)
     _render_deployment_install(pkg_json;name;L)
     _render_deployment_reqs(reqs;L)
@@ -74,7 +114,7 @@ D:
     _inject_toc(content)
     generate_sumd_content(proj_dir;return_sources;raw_sources;profile)
   sumd/extractor.py:
-    e: _read_toml,extract_pyproject,extract_taskfile,extract_openapi,_parse_doql_entities,_parse_doql_interfaces,_parse_doql_workflows,_parse_doql_content,extract_doql,extract_pyqual,extract_python_modules,extract_readme_title,extract_requirements,extract_makefile,extract_goal,extract_env,extract_dockerfile,extract_docker_compose,extract_package_json,_lang_of,_fan_out,_cc_estimate,_try_radon_cc,_analyse_py_top_funcs,_analyse_py_top_classes,_analyse_py_module,_collect_map_files,_render_map_detail,_map_cc_stats,generate_map_toon,extract_source_snippets,extract_project_analysis
+    e: _read_toml,extract_pyproject,extract_taskfile,extract_openapi,_parse_doql_entities,_parse_doql_interfaces,_parse_doql_workflows,_parse_doql_content,extract_doql,extract_pyqual,extract_python_modules,extract_readme_title,extract_requirements,extract_makefile,extract_goal,extract_env,extract_dockerfile,extract_docker_compose,extract_package_json,_lang_of,_fan_out,_cc_estimate,_try_radon_cc,_analyse_py_top_funcs,_analyse_py_top_classes,_analyse_py_module,_collect_map_files,_render_map_detail,_map_cc_stats,generate_map_toon,required_tools_for_profile,extract_source_snippets,extract_project_analysis
     _read_toml(path)
     extract_pyproject(proj_dir)
     extract_taskfile(proj_dir)
@@ -105,8 +145,9 @@ D:
     _render_map_detail(proj_dir;modules)
     _map_cc_stats(all_funcs)
     generate_map_toon(proj_dir)
+    required_tools_for_profile(profile)
     extract_source_snippets(proj_dir;pkg_name)
-    extract_project_analysis(proj_dir)
+    extract_project_analysis(proj_dir;refactor)
   sumd/parser.py:
     e: SectionType,Section,SUMDDocument,SUMDParser,CodeBlockIssue,parse,parse_file,validate,_validate_yaml_body,_validate_less_css_body,_validate_mermaid_body,_validate_toon_body,_validate_bash_body,_validate_deps_body,validate_codeblocks,_check_h1,_check_required_sections,_check_metadata_fields,_check_unclosed_fences,_check_empty_links,validate_markdown,validate_sumd_file
     SectionType(Enum):  # SUMD section types...
@@ -125,42 +166,17 @@ D:
     _validate_deps_body(body;path)
     validate_codeblocks(content;source)
     _check_h1(lines;source)
-    _check_required_sections(lines;source)
+    _check_required_sections(lines;source;profile)
     _check_metadata_fields(lines;source)
     _check_unclosed_fences(lines;source)
     _check_empty_links(content;source)
-    validate_markdown(content;source)
-    validate_sumd_file(path)
-  sumd/cli.py:
-    e: cli,validate,export,info,generate,extract,_detect_projects,_run_analysis_tools,_export_sumd_json,_render_write_validate,_scan_one_project,scan,lint,_lint_collect_paths,_lint_print_result,_setup_tools_venv,_run_code2llm_formats,_run_tool_subprocess,analyze,_api_scenario_template,_scaffold_write,_scaffold_smoke_scenario,_scaffold_crud_scenarios,_scaffold_from_openapi,_scaffold_generic,scaffold,map_cmd,main
-    cli()
-    validate(file)
-    export(file;format;output)
-    info(file)
-    generate(file;format;output)
-    extract(file;section)
-    _detect_projects(workspace;max_depth)
-    _run_analysis_tools(proj_dir;tool_list)
-    _export_sumd_json(proj_dir;doc)
-    _render_write_validate(proj_dir;sumd_path;raw;profile)
-    _scan_one_project(proj_dir;fix;raw;export_json;run_analyze;tool_list;parser_inst;profile)
-    scan(workspace;export_json;report;fix;raw;analyze;tools;profile;depth)
-    lint(files;workspace;as_json)
-    _lint_collect_paths(files;workspace)
-    _lint_print_result(path;r)
-    _setup_tools_venv(venv_dir;tool_list;force)
-    _run_code2llm_formats(bin_dir;project;project_output)
-    _run_tool_subprocess(bin_dir;tool;cmd_args)
-    analyze(project;tools;force)
-    _api_scenario_template(name;scenario_type;endpoints_block;base_path)
-    _scaffold_write(path;content;force;generated;skipped)
-    _scaffold_smoke_scenario(paths;base;out_dir;force;generated;skipped)
-    _scaffold_crud_scenarios(groups;base;out_dir;force;generated;skipped)
-    _scaffold_from_openapi(spec;out_dir;scenario_type;force;generated;skipped)
-    _scaffold_generic(out_dir;force;generated;skipped)
-    scaffold(project;output;force;scenario_type)
-    map_cmd(project;output;force;stdout)
-    main()
+    validate_markdown(content;source;profile)
+    validate_sumd_file(path;profile)
+  sumd/pipeline.py:
+    e: RenderPipeline,_refresh_map_toon,_refresh_analysis_files
+    RenderPipeline: __init__(2),_collect(0),_build_registered_sections(2),_render_legacy_sections(1),_assemble(2),run(2)  # Collect project data → build sections → render → inject TOC...
+    _refresh_map_toon(proj_dir)
+    _refresh_analysis_files(proj_dir;profile)
   sumd/toon_parser.py:
     e: _parse_toon_block_config,_parse_toon_block_api,_parse_toon_block_assert,_parse_toon_block_performance,_parse_toon_block_navigate,_parse_toon_block_gui,_parse_toon_file,extract_testql_scenarios
     _parse_toon_block_config(lines)
@@ -188,27 +204,27 @@ D:
   sumd/sections/metadata.py:
     e: MetadataSection
     MetadataSection: should_render(1),render(1)  # Render ## Metadata — always present, all profiles...
-  sumd/pipeline.py:
-    e: RenderPipeline
-    RenderPipeline: __init__(2),_collect(0),_build_registered_sections(2),_render_legacy_sections(1),_assemble(2),run(2)  # Collect project data → build sections → render → inject TOC...
   sumd/sections/dependencies.py:
     e: DependenciesSection
     DependenciesSection: should_render(1),render(1)
   sumd/sections/interfaces.py:
     e: InterfacesSection
     InterfacesSection: should_render(1),render(1)
+  sumd/sections/refactor_analysis.py:
+    e: RefactorAnalysisSection
+    RefactorAnalysisSection: should_render(1),render(1)
   sumd/sections/code_analysis.py:
     e: CodeAnalysisSection
     CodeAnalysisSection: should_render(1),render(1)
   sumd/sections/call_graph.py:
     e: CallGraphSection
     CallGraphSection: should_render(1),render(1)
-  sumd/sections/workflows.py:
-    e: WorkflowsSection
-    WorkflowsSection: should_render(1),render(1)
   sumd/sections/extras.py:
     e: ExtrasSection
     ExtrasSection: should_render(1),render(1)
+  sumd/sections/workflows.py:
+    e: WorkflowsSection
+    WorkflowsSection: should_render(1),render(1)
   sumd/sections/environment.py:
     e: EnvironmentSection
     EnvironmentSection: should_render(1),render(1)
@@ -238,7 +254,7 @@ D:
 Attributes:
     na...
   project.sh:
-  sumd/__init__.py:
   sumd/generator.py:
+  sumd/__init__.py:
   sumd/sections/__init__.py:
-  scripts/generate_all_sumd.py:
+  scripts/bootstrap.sh:

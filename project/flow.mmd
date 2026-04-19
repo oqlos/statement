@@ -19,26 +19,26 @@ flowchart TD
         sumd__cli__lint["lint"]
         sumd__cli___lint_collect_paths["_lint_collect_paths"]
         sumd__cli___lint_print_result["_lint_print_result"]
-        ...["+13 more"]
+        ...["+14 more"]
     end
 
     subgraph Core
+        sumd__extractor___fan_out["_fan_out"]
+        sumd__extractor___analyse_py_top_funcs["_analyse_py_top_funcs"]
+        sumd__extractor___analyse_py_module["_analyse_py_module"]
+        sumd__extractor___render_map_detail["_render_map_detail"]
+        sumd__extractor__generate_map_toon("generate_map_toon CC=11")
+        sumd__pipeline___refresh_map_toon["_refresh_map_toon"]
         sumd__pipeline__RenderPipeline___collect["_collect"]
         sumd__pipeline__RenderPipeline___build_registered_sections["_build_registered_sections"]
         sumd__pipeline__RenderPipeline___render_legacy_sections["_render_legacy_sections"]
         sumd__pipeline__RenderPipeline___assemble["_assemble"]
         sumd__pipeline__RenderPipeline__run["run"]
-        sumd__mcp_server__list_tools["list_tools"]
-        sumd__mcp_server___tool_parse_sumd["_tool_parse_sumd"]
-        sumd__mcp_server___tool_validate_sumd["_tool_validate_sumd"]
-        sumd__mcp_server___tool_list_sections["_tool_list_sections"]
-        sumd__mcp_server___tool_get_section["_tool_get_section"]
-        sumd__mcp_server___tool_info_sumd["_tool_info_sumd"]
-        sumd__mcp_server___tool_generate_sumd["_tool_generate_sumd"]
-        sumd__mcp_server__call_tool["call_tool"]
-        sumd__mcp_server__main["main"]
-        sumd__sections__interfaces__InterfacesSection__should_render["should_render"]
-        ...["+49 more"]
+        sumd__renderer___render_test_contracts["_render_test_contracts"]
+        sumd__renderer___parse_calls_hubs{{_parse_calls_hubs CC=15}}
+        sumd__renderer___render_metadata_section["_render_metadata_section"]
+        sumd__renderer__generate_sumd_content["generate_sumd_content"]
+        ...["+54 more"]
     end
 
     subgraph Exporters

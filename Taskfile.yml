@@ -181,7 +181,7 @@ tasks:
     cmds:
       - task: clean
       - task: build
-      - twine upload dist/*
+      - "{{.VENV_PY}} -m twine upload dist/*"
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Utility

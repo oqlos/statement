@@ -1,33 +1,37 @@
-# code2llm/evolution | 177 func | 22f | 2026-04-19
+# code2llm/evolution | 191 func | 23f | 2026-04-19
 
-NEXT[4] (ranked by impact):
-  [1] !! SPLIT           sumd/renderer.py
-      WHY: 873L, 0 classes, max CC=15
-      EFFORT: ~4h  IMPACT: 13095
+NEXT[5] (ranked by impact):
+  [1] !! SPLIT           sumd/cli.py
+      WHY: 1090L, 0 classes, max CC=15
+      EFFORT: ~4h  IMPACT: 16350
 
-  [2] !! SPLIT           sumd/extractor.py
-      WHY: 761L, 0 classes, max CC=13
-      EFFORT: ~4h  IMPACT: 9893
+  [2] !! SPLIT           sumd/renderer.py
+      WHY: 989L, 0 classes, max CC=15
+      EFFORT: ~4h  IMPACT: 14835
 
-  [3] !! SPLIT           sumd/cli.py
-      WHY: 820L, 0 classes, max CC=11
-      EFFORT: ~4h  IMPACT: 9020
+  [3] !! SPLIT           sumd/extractor.py
+      WHY: 886L, 0 classes, max CC=13
+      EFFORT: ~4h  IMPACT: 11518
 
-  [4] !  SPLIT-FUNC      _parse_calls_hubs  CC=15  fan=7
+  [4] !  SPLIT-FUNC      _run_analysis_tools  CC=15  fan=9
+      WHY: CC=15 exceeds 15
+      EFFORT: ~1h  IMPACT: 135
+
+  [5] !  SPLIT-FUNC      _parse_calls_hubs  CC=15  fan=7
       WHY: CC=15 exceeds 15
       EFFORT: ~1h  IMPACT: 105
 
 
 RISKS[3]:
-  ⚠ Splitting sumd/renderer.py may break 38 import paths
-  ⚠ Splitting sumd/cli.py may break 28 import paths
-  ⚠ Splitting sumd/extractor.py may break 32 import paths
+  ⚠ Splitting sumd/cli.py may break 29 import paths
+  ⚠ Splitting sumd/renderer.py may break 46 import paths
+  ⚠ Splitting sumd/extractor.py may break 33 import paths
 
 METRICS-TARGET:
-  CC̄:          4.7 → ≤3.3
+  CC̄:          4.6 → ≤3.2
   max-CC:      15 → ≤7
-  god-modules: 3 → 0
-  high-CC(≥15): 1 → ≤0
+  god-modules: 4 → 0
+  high-CC(≥15): 2 → ≤1
   hub-types:   0 → ≤0
 
 PATTERNS (language parser shared logic):
@@ -55,4 +59,4 @@ PATTERNS (language parser shared logic):
     - Standardized FunctionInfo/ClassInfo models
 
 HISTORY:
-  prev CC̄=4.7 → now CC̄=4.7
+  prev CC̄=4.5 → now CC̄=4.6
