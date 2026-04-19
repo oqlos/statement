@@ -4,17 +4,17 @@
 
 - **Project**: /home/tom/github/oqlos/sumd
 - **Primary Language**: python
-- **Languages**: python: 26, shell: 1
+- **Languages**: python: 27, shell: 1
 - **Analysis Mode**: static
-- **Total Functions**: 172
-- **Total Classes**: 22
-- **Modules**: 27
-- **Entry Points**: 74
+- **Total Functions**: 188
+- **Total Classes**: 23
+- **Modules**: 28
+- **Entry Points**: 77
 
 ## Architecture by Module
 
 ### sumd.renderer
-- **Functions**: 34
+- **Functions**: 46
 - **File**: `renderer.py`
 
 ### sumd.extractor
@@ -22,7 +22,7 @@
 - **File**: `extractor.py`
 
 ### sumd.cli
-- **Functions**: 27
+- **Functions**: 29
 - **File**: `cli.py`
 
 ### sumd.parser
@@ -47,6 +47,11 @@
 - **Functions**: 2
 - **Classes**: 1
 - **File**: `interfaces.py`
+
+### sumd.sections.refactor_analysis
+- **Functions**: 2
+- **Classes**: 1
+- **File**: `refactor_analysis.py`
 
 ### sumd.sections.quality
 - **Functions**: 2
@@ -73,44 +78,46 @@
 - **Classes**: 1
 - **File**: `dependencies.py`
 
-### sumd.sections.call_graph
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `call_graph.py`
-
 ### sumd.sections.architecture
 - **Functions**: 2
 - **Classes**: 1
 - **File**: `architecture.py`
+
+### sumd.sections.call_graph
+- **Functions**: 2
+- **Classes**: 1
+- **File**: `call_graph.py`
 
 ### sumd.sections.source_snippets
 - **Functions**: 2
 - **Classes**: 1
 - **File**: `source_snippets.py`
 
-### sumd.sections.workflows
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `workflows.py`
-
 ### sumd.sections.extras
 - **Functions**: 2
 - **Classes**: 1
 - **File**: `extras.py`
+
+### sumd.sections.workflows
+- **Functions**: 2
+- **Classes**: 1
+- **File**: `workflows.py`
 
 ### sumd.sections.api_stubs
 - **Functions**: 2
 - **Classes**: 1
 - **File**: `api_stubs.py`
 
-### sumd.sections.environment
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `environment.py`
-
 ## Key Entry Points
 
 Main execution flows into the system:
+
+### sumd.cli.scan
+> Scan a workspace directory and generate SUMD.md for every project found.
+
+Detects projects by presence of pyproject.toml. Extracts metadata from:
+pypr
+- **Calls**: cli.command, click.argument, click.option, click.option, click.option, click.option, click.option, click.option
 
 ### sumd.cli.analyze
 > Run analysis tools (code2llm, redup, vallm) on a project.
@@ -126,13 +133,6 @@ PROJECT: Path
 Reads openapi.yaml (if present) and generates .testql.toon.yaml scenario files
 for e
 - **Calls**: cli.command, click.argument, click.option, click.option, click.option, project.resolve, None.resolve, out_dir.mkdir
-
-### sumd.cli.scan
-> Scan a workspace directory and generate SUMD.md for every project found.
-
-Detects projects by presence of pyproject.toml. Extracts metadata from:
-pypr
-- **Calls**: cli.command, click.argument, click.option, click.option, click.option, click.option, click.option, click.option
 
 ### sumd.cli.generate
 > Generate a SUMD document from structured format.
@@ -207,14 +207,17 @@ Args:
     lines: List of document lines
 - **Calls**: line.startswith, None.strip, sections.append, None.lower, self.SECTION_MAPPING.get, Section, None.strip, sections.append
 
-### sumd.mcp_server._tool_generate_sumd
-- **Calls**: arguments.get, data.get, data.get, None.join, section.get, sumd.mcp_server._resolve_path, out.write_text, types.TextContent
-
 ### sumd.cli.info
 > Display information about a SUMD document.
 
 FILE: Path to the SUMD markdown file
 - **Calls**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, click.echo, click.echo, click.echo, click.Path, click.echo
+
+### sumd.mcp_server._tool_generate_sumd
+- **Calls**: arguments.get, data.get, data.get, None.join, section.get, sumd.mcp_server._resolve_path, out.write_text, types.TextContent
+
+### sumd.sections.refactor_analysis.RefactorAnalysisSection.render
+- **Calls**: a, a, a, a, None.replace, a, a, a
 
 ### sumd.mcp_server.list_tools
 - **Calls**: server.list_tools, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool
@@ -249,26 +252,23 @@ FILE: Path to the SUMD markdown file
 ### sumd.mcp_server._tool_list_sections
 - **Calls**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, types.TextContent, json.dumps
 
-### sumd.sections.environment.EnvironmentSection.render
-- **Calls**: lines.extend, lines.extend, sumd.renderer._render_env_section, sumd.renderer._render_goal_section
-
 ## Process Flows
 
 Key execution flows identified:
 
-### Flow 1: analyze
+### Flow 1: scan
+```
+scan [sumd.cli]
+```
+
+### Flow 2: analyze
 ```
 analyze [sumd.cli]
 ```
 
-### Flow 2: scaffold
+### Flow 3: scaffold
 ```
 scaffold [sumd.cli]
-```
-
-### Flow 3: scan
-```
-scan [sumd.cli]
 ```
 
 ### Flow 4: generate
@@ -331,6 +331,10 @@ Usage:
 - **Methods**: 2
 - **Key Methods**: sumd.sections.interfaces.InterfacesSection.should_render, sumd.sections.interfaces.InterfacesSection.render
 
+### sumd.sections.refactor_analysis.RefactorAnalysisSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.refactor_analysis.RefactorAnalysisSection.should_render, sumd.sections.refactor_analysis.RefactorAnalysisSection.render
+
 ### sumd.sections.quality.QualitySection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.quality.QualitySection.should_render, sumd.sections.quality.QualitySection.render
@@ -352,37 +356,37 @@ Usage:
 - **Methods**: 2
 - **Key Methods**: sumd.sections.dependencies.DependenciesSection.should_render, sumd.sections.dependencies.DependenciesSection.render
 
-### sumd.sections.call_graph.CallGraphSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.call_graph.CallGraphSection.should_render, sumd.sections.call_graph.CallGraphSection.render
-
 ### sumd.sections.architecture.ArchitectureSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.architecture.ArchitectureSection.should_render, sumd.sections.architecture.ArchitectureSection.render
+
+### sumd.sections.call_graph.CallGraphSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.call_graph.CallGraphSection.should_render, sumd.sections.call_graph.CallGraphSection.render
 
 ### sumd.sections.source_snippets.SourceSnippetsSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.source_snippets.SourceSnippetsSection.should_render, sumd.sections.source_snippets.SourceSnippetsSection.render
 
-### sumd.sections.workflows.WorkflowsSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.workflows.WorkflowsSection.should_render, sumd.sections.workflows.WorkflowsSection.render
-
 ### sumd.sections.extras.ExtrasSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.extras.ExtrasSection.should_render, sumd.sections.extras.ExtrasSection.render
+
+### sumd.sections.workflows.WorkflowsSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.workflows.WorkflowsSection.should_render, sumd.sections.workflows.WorkflowsSection.render
 
 ### sumd.sections.api_stubs.ApiStubsSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.api_stubs.ApiStubsSection.should_render, sumd.sections.api_stubs.ApiStubsSection.render
 
-### sumd.sections.environment.EnvironmentSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.environment.EnvironmentSection.should_render, sumd.sections.environment.EnvironmentSection.render
-
 ### sumd.sections.configuration.ConfigurationSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.configuration.ConfigurationSection.should_render, sumd.sections.configuration.ConfigurationSection.render
+
+### sumd.sections.environment.EnvironmentSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.environment.EnvironmentSection.should_render, sumd.sections.environment.EnvironmentSection.render
 
 ### sumd.sections.base.Section
 > Protocol for all SUMD section renderers.
@@ -401,10 +405,6 @@ Attributes:
 > SUMD section types.
 - **Methods**: 0
 - **Inherits**: Enum
-
-### sumd.parser.Section
-> Represents a SUMD section.
-- **Methods**: 0
 
 ## Data Transformation Functions
 
@@ -454,6 +454,24 @@ Key functions that process and transform data:
 > Parse DOQL content from .less or .css file into structured data.
 - **Output to**: re.search, re.finditer, sumd.extractor._parse_doql_interfaces, None.splitlines, dict
 
+### sumd.cli.validate
+> Validate a SUMD document.
+
+FILE: Path to the SUMD markdown file
+- **Output to**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate
+
+### sumd.cli._render_write_validate
+> Render SUMD content, write file, validate. Returns (doc, md_issues, cb_errors, cb_warnings, sources)
+- **Output to**: None.run, sumd_path.write_text, sumd.parser.validate_sumd_file, sumd.parser.SUMDParser.parse_file, RenderPipeline
+
+### sumd.cli._run_code2llm_formats
+> Run code2llm for each format. Returns True if all succeeded.
+- **Output to**: code2llm.exists, subprocess.run, click.echo, click.echo, str
+
+### sumd.cli._run_tool_subprocess
+> Run a single analysis tool subprocess. Returns True on success.
+- **Output to**: subprocess.run, click.echo, exe.exists, click.echo, str
+
 ### sumd.mcp_server._tool_parse_sumd
 - **Output to**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, types.TextContent, json.dumps, sumd.mcp_server._doc_to_dict
 
@@ -464,23 +482,20 @@ Key functions that process and transform data:
 > Render parsed DOQL blocks into L (mutates in place).
 - **Output to**: sumd.renderer._render_doql_app, sumd.renderer._render_doql_entities, sumd.renderer._render_doql_interfaces, sumd.renderer._render_doql_integrations
 
+### sumd.renderer._render_quality_parsed
+- **Output to**: pyqual.get, pyqual.get, pyqual.get, pyqual.get, a
+
+### sumd.renderer._parse_calls_header
+> Parse node/edge/module counts and CC average from header comments.
+- **Output to**: line.startswith, line.startswith, _re_calls.search, _re_calls.search, int
+
+### sumd.renderer._parse_calls_hubs
+> Parse HUBS section into list of hub dicts.
+- **Output to**: line.startswith, hubs.append, line.startswith, line.startswith, line.startswith
+
 ### sumd.renderer._parse_calls_toon
 > Parse calls.toon.yaml text into structured dict for rendering.
-- **Output to**: content.splitlines, line.startswith, line.startswith, line.startswith, None.append
-
-### sumd.cli.validate
-> Validate a SUMD document.
-
-FILE: Path to the SUMD markdown file
-- **Output to**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate
-
-### sumd.cli._run_code2llm_formats
-> Run code2llm for each format. Returns True if all succeeded.
-- **Output to**: code2llm.exists, subprocess.run, click.echo, click.echo, str
-
-### sumd.cli._run_tool_subprocess
-> Run a single analysis tool subprocess. Returns True on success.
-- **Output to**: subprocess.run, click.echo, exe.exists, click.echo, str
+- **Output to**: content.splitlines, sumd.renderer._parse_calls_header, sumd.renderer._parse_calls_hubs
 
 ### sumd.parser.SUMDParser.parse
 > Parse a SUMD markdown document.
@@ -509,49 +524,14 @@ Args:
     lines: List of document lines
 - **Output to**: enumerate, line.startswith, None.strip, header_content.split, None.strip
 
-### sumd.parser.SUMDParser._parse_sections
-> Parse all sections in the document.
-
-Args:
-    lines: List of document lines
-- **Output to**: line.startswith, None.strip, sections.append, None.lower, self.SECTION_MAPPING.get
-
-### sumd.parser.SUMDParser.validate
-> Validate a SUMD document against the specification.
-
-Args:
-    document: The document to validate
-  
-- **Output to**: errors.append, errors.append, errors.append, errors.append
-
-### sumd.parser.parse
-> Parse a SUMD markdown document.
-
-Args:
-    content: The markdown content to parse
-    
-Returns:
-    
-- **Output to**: SUMDParser, parser.parse
-
-### sumd.parser.parse_file
-> Parse a SUMD file.
-
-Args:
-    path: Path to the SUMD markdown file
-    
-Returns:
-    SUMDDocument: P
-- **Output to**: SUMDParser, parser.parse_file
-
 ## Public API Surface
 
 Functions exposed as public API (no underscore prefix):
 
+- `sumd.cli.scan` - 33 calls
 - `sumd.cli.analyze` - 33 calls
 - `sumd.cli.scaffold` - 33 calls
 - `sumd.extractor.generate_map_toon` - 32 calls
-- `sumd.cli.scan` - 31 calls
 - `sumd.cli.generate` - 30 calls
 - `sumd.parser.validate_codeblocks` - 25 calls
 - `sumd.extractor.extract_openapi` - 24 calls
@@ -573,11 +553,12 @@ Functions exposed as public API (no underscore prefix):
 - `sumd.extractor.extract_makefile` - 12 calls
 - `sumd.extractor.extract_source_snippets` - 12 calls
 - `sumd.cli.info` - 11 calls
+- `sumd.sections.refactor_analysis.RefactorAnalysisSection.render` - 11 calls
 - `sumd.extractor.extract_requirements` - 9 calls
 - `sumd.mcp_server.list_tools` - 8 calls
+- `sumd.extractor.extract_project_analysis` - 7 calls
 - `sumd.parser.validate_markdown` - 6 calls
 - `sumd.extractor.extract_readme_title` - 5 calls
-- `sumd.extractor.extract_project_analysis` - 5 calls
 - `sumd.mcp_server.call_tool` - 5 calls
 - `sumd.parser.validate_sumd_file` - 5 calls
 - `sumd.extractor.extract_python_modules` - 4 calls
@@ -587,7 +568,6 @@ Functions exposed as public API (no underscore prefix):
 - `sumd.extractor.extract_doql` - 3 calls
 - `sumd.pipeline.RenderPipeline.run` - 3 calls
 - `sumd.mcp_server.main` - 3 calls
-- `sumd.sections.dependencies.DependenciesSection.should_render` - 3 calls
 
 ## System Interactions
 
@@ -595,6 +575,9 @@ How components interact:
 
 ```mermaid
 graph TD
+    scan --> command
+    scan --> argument
+    scan --> option
     analyze --> command
     analyze --> argument
     analyze --> option
@@ -602,9 +585,6 @@ graph TD
     scaffold --> command
     scaffold --> argument
     scaffold --> option
-    scan --> command
-    scan --> argument
-    scan --> option
     generate --> command
     generate --> argument
     generate --> option

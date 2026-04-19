@@ -708,8 +708,19 @@ def generate_map_toon(proj_dir: Path) -> str:
 # ---------------------------------------------------------------------------
 
 _PROJECT_ANALYSIS_FILES = [
-    ("map.toon.yaml",   "toon"),
-    ("calls.toon.yaml", "toon"),
+    ("map.toon.yaml",        "toon"),
+    ("calls.toon.yaml",      "toon"),
+]
+
+# Files loaded only for the 'refactor' profile (pre-refactoring analysis).
+# map.toon.yaml is included here too — structural overview is still relevant.
+_REFACTOR_ANALYSIS_FILES = [
+    ("map.toon.yaml",        "toon"),
+    ("calls.toon.yaml",      "toon"),
+    ("analysis.toon.yaml",   "toon"),
+    ("duplication.toon.yaml","toon"),
+    ("evolution.toon.yaml",  "toon"),
+    ("validation.toon.yaml", "toon"),
 ]
 
 
@@ -744,13 +755,23 @@ def extract_source_snippets(proj_dir: Path, pkg_name: str) -> list[dict]:
     return results
 
 
-def extract_project_analysis(proj_dir: Path) -> list[dict[str, str]]:
-    """Return list of {file, lang, content} for files present in project/ subdir."""
+def extract_project_analysis(proj_dir: Path, refactor: bool = False) -> list[dict[str, str]]:
+    """Return list of {file, lang, content} for files present in project/ subdir.
+
+    Args:
+        refactor: if True, load refactor-profile files (analysis, duplication,
+                  evolution, validation) in addition to the standard set.
+    """
     project_dir = proj_dir / "project"
     if not project_dir.is_dir():
         return []
+    file_list = _REFACTOR_ANALYSIS_FILES if refactor else _PROJECT_ANALYSIS_FILES
     results = []
-    for filename, lang in _PROJECT_ANALYSIS_FILES:
+    seen: set[str] = set()
+    for filename, lang in file_list:
+        if filename in seen:
+            continue
+        seen.add(filename)
         fpath = project_dir / filename
         if fpath.exists():
             results.append({

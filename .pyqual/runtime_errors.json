@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-04-19T07:55:37.397426+00:00",
+    "stage": "test",
+    "command": "pytest --cov=pyqual --cov-branch --cov-report=json:.pyqual/coverage.json -q",
+    "tool": "pytest",
+    "returncode": 2,
+    "duration_s": 1.772,
+    "error_type": "unknown",
+    "message": "4 errors in 0.38s",
+    "stdout_tail": "evel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_sections.py:9: in <module>\n    from sumd.sections.base import RenderContext\nE   ModuleNotFoundError: No module named 'sumd'\n=========================== short test summary info ============================\nERROR tests/test_extractor.py\nERROR tests/test_parser.py\nERROR tests/test_pipeline.py\nERROR tests/test_sections.py\n!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!!\n4 errors in 0.38s\n",
+    "stderr_tail": ""
+  }
+]

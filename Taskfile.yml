@@ -22,24 +22,35 @@ tasks:
       - pip install -e .[dev]
 
   quality:
-    desc: Run pyqual quality pipeline
+    desc: Run pyqual quality pipeline (uses pyqual.yaml)
     cmds:
-      - pyqual run
+      - pyqual -c pyqual.yaml run
 
   quality:fix:
-    desc: Run pyqual with auto-fix
+    desc: Run pyqual with auto-fix (uses pyqual.yaml)
     cmds:
-      - pyqual run --fix
+      - pyqual -c pyqual.yaml run --fix
 
   quality:report:
-    desc: Generate pyqual quality report
+    desc: Generate pyqual quality report (uses pyqual.yaml)
     cmds:
-      - pyqual report
+      - pyqual -c pyqual.yaml report
 
   test:
     desc: Run pytest suite
     cmds:
       - pytest -q
+
+  test:report:
+    desc: Run pytest suite and generate HTML report
+    cmds:
+      - pytest --json-report --json-report-file=test-results.json -q
+      - testql report test-results.json -o report.html
+
+  test:report:example:
+    desc: Generate example testql HTML report
+    cmds:
+      - testql report --example -o report.html
 
   lint:
     desc: Run ruff lint check
@@ -72,27 +83,25 @@ tasks:
   # ─────────────────────────────────────────────────────────────────────────────
 
   structure:
-    desc: Generate project structure (app.doql.css + app.doql.less)
+    desc: Generate project structure (app.doql.less)
     cmds:
       - |
         echo "📁 Analyzing sumd project structure..."
-        {{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force
-        echo "🎨 Exporting to LESS format..."
-        {{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}
-        echo "✅ Structure generated: app.doql.css + {{.DOQL_OUTPUT}}"
+        {{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.less --force
+        echo "✅ Structure generated: {{.DOQL_OUTPUT}}"
 
   doql:adopt:
-    desc: Reverse-engineer sumd project structure (CSS only)
+    desc: Reverse-engineer sumd project structure (LESS format)
     cmds:
-      - "{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.css --force"
-      - echo "✅ Captured in app.doql.css"
+      - "{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.less --force"
+      - echo "✅ Captured in app.doql.less"
 
   doql:export:
-    desc: Export to LESS format
+    desc: Export app.doql.less to other formats
     cmds:
       - |
-        if [ ! -f "app.doql.css" ]; then
-          echo "❌ app.doql.css not found. Run: task structure"
+        if [ ! -f "app.doql.less" ]; then
+          echo "❌ app.doql.less not found. Run: task structure"
           exit 1
         fi
       - "{{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}"
@@ -121,12 +130,7 @@ tasks:
           echo "❌ {{.DOQL_OUTPUT}} not found. Run: task structure"
           exit 1
         fi
-      - |
-        # Regenerate LESS from CSS if CSS exists
-        if [ -f "app.doql.css" ]; then
-          {{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}}
-        fi
-      - "{{.DOQL_CMD}} build app.doql.css --out build/"
+      - "{{.DOQL_CMD}} build app.doql.less --out build/"
 
   analyze:
     desc: Full doql analysis (structure + validate + doctor)
@@ -146,10 +150,56 @@ tasks:
       - python -m sumd.cli docs/ docs/
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # SUMD Documentation Generation
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  sumd:
+    desc: Generate SUMD.md (full project documentation)
+    cmds:
+      - sumd scan .
+
+  sumr:
+    desc: Generate SUMR.md (pre-refactoring analysis report)
+    cmds:
+      - sumd scan . --profile refactor
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Release
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  version:bump:
+    desc: Bump patch version (hatch)
+    cmds:
+      - hatch version patch
+      - echo "✅ Version bumped:"
+      - hatch version
+
+  publish:
+    desc: Build and publish to PyPI
+    cmds:
+      - task: clean
+      - task: build
+      - twine upload dist/*
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # Utility
   # ─────────────────────────────────────────────────────────────────────────────
+
+  check:
+    desc: Full pre-commit check (lint + test + quality)
+    cmds:
+      - task: lint
+      - task: test
+      - task: quality
 
   help:
     desc: Show available tasks
     cmds:
       - task --list
+
+  all:
+    desc: Install, full check, generate SUMD docs
+    cmds:
+      - task: install
+      - task: check
+      - task: sumd

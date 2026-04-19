@@ -63,6 +63,7 @@ class RenderPipeline:
     def __init__(self, proj_dir: Path, raw_sources: bool = True) -> None:
         self.proj_dir = proj_dir.resolve()
         self.raw_sources = raw_sources
+        self._profile: str = "rich"  # set before _collect() by run()
 
     # ── Phase 1: collect ────────────────────────────────────────────────
 
@@ -86,7 +87,7 @@ class RenderPipeline:
         dockerfile = extract_dockerfile(proj_dir)
         compose  = extract_docker_compose(proj_dir)
         pkg_json = extract_package_json(proj_dir)
-        project_analysis = extract_project_analysis(proj_dir)
+        project_analysis = extract_project_analysis(proj_dir, refactor=(self._profile == "refactor"))
         source_snippets = extract_source_snippets(proj_dir, pkg_name)
 
         name        = pyproj.get("name", pkg_name)
@@ -160,7 +161,10 @@ class RenderPipeline:
         # Document header
         a(f"# {ctx.title}")
         a("")
-        a(ctx.description)
+        if profile == "refactor":
+            a("SUMD - Structured Unified Markdown Descriptor for AI-aware project refactorization")
+        else:
+            a(ctx.description)
         a("")
 
         # Registered sections (new architecture)
@@ -187,12 +191,13 @@ class RenderPipeline:
         """Run the full pipeline and return rendered SUMD content.
 
         Args:
-            profile: 'minimal' | 'light' | 'rich'
+            profile: 'minimal' | 'light' | 'rich' | 'refactor'
             return_sources: if True, return (content, sources_used) tuple
 
         Returns:
             str or (str, list[str])
         """
+        self._profile = profile
         ctx = self._collect()
         raw = self._assemble(ctx, profile)
         content = _inject_toc(raw)

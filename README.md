@@ -61,6 +61,9 @@ sumd scan . --fix --profile minimal  # core sections only (metadata, architectur
 sumd scan . --fix --profile light    # + interfaces, quality, configuration, environment, extras
 sumd scan . --fix --profile rich     # + code analysis, source snippets, call graph, API stubs, test contracts (default)
 
+# Generate SUMR.md (pre-refactoring analysis report)
+sumd scan . --profile refactor       # creates SUMR.md for AI-aware refactorization
+
 # Lint / validate SUMD files
 sumd lint SUMD.md               # validate a single file
 sumd lint --workspace .         # validate all SUMD.md files in the workspace
@@ -123,7 +126,7 @@ SUMD auto-embeds the following sources from a project (when present):
 | `Taskfile.yml` | all tasks as raw YAML | `markpact:taskfile` |
 | `openapi.yaml` | full OpenAPI spec (endpoints as sections) | `markpact:openapi` |
 | `testql-scenarios/**` | all `.testql.toon.yaml` scenario files | `markpact:testql` |
-| `app.doql.less` / `.css` | DOQL styling | `markpact:doql` |
+| `app.doql.less` (preferred) or `.css` | DOQL styling | `markpact:doql` |
 | `pyqual.yaml` | quality pipeline config | `markpact:pyqual` |
 | `goal.yaml` | project intent | _rendered_ |
 | `.env.example` | env variables list | _listed_ |

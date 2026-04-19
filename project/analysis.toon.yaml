@@ -1,37 +1,36 @@
-# code2llm | 27f 4168L | python:26,shell:1 | 2026-04-18
-# CC̄=4.8 | critical:3/172 | dups:0 | cycles:0
+# code2llm | 28f 4394L | python:27,shell:1 | 2026-04-19
+# CC̄=4.5 | critical:1/188 | dups:0 | cycles:0
 
-HEALTH[3]:
-  🟡 CC    _scan_one_project CC=15 (limit:15)
-  🟡 CC    _render_testql_one_structured CC=15 (limit:15)
-  🟡 CC    _parse_calls_toon CC=20 (limit:15)
+HEALTH[1]:
+  🟡 CC    _parse_calls_hubs CC=15 (limit:15)
 
 REFACTOR[1]:
-  1. split 3 high-CC methods  (CC>15)
+  1. split 1 high-CC methods  (CC>15)
 
-PIPELINES[66]:
-  [1] Src [validate]: validate → parse_file
+PIPELINES[69]:
+  [1] Src [__init__]: __init__
       PURITY: 100% pure
-  [2] Src [export]: export → parse_file
+  [2] Src [_collect]: _collect → extract_pyproject → _read_toml
       PURITY: 100% pure
-  [3] Src [info]: info → parse_file
+  [3] Src [_build_registered_sections]: _build_registered_sections
       PURITY: 100% pure
-  [4] Src [generate]: generate
+  [4] Src [_assemble]: _assemble
       PURITY: 100% pure
-  [5] Src [extract]: extract → parse_file
+  [5] Src [run]: run → _inject_toc
       PURITY: 100% pure
 
 LAYERS:
-  sumd/                           CC̄=4.8    ←in:14  →out:0
-  │ !! renderer                   851L  0C   34m  CC=20     ←14
-  │ !! cli                        777L  0C   27m  CC=15     ←0
-  │ !! extractor                  761L  0C   32m  CC=13     ←2
-  │ parser                     489L  5C   23m  CC=13     ←2
+  sumd/                           CC̄=4.5    ←in:14  →out:0
+  │ !! renderer                   912L  0C   46m  CC=15     ←14
+  │ !! cli                        842L  0C   29m  CC=12     ←0
+  │ !! extractor                  782L  0C   32m  CC=13     ←2
+  │ parser                     491L  5C   23m  CC=13     ←2
   │ mcp_server                 322L  0C   12m  CC=5      ←0
-  │ pipeline                   205L  1C    6m  CC=4      ←0
+  │ pipeline                   207L  1C    6m  CC=4      ←0
   │ toon_parser                166L  0C    8m  CC=9      ←1
   │ base                        91L  2C    2m  CC=1      ←0
-  │ __init__                    70L  0C    0m  CC=0.0    ←0
+  │ __init__                    78L  0C    0m  CC=0.0    ←0
+  │ refactor_analysis           67L  1C    2m  CC=3      ←0
   │ metadata                    47L  1C    2m  CC=5      ←0
   │ __init__                    33L  0C    0m  CC=0.0    ←0
   │ call_graph                  26L  1C    2m  CC=2      ←0
@@ -44,8 +43,8 @@ LAYERS:
   │ interfaces                  20L  1C    2m  CC=3      ←0
   │ quality                     20L  1C    2m  CC=1      ←0
   │ architecture                20L  1C    2m  CC=1      ←0
-  │ workflows                   20L  1C    2m  CC=2      ←0
   │ extras                      20L  1C    2m  CC=2      ←0
+  │ workflows                   20L  1C    2m  CC=2      ←0
   │ configuration               20L  1C    2m  CC=1      ←0
   │ generator                   15L  0C    0m  CC=0.0    ←0
   │

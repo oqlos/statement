@@ -26,6 +26,7 @@ from sumd.sections.extras import ExtrasSection
 from sumd.sections.interfaces import InterfacesSection
 from sumd.sections.metadata import MetadataSection
 from sumd.sections.quality import QualitySection
+from sumd.sections.refactor_analysis import RefactorAnalysisSection
 from sumd.sections.source_snippets import SourceSnippetsSection
 from sumd.sections.test_contracts import TestContractsSection
 from sumd.sections.workflows import WorkflowsSection
@@ -48,6 +49,7 @@ SECTION_REGISTRY: list[type] = [
     CallGraphSection,
     ApiStubsSection,
     TestContractsSection,
+    RefactorAnalysisSection,
 ]
 
 # Profile definitions — which section *names* are included per profile.
@@ -64,6 +66,12 @@ PROFILES: dict[str, set[str]] = {
         "quality", "configuration", "dependencies", "deployment",
         "environment", "extras", "code_analysis", "source_snippets",
         "call_graph", "api_stubs", "test_contracts",
+    },
+    # Pre-refactoring analysis profile — focused on code quality signals.
+    # Includes architecture + call graph in full, skips documentation sections.
+    "refactor": {
+        "metadata", "architecture", "quality", "dependencies",
+        "source_snippets", "refactor_analysis",
     },
 }
 

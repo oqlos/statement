@@ -382,6 +382,7 @@ def validate_codeblocks(content: str, source: str = "SUMD.md") -> list[CodeBlock
 
 _REQUIRED_H2 = {"metadata", "intent", "architecture",
                  "workflows", "dependencies", "deployment"}
+_REQUIRED_H2_REFACTOR = {"metadata", "architecture", "refactoring analysis"}
 _RECOMMENDED_H2 = {"interfaces"}  # present in API projects but not required
 
 _METADATA_FIELDS = {"name", "version"}  # required metadata bullet keys
@@ -394,13 +395,14 @@ def _check_h1(lines: list[str], source: str) -> list[str]:
     return []
 
 
-def _check_required_sections(lines: list[str], source: str) -> list[str]:
+def _check_required_sections(lines: list[str], source: str, profile: str = "rich") -> list[str]:
     """Return errors for any missing required H2 sections."""
     found_h2 = {re.sub(r"`.*?`", "", line[3:]).strip().lower()
                 for line in lines if line.startswith("## ")}
+    required = _REQUIRED_H2_REFACTOR if profile == "refactor" else _REQUIRED_H2
     return [
         f"{source}: missing required section '## {req.title()}'"
-        for req in _REQUIRED_H2
+        for req in required
         if not any(req in h for h in found_h2)
     ]
 
@@ -441,12 +443,12 @@ def _check_empty_links(content: str, source: str) -> list[str]:
     ]
 
 
-def validate_markdown(content: str, source: str = "SUMD.md") -> list[str]:
+def validate_markdown(content: str, source: str = "SUMD.md", profile: str = "rich") -> list[str]:
     """Validate SUMD markdown structure.
 
     Checks:
     - H1 title present
-    - Required H2 sections present
+    - Required H2 sections present (profile-aware)
     - Metadata section has name and version bullets
     - No broken markdown links [text]() with empty href
     - No unclosed fenced code blocks
@@ -454,7 +456,7 @@ def validate_markdown(content: str, source: str = "SUMD.md") -> list[str]:
     lines = content.splitlines()
     return (
         _check_h1(lines, source)
-        + _check_required_sections(lines, source)
+        + _check_required_sections(lines, source, profile)
         + _check_metadata_fields(lines, source)
         + _check_unclosed_fences(lines, source)
         + _check_empty_links(content, source)
@@ -465,7 +467,7 @@ def validate_markdown(content: str, source: str = "SUMD.md") -> list[str]:
 # Combined validator
 # ---------------------------------------------------------------------------
 
-def validate_sumd_file(path: Path) -> dict:
+def validate_sumd_file(path: Path, profile: str = "rich") -> dict:
     """Run all validators on a SUMD.md file.
 
     Returns:
@@ -478,7 +480,7 @@ def validate_sumd_file(path: Path) -> dict:
     """
     content = path.read_text(encoding="utf-8")
     source = path.name
-    md_issues = validate_markdown(content, source)
+    md_issues = validate_markdown(content, source, profile)
     cb_issues = validate_codeblocks(content, source)
     return {
         "source": str(path),

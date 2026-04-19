@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `sumd .` / `sumd <path>` shortcut: first non-command argument treated as `scan <path> --fix`
+- SUMR.md header updated to reflect "refactorization" purpose instead of "documentation"
 - Recursive project discovery: `_detect_projects` now walks subdirectories at any depth (skips `.venv`, `node_modules`, `.git`, `build`, `dist`, `.sumd-tools`, etc.)
 - `--depth N` flag for `scan`: limit recursive search depth (default: unlimited)
 - Auto-detect workspace-as-project: if workspace root has `pyproject.toml` and no subdirectory projects are found, scans root as single project

@@ -3,7 +3,12 @@
 __pycache__/
 *.py[codz]
 *$py.class
-
+test-results.json
+.idea
+report.html
+.vscode
+.ruff_cache
+coverage.json
 # C extensions
 *.so
 

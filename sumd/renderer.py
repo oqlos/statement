@@ -11,6 +11,35 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 
+def _render_architecture_doql_section(
+    doql: dict, proj_dir: Path, raw_sources: bool, L: list[str]
+) -> None:
+    a = L.append
+    doql_sources = ", ".join(f"`{s}`" for s in doql.get("sources", ["app.doql.less"]))
+    a(f"### DOQL Application Declaration ({doql_sources})")
+    a("")
+    if raw_sources:
+        for fname in doql.get("sources", ["app.doql.less"]):
+            fpath = proj_dir / fname
+            if fpath.exists():
+                lang = "less" if fname.endswith(".less") else "css"
+                a(f"```{lang} markpact:doql path={fname}")
+                a(fpath.read_text(encoding="utf-8").rstrip())
+                a("```")
+                a("")
+    else:
+        _render_architecture_doql_parsed(doql, L)
+
+
+def _render_architecture_modules(modules: list[str], name: str, L: list[str]) -> None:
+    a = L.append
+    a("### Source Modules")
+    a("")
+    for mod in modules:
+        a(f"- `{name}.{mod}`")
+    a("")
+
+
 def _render_architecture(
     doql: dict, modules: list[str], name: str, proj_dir: Path, raw_sources: bool
 ) -> list[str]:
@@ -23,26 +52,9 @@ def _render_architecture(
     a("```")
     a("")
     if doql.get("app") or doql.get("entities") or doql.get("interfaces") or doql.get("workflows"):
-        doql_sources = ", ".join(f"`{s}`" for s in doql.get("sources", ["app.doql.less"]))
-        a(f"### DOQL Application Declaration ({doql_sources})")
-        a("")
-        if raw_sources:
-            for fname in doql.get("sources", ["app.doql.less"]):
-                fpath = proj_dir / fname
-                if fpath.exists():
-                    lang = "less" if fname.endswith(".less") else "css"
-                    a(f"```{lang} markpact:doql path={fname}")
-                    a(fpath.read_text(encoding="utf-8").rstrip())
-                    a("```")
-                    a("")
-        else:
-            _render_architecture_doql_parsed(doql, L)
+        _render_architecture_doql_section(doql, proj_dir, raw_sources, L)
     if modules:
-        a("### Source Modules")
-        a("")
-        for mod in modules:
-            a(f"- `{name}.{mod}`")
-        a("")
+        _render_architecture_modules(modules, name, L)
     return L
 
 
@@ -232,42 +244,88 @@ def _render_interfaces_testql(
             _render_testql_one_structured(sc, L)
 
 
+def _render_workflows_doql(doql: dict, L: list[str]) -> None:
+    a = L.append
+    doql_sources_wf = ", ".join(f"`{s}`" for s in doql.get("sources", ["app.doql.less"]))
+    a(f"### DOQL Workflows ({doql_sources_wf})")
+    a("")
+    for wf in doql["workflows"]:
+        steps = " → ".join(wf["steps"]) if wf["steps"] else "*(no steps)*"
+        a(f"- **{wf['name']}** `[{wf['trigger']}]`: `{steps}`")
+    a("")
+
+
+def _render_workflows_taskfile(tasks: list, proj_dir: Path, raw_sources: bool, L: list[str]) -> None:
+    a = L.append
+    a("### Taskfile Tasks (`Taskfile.yml`)")
+    a("")
+    if raw_sources:
+        taskfile_path = proj_dir / "Taskfile.yml"
+        if taskfile_path.exists():
+            a("```yaml markpact:taskfile path=Taskfile.yml")
+            a(taskfile_path.read_text(encoding="utf-8").rstrip())
+            a("```")
+            a("")
+    else:
+        a("```yaml markpact:taskfile path=Taskfile.yml")
+        a("tasks:")
+        for t in tasks:
+            a(f"  {t['name']}:")
+            if t["desc"]:
+                a(f'    desc: "{t["desc"]}"')
+            if t["cmd"]:
+                a("    cmds:")
+                a(f"      - {t['cmd']}")
+        a("```")
+        a("")
+
+
 def _render_workflows(doql: dict, tasks: list, proj_dir: Path, raw_sources: bool) -> list[str]:
     L: list[str] = []
     a = L.append
     a("## Workflows")
     a("")
     if doql.get("workflows") and not raw_sources:
-        doql_sources_wf = ", ".join(f"`{s}`" for s in doql.get("sources", ["app.doql.less"]))
-        a(f"### DOQL Workflows ({doql_sources_wf})")
-        a("")
-        for wf in doql["workflows"]:
-            steps = " → ".join(wf["steps"]) if wf["steps"] else "*(no steps)*"
-            a(f"- **{wf['name']}** `[{wf['trigger']}]`: `{steps}`")
-        a("")
+        _render_workflows_doql(doql, L)
     if tasks:
-        a("### Taskfile Tasks (`Taskfile.yml`)")
-        a("")
-        if raw_sources:
-            taskfile_path = proj_dir / "Taskfile.yml"
-            if taskfile_path.exists():
-                a("```yaml markpact:taskfile path=Taskfile.yml")
-                a(taskfile_path.read_text(encoding="utf-8").rstrip())
-                a("```")
-                a("")
-        else:
-            a("```yaml markpact:taskfile path=Taskfile.yml")
-            a("tasks:")
-            for t in tasks:
-                a(f"  {t['name']}:")
-                if t["desc"]:
-                    a(f'    desc: "{t["desc"]}"')
-                if t["cmd"]:
-                    a("    cmds:")
-                    a(f"      - {t['cmd']}")
-            a("```")
-            a("")
+        _render_workflows_taskfile(tasks, proj_dir, raw_sources, L)
     return L
+
+
+def _render_quality_raw(proj_dir: Path, L: list[str]) -> None:
+    a = L.append
+    pyqual_path = proj_dir / "pyqual.yaml"
+    if pyqual_path.exists():
+        a("```yaml markpact:pyqual path=pyqual.yaml")
+        a(pyqual_path.read_text(encoding="utf-8").rstrip())
+        a("```")
+        a("")
+
+
+def _render_quality_parsed(pyqual: dict, L: list[str]) -> None:
+    a = L.append
+    if pyqual.get("name"):
+        a(f"**Pipeline**: `{pyqual['name']}`")
+        a("")
+    if pyqual.get("metrics"):
+        a("### Metrics / Thresholds")
+        a("")
+        for k, v in pyqual["metrics"].items():
+            a(f"- `{k}`: `{v}`")
+        a("")
+    if pyqual.get("stages"):
+        a("### Stages")
+        a("")
+        for s in pyqual["stages"]:
+            opt = " *(optional)*" if s.get("optional") else ""
+            a(f"- **{s['name']}**: `{s['tool']}`{opt}")
+        a("")
+    if pyqual.get("loop"):
+        a("### Loop Behavior")
+        a("")
+        for k, v in pyqual["loop"].items():
+            a(f"- `{k}`: `{v}`")
+        a("")
 
 
 def _render_quality(pyqual: dict, proj_dir: Path, raw_sources: bool) -> list[str]:
@@ -278,47 +336,14 @@ def _render_quality(pyqual: dict, proj_dir: Path, raw_sources: bool) -> list[str
     a("## Quality Pipeline (`pyqual.yaml`)")
     a("")
     if raw_sources:
-        pyqual_path = proj_dir / "pyqual.yaml"
-        if pyqual_path.exists():
-            a("```yaml markpact:pyqual path=pyqual.yaml")
-            a(pyqual_path.read_text(encoding="utf-8").rstrip())
-            a("```")
-            a("")
+        _render_quality_raw(proj_dir, L)
     else:
-        if pyqual.get("name"):
-            a(f"**Pipeline**: `{pyqual['name']}`")
-            a("")
-        if pyqual.get("metrics"):
-            a("### Metrics / Thresholds")
-            a("")
-            for k, v in pyqual["metrics"].items():
-                a(f"- `{k}`: `{v}`")
-            a("")
-        if pyqual.get("stages"):
-            a("### Stages")
-            a("")
-            for s in pyqual["stages"]:
-                opt = " *(optional)*" if s.get("optional") else ""
-                a(f"- **{s['name']}**: `{s['tool']}`{opt}")
-            a("")
-        if pyqual.get("loop"):
-            a("### Loop Behavior")
-            a("")
-            for k, v in pyqual["loop"].items():
-                a(f"- `{k}`: `{v}`")
-            a("")
+        _render_quality_parsed(pyqual, L)
     return L
 
 
-def _render_dependencies(deps: list, dev_deps: list, pkg_json: dict | None = None) -> list[str]:
-    L: list[str] = []
+def _render_deps_runtime(deps: list, node_deps: list, L: list[str]) -> None:
     a = L.append
-    a("## Dependencies")
-    a("")
-    pkg_json = pkg_json or {}
-    node_deps = pkg_json.get("dependencies", [])
-    node_dev = pkg_json.get("devDependencies", [])
-
     if deps:
         a("### Runtime")
         a("")
@@ -342,6 +367,10 @@ def _render_dependencies(deps: list, dev_deps: list, pkg_json: dict | None = Non
         a("")
         a("*(see pyproject.toml)*")
         a("")
+
+
+def _render_deps_dev(dev_deps: list, node_dev: list, L: list[str]) -> None:
+    a = L.append
     if dev_deps:
         a("### Development")
         a("")
@@ -360,6 +389,16 @@ def _render_dependencies(deps: list, dev_deps: list, pkg_json: dict | None = Non
             a(f"# (+{len(node_dev) - 20} more)")
         a("```")
         a("")
+
+
+def _render_dependencies(deps: list, dev_deps: list, pkg_json: dict | None = None) -> list[str]:
+    pkg_json = pkg_json or {}
+    L: list[str] = []
+    a = L.append
+    a("## Dependencies")
+    a("")
+    _render_deps_runtime(deps, pkg_json.get("dependencies", []), L)
+    _render_deps_dev(dev_deps, pkg_json.get("devDependencies", []), L)
     return L
 
 

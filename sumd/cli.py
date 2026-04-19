@@ -285,7 +285,7 @@ def _render_write_validate(
     """Render SUMD content, write file, validate. Returns (doc, md_issues, cb_errors, cb_warnings, sources)."""
     content, sources = RenderPipeline(proj_dir, raw_sources=raw).run(profile=profile, return_sources=True)
     sumd_path.write_text(content, encoding="utf-8")
-    result = validate_sumd_file(sumd_path)
+    result = validate_sumd_file(sumd_path, profile=profile)
     md_issues = result["markdown"]
     cb_errors = [c for c in result["codeblocks"] if c.kind == "error"]
     cb_warnings = [c for c in result["codeblocks"] if c.kind == "warning"]
@@ -298,8 +298,9 @@ def _scan_one_project(
     run_analyze: bool, tool_list: list[str], parser_inst: "SUMDParser",
     profile: str = "rich",
 ) -> dict:
-    """Generate SUMD.md for one project and return a result dict."""
-    sumd_path = proj_dir / "SUMD.md"
+    """Generate SUMD.md (or SUMR.md for refactor profile) for one project."""
+    output_name = "SUMR.md" if profile == "refactor" else "SUMD.md"
+    sumd_path = proj_dir / output_name
 
     if sumd_path.exists() and not fix:
         dash = "\u2013"
@@ -348,11 +349,11 @@ def _scan_one_project(
 @click.argument("workspace", type=click.Path(exists=True, path_type=Path), default=".")
 @click.option("--export-json/--no-export-json", default=True, help="Also export sumd.json per project")
 @click.option("--report", type=click.Path(path_type=Path), default=None, help="Save JSON summary report to file")
-@click.option("--fix/--no-fix", default=False, help="Overwrite existing SUMD.md even if already present")
+@click.option("--fix/--no-fix", default=True, help="Overwrite existing SUMD.md (default). Use --no-fix to skip if already present.")
 @click.option("--raw/--no-raw", default=True, help="Embed source files as raw code blocks (default). Use --no-raw for structured Markdown.")
 @click.option("--analyze/--no-analyze", default=False, help="Run analysis tools (code2llm, redup, vallm) on each project after scan")
 @click.option("--tools", type=str, default="code2llm,redup,vallm", help="Tools to run with --analyze")
-@click.option("--profile", type=click.Choice(["minimal", "light", "rich"]), default="rich", help="Section profile to use when rendering SUMD.md")
+@click.option("--profile", type=click.Choice(["minimal", "light", "rich", "refactor"]), default="rich", help="Section profile to use when rendering SUMD.md. Use 'refactor' for pre-refactoring analysis report.")
 @click.option("--depth", type=int, default=None, help="Max directory depth to scan for projects (default: unlimited)")
 def scan(workspace: Path, export_json: bool, report: Optional[Path], fix: bool, raw: bool, analyze: bool, tools: str, profile: str, depth: Optional[int]):
     """Scan a workspace directory and generate SUMD.md for every project found.
@@ -813,6 +814,27 @@ def main():
     }
     if args and args[0] not in known_commands and not args[0].startswith("-"):
         _sys.argv = [_sys.argv[0], "scan", args[0], "--fix"] + args[1:]
+    cli()
+
+
+def main_sumr():
+    """Entry point for `sumr` command — generates SUMR.md (refactor profile).
+
+    Usage:
+        sumr .                  # generate SUMR.md in current project
+        sumr /path/to/project   # generate SUMR.md in specified project
+    """
+    import sys as _sys
+    args = _sys.argv[1:]
+    # Default to current dir if no path given
+    path = "."
+    extra = []
+    if args and not args[0].startswith("-"):
+        path = args[0]
+        extra = args[1:]
+    else:
+        extra = args
+    _sys.argv = [_sys.argv[0], "scan", path, "--profile", "refactor"] + extra
     cli()
 
 

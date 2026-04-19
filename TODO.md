@@ -144,3 +144,5 @@ Add these validators to `parser.py` after P3 is implemented.
 - ✅ `_PROJECT_ANALYSIS_FILES` = `[project.toon.yaml, calls.yaml]`
 - ✅ `sumd scaffold ./sumd` → `testql-scenarios/smoke-generic.testql.toon.yaml`
 - ✅ All 6 projects: 0 lint errors, scan ✅
+- ✅ SUMR.md header updated: "refactorization" instead of "documentation"
+- ✅ SUMD.md and SUMR.md regenerated with latest project metadata
