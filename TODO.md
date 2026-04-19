@@ -1,6 +1,26 @@
 # sumd — TODO & Refactoring Priorities
 
-Generated: 2026-04-18
+Generated: 2026-04-19 (updated for v0.2.0-rc1)
+
+---
+
+## ✅ Done in v0.2.0-rc1
+
+- `sumr` CLI command + `refactor` profile → `SUMR.md`
+- Single `.venv` (removed dual-venv split)
+- 88 unit tests, 37% branch+statement coverage
+- `task doctor` smoke-test (5 checks)
+- pyqual publish stage (twine-publish, when: metrics_pass)
+- Published to PyPI: https://pypi.org/project/sumd/0.2.0rc1/
+
+---
+
+## P0 — 0.2.0 stable release blockers
+
+- [ ] Raise test coverage to ≥ 50% before 0.2.0 stable
+- [ ] Add `sumd/__main__.py` to support `python -m sumd` invocation
+- [ ] Real testql CLI scenario file (`sumd-cli.testql.toon.yaml`) replacing smoke placeholder
+- [ ] Validate rc1 on CI before promoting to 0.2.0 stable
 
 ---
 

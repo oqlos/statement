@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0-rc1] - 2026-04-19
+
+### Added
+- `sumr` CLI command: generates `SUMR.md` (pre-refactoring analysis report) via `sumd scan . --profile refactor`
+- `refactor` section profile → produces `SUMR.md` with subtitle "AI-aware project refactorization"
+- `task doctor` smoke-test: 5 health checks (pyqual, pytest, ruff, sumd binary × 2)
+- `publish` stage in pyqual pipeline: `twine-publish` runs automatically when all gates pass
+- 88 unit tests across `test_pipeline.py`, `test_sections.py` (30), `test_extractor.py` (37)
+- `--cov-branch` added to pytest `addopts` for accurate branch+statement coverage reporting
+- pyqual gates: `coverage_min: 35`, `vallm_pass_min: 60`
+
+### Fixed
+- Single `.venv`: removed dual-venv split (`.venv` vs `venv`), all tasks use `{{.VENV_PY}} = .venv/bin/python`
+- Coverage metric aligned between pyqual (branch+statement) and pytest report
+- pyqual command order in Taskfile: `pyqual -c pyqual.yaml run` → `python -m pyqual run`
+- `sumd/cli.py`: replaced hardcoded `__version__ = "0.1.24"` with `from sumd import __version__`
+
+### Changed
+- `SUMR.md` header: "AI-aware project refactorization" (was generic documentation subtitle)
+- `Taskfile.yml`: all commands use `{{.VENV_PY}}` variable; `publish` task uses `python -m twine upload dist/*`
+
+## [0.1.25] - 2026-04-19 (pre-release internal)
+
 ### Added
 - `sumd .` / `sumd <path>` shortcut: first non-command argument treated as `scan <path> --fix`
 - SUMR.md header updated to reflect "refactorization" purpose instead of "documentation"

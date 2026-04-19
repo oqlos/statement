@@ -36,8 +36,27 @@ SUMD (Structured Unified Markdown Descriptor) is a lightweight structured markdo
 ## Installation
 
 ```bash
-pip install sumd
+pip install sumd                  # stable
+pip install sumd==0.2.0rc1        # latest release candidate
 ```
+
+## Developer Workflow
+
+```bash
+# health check — verify environment
+task doctor
+
+# run tests with coverage
+task test
+
+# quality gate (CC + vallm + coverage)
+task pyqual
+
+# build + publish (runs automatically when gates pass via pyqual pipeline)
+task publish
+```
+
+
 
 ## Usage
 
@@ -61,8 +80,9 @@ sumd scan . --fix --profile minimal  # core sections only (metadata, architectur
 sumd scan . --fix --profile light    # + interfaces, quality, configuration, environment, extras
 sumd scan . --fix --profile rich     # + code analysis, source snippets, call graph, API stubs, test contracts (default)
 
-# Generate SUMR.md (pre-refactoring analysis report)
-sumd scan . --profile refactor       # creates SUMR.md for AI-aware refactorization
+# Generate SUMR.md (pre-refactoring analysis report for AI-aware refactorization)
+sumd scan . --profile refactor       # creates SUMR.md — use sumr alias below
+sumr .                               # shorthand: sumr <path> ≡ sumd scan <path> --profile refactor
 
 # Lint / validate SUMD files
 sumd lint SUMD.md               # validate a single file
@@ -95,6 +115,7 @@ SUMD renders output in configurable **profiles** to trade off detail vs. token c
 | `minimal` | Metadata, Architecture, Workflows, Dependencies, Deployment | Quick overview, CI badges |
 | `light` | + Interfaces, Quality, Configuration, Environment, Extras | Standard documentation |
 | `rich` | + Code Analysis, Source Snippets, Call Graph, API Stubs, Test Contracts | LLM context injection (default) |
+| `refactor` | Refactoring-focused analysis → generates `SUMR.md` | AI-aware pre-refactoring report |
 
 ### Python API
 
