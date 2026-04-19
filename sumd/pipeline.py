@@ -42,6 +42,7 @@ from sumd.extractor import (
     extract_requirements,
     extract_source_snippets,
     extract_taskfile,
+    generate_map_toon,
 )
 from sumd.renderer import (
     _collect_sources,
@@ -50,6 +51,26 @@ from sumd.renderer import (
 from sumd.sections import PROFILES, SECTION_REGISTRY
 from sumd.sections.base import RenderContext
 from sumd.toon_parser import extract_testql_scenarios
+
+
+def _refresh_map_toon(proj_dir: Path) -> None:
+    """Regenerate project/map.toon.yaml from current source before embedding.
+
+    Called automatically by RenderPipeline._collect() so that every
+    `sumd scan` / `sumd .` / `sumr .` embeds an up-to-date map regardless
+    of whether the user ran `sumd map` manually beforehand.
+
+    Silently skips if generation fails (e.g. no Python sources found).
+    """
+    try:
+        content = generate_map_toon(proj_dir)
+        if not content:
+            return
+        map_path = proj_dir / "project" / "map.toon.yaml"
+        map_path.parent.mkdir(parents=True, exist_ok=True)
+        map_path.write_text(content, encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass  # non-fatal — embed will use the previous file if it exists
 
 
 class RenderPipeline:
@@ -87,6 +108,12 @@ class RenderPipeline:
         dockerfile = extract_dockerfile(proj_dir)
         compose = extract_docker_compose(proj_dir)
         pkg_json = extract_package_json(proj_dir)
+
+        # Auto-regenerate map.toon.yaml before embedding — pure-Python, fast (~0.1s),
+        # ensures SUMD.md always reflects current code without requiring a separate
+        # `sumd map` invocation.
+        _refresh_map_toon(proj_dir)
+
         project_analysis = extract_project_analysis(
             proj_dir, refactor=(self._profile == "refactor")
         )
