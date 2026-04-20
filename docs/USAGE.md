@@ -78,6 +78,7 @@ sumd scan . --fix --report summary.json  # write scan report to JSON
 sumd scan . --fix --analyze              # also run code2llm, redup, vallm analysis
 sumd scan . --fix --analyze --tools code2llm,redup  # run only selected tools
 sumd scan . --fix --depth 2              # limit recursive search depth (default: unlimited)
+sumd scan . --fix --no-generate-doql     # skip auto-generation of app.doql.less
 
 # Profile selection
 sumd scan . --fix --profile minimal
@@ -464,6 +465,8 @@ docker run --rm -v "$PWD:/project" python:3.12-slim \
 | `openapi.yaml` | full spec + endpoints | structured sections |
 | `testql-scenarios/**/*.testql.toon.yaml` | scenario files | raw toon blocks |
 | `app.doql.less` / `.css` | DOQL bindings | raw Less/CSS |
+
+**Auto-generated:** If `app.doql.less` doesn't exist, `sumd scan` generates it automatically with standard workflows (install, dev, build, test, lint, fmt, clean, help). Use `--no-generate-doql` to disable.
 | `pyqual.yaml` | quality pipeline config | raw YAML |
 | `goal.yaml` | project intent | rendered prose |
 | `.env.example` | env variable list | bulleted list |
