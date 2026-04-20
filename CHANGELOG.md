@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.15] - 2026-04-20
+
+### Docs
+- Update README.md
+
+### Other
+- Update sumd/cli.py
+
 ## [0.3.14] - 2026-04-20
 
 ### Docs

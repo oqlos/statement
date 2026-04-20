@@ -558,8 +558,8 @@ def _scan_one_project(
 )
 @click.option(
     "--generate-doql/--no-generate-doql",
-    default=False,
-    help="Generate doql.{project}.less file for each project if it doesn't exist",
+    default=True,
+    help="Generate app.doql.less file for each project if it doesn't exist (default: enabled)",
 )
 def scan(
     workspace: Path,
