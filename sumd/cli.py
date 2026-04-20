@@ -464,6 +464,15 @@ def _scan_one_project(
         return {"status": "SKIP", "path": str(sumd_path)}
 
     try:
+        # Generate app.doql.less BEFORE rendering SUMD so it gets included
+        if generate_doql:
+            pyproj = extract_pyproject(proj_dir)
+            project_name = pyproj.get("name", proj_dir.name)
+            version = pyproj.get("version", "0.1.0")
+            doql_path = _generate_doql_less(proj_dir, project_name, version)
+            if doql_path:
+                click.echo(f"   📝 Generated {doql_path.name}")
+
         doc, md_issues, cb_errors, cb_warnings, sources = _render_write_validate(
             proj_dir, sumd_path, raw, profile
         )
@@ -478,14 +487,6 @@ def _scan_one_project(
             return {"status": "INVALID", "errors": all_errors, "path": str(sumd_path)}
 
         _echo_scan_result(proj_dir, doc, sources, cb_warnings)
-
-        # Generate doql.{project_name}.less if requested and doesn't exist
-        if generate_doql:
-            pyproj = extract_pyproject(proj_dir)
-            version = pyproj.get("version", "0.1.0")
-            doql_path = _generate_doql_less(proj_dir, doc.project_name, version)
-            if doql_path:
-                click.echo(f"   📝 Generated {doql_path.name}")
 
         if export_json:
             _export_sumd_json(proj_dir, doc)
