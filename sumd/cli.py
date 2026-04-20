@@ -18,11 +18,11 @@ from sumd import __version__
 
 
 def _generate_doql_less(proj_dir: Path, project_name: str, version: str = "0.1.0") -> Path | None:
-    """Generate doql.{project_name}.less file if it doesn't exist.
+    """Generate app.doql.less file if it doesn't exist.
 
     Returns the path to the generated file, or None if skipped.
     """
-    doql_path = proj_dir / f"doql.{project_name}.less"
+    doql_path = proj_dir / "app.doql.less"
     if doql_path.exists():
         return None  # Don't overwrite existing files
 
