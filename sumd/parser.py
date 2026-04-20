@@ -430,8 +430,6 @@ _REQUIRED_H2 = {
     "metadata",
     "intent",
     "architecture",
-    "workflows",
-    "dependencies",
     "deployment",
 }
 _REQUIRED_H2_REFACTOR = {"metadata", "architecture", "refactoring analysis"}
