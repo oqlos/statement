@@ -1,7 +1,7 @@
-# sumd | 784 func | 34f | 23116L | python | 2026-04-23
+# sumd | 835 func | 36f | 21118L | python | 2026-04-23
 
 HEALTH:
-  CC̄=1.3  critical=10 (limit:10)  dup=5  cycles=0
+  CC̄=1.2  critical=10 (limit:10)  dup=3  cycles=0
 
 ALERTS[20]:
   !!! high_fan_out     RenderPipeline._collect = 22 (limit:10)
@@ -15,23 +15,23 @@ ALERTS[20]:
   !   high_fan_out     _parse_toon_file = 13 (limit:10)
   !   high_fan_out     _scaffold_from_openapi = 13 (limit:10)
 
-MODULES[92] (top by size):
-  M[project/map.toon.yaml] 3140L C:0 F:221 CC↑0 D:0 (yaml)
-  M[project/calls.yaml] 2591L C:0 F:0 CC↑0 D:0 (yaml)
+MODULES[94] (top by size):
+  M[project/calls.yaml] 2619L C:0 F:0 CC↑0 D:0 (yaml)
   M[sumd/cli.py] 1682L C:0 F:43 CC↑11 D:0 (python)
-  M[SUMD.md] 1294L C:5 F:188 CC↑0 D:1 (md)
-  M[SUMR.md] 1235L C:5 F:138 CC↑0 D:18 (md)
-  M[sumd/renderer.py] 1036L C:0 F:54 CC↑11 D:0 (python)
-  M[sumd/extractor.py] 908L C:0 F:39 CC↑12 D:0 (python)
-  M[CHANGELOG.md] 681L C:0 F:0 CC↑0 D:0 (md)
-  M[docs/README.md] 600L C:0 F:1 CC↑0 D:0 (md)
-  M[project/context.md] 556L C:0 F:0 CC↑0 D:0 (md)
+  M[SUMD.md] 1580L C:1 F:216 CC↑0 D:0 (md)
+  M[SUMR.md] 1501L C:2 F:161 CC↑0 D:14 (md)
+  M[sumd/extractor.py] 908L C:0 F:39 CC↑12 D:2 (python)
+  M[CHANGELOG.md] 743L C:0 F:0 CC↑0 D:0 (md)
+  M[project/context.md] 662L C:0 F:0 CC↑0 D:0 (md)
+  M[docs/README.md] 602L C:0 F:1 CC↑0 D:0 (md)
   M[goal.yaml] 511L C:0 F:0 CC↑0 D:0 (yaml)
-  M[docs/USAGE.md] 487L C:0 F:1 CC↑0 D:3 (md)
+  M[docs/USAGE.md] 494L C:0 F:1 CC↑0 D:0 (md)
+  M[sumd/pipeline.py] 435L C:1 F:16 CC↑7 D:0 (python)
   M[SPEC.md] 423L C:0 F:0 CC↑0 D:0 (md)
+  M[project/map.toon.yaml] 419L C:0 F:216 CC↑0 D:0 (yaml)
   M[sumd/mcp_server.py] 358L C:0 F:12 CC↑5 D:0 (python)
   M[project/README.md] 339L C:0 F:0 CC↑0 D:0 (md)
-  LANGS: python:31/yaml:19/md:19/json:7/yml:6/shell:5/toml:2/other:2/txt:1
+  LANGS: python:31/yaml:20/md:20/json:7/yml:6/shell:5/toml:2/other:2/txt:1
 
 HOTSPOTS[10]:
   ★ RenderPipeline._collect fan=22  // Extract all project data and build RenderContext.
@@ -46,12 +46,12 @@ Detect
 FILE: Path to the structured f
   ★ analyze fan=17  // Analysis pipeline, 17 stages
 
-REFACTOR[14]:
+REFACTOR[12]:
   [1] H/H Split god module sumd/extractor.py (908L, 0 classes)
   [2] H/H Split god module sumd/cli.py (1682L, 0 classes)
-  [3] H/H Split god module sumd/renderer.py (1036L, 0 classes)
-  [4] H/H Split god module CHANGELOG.md (681L, 0 classes)
-  [5] H/H Split god module SUMD.md (1294L, 5 classes)
+  [3] H/H Split god module CHANGELOG.md (743L, 0 classes)
+  [4] H/H Split god module SUMD.md (1580L, 1 classes)
+  [5] H/H Split god module SUMR.md (1501L, 2 classes)
 
 EVOLUTION:
-  2026-04-23 CC̄=1.3 crit=10 23116L // Automated analysis
+  2026-04-23 CC̄=1.2 crit=10 21118L // Automated analysis

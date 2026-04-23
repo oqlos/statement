@@ -6,16 +6,12 @@
 - **Primary Language**: python
 - **Languages**: python: 31, shell: 5
 - **Analysis Mode**: static
-- **Total Functions**: 229
+- **Total Functions**: 226
 - **Total Classes**: 23
 - **Modules**: 36
-- **Entry Points**: 80
+- **Entry Points**: 78
 
 ## Architecture by Module
-
-### sumd.renderer
-- **Functions**: 54
-- **File**: `renderer.py`
 
 ### sumd.cli
 - **Functions**: 43
@@ -24,6 +20,11 @@
 ### sumd.extractor
 - **Functions**: 39
 - **File**: `extractor.py`
+
+### sumd.pipeline
+- **Functions**: 16
+- **Classes**: 1
+- **File**: `pipeline.py`
 
 ### sumd.validator
 - **Functions**: 15
@@ -34,76 +35,78 @@
 - **Functions**: 12
 - **File**: `mcp_server.py`
 
-### sumd.pipeline
+### sumd.sections.architecture
 - **Functions**: 10
 - **Classes**: 1
-- **File**: `pipeline.py`
+- **File**: `architecture.py`
 
 ### sumd.parser
 - **Functions**: 9
 - **Classes**: 1
 - **File**: `parser.py`
 
+### sumd.sections.interfaces
+- **Functions**: 9
+- **Classes**: 1
+- **File**: `interfaces.py`
+
 ### sumd.toon_parser
 - **Functions**: 8
 - **File**: `toon_parser.py`
+
+### sumd.sections.call_graph
+- **Functions**: 8
+- **Classes**: 1
+- **File**: `call_graph.py`
+
+### sumd.sections.deployment
+- **Functions**: 7
+- **Classes**: 1
+- **File**: `deployment.py`
+
+### sumd.sections.quality
+- **Functions**: 5
+- **Classes**: 1
+- **File**: `quality.py`
+
+### sumd.sections.dependencies
+- **Functions**: 5
+- **Classes**: 1
+- **File**: `dependencies.py`
+
+### sumd.sections.workflows
+- **Functions**: 5
+- **Classes**: 1
+- **File**: `workflows.py`
+
+### sumd.sections.extras
+- **Functions**: 5
+- **Classes**: 1
+- **File**: `extras.py`
+
+### sumd.sections.environment
+- **Functions**: 4
+- **Classes**: 1
+- **File**: `environment.py`
 
 ### examples.llm.openai_example
 - **Functions**: 3
 - **File**: `openai_example.py`
 
-### examples.llm.anthropic_example
-- **Functions**: 2
-- **File**: `anthropic_example.py`
-
-### examples.mcp.mcp_client
-- **Functions**: 2
-- **File**: `mcp_client.py`
-
-### sumd.sections.interfaces
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `interfaces.py`
-
-### sumd.sections.refactor_analysis
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `refactor_analysis.py`
-
-### sumd.sections.quality
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `quality.py`
-
-### sumd.sections.deployment
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `deployment.py`
-
 ### sumd.sections.code_analysis
-- **Functions**: 2
+- **Functions**: 3
 - **Classes**: 1
 - **File**: `code_analysis.py`
 
-### sumd.sections.metadata
-- **Functions**: 2
+### sumd.sections.source_snippets
+- **Functions**: 3
 - **Classes**: 1
-- **File**: `metadata.py`
+- **File**: `source_snippets.py`
 
-### sumd.sections.dependencies
-- **Functions**: 2
+### sumd.sections.api_stubs
+- **Functions**: 3
 - **Classes**: 1
-- **File**: `dependencies.py`
-
-### sumd.sections.call_graph
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `call_graph.py`
-
-### sumd.sections.architecture
-- **Functions**: 2
-- **Classes**: 1
-- **File**: `architecture.py`
+- **File**: `api_stubs.py`
 
 ## Key Entry Points
 
@@ -181,13 +184,6 @@ Args:
 ### sumd.sections.metadata.MetadataSection.render
 - **Calls**: a, a, a, a, a, ctx.openapi.get, a, a
 
-### sumd.renderer._render_test_contracts
-> Render test scenarios as contract signatures — endpoint + key assertions.
-- **Calls**: a, a, a, a, sorted, sc.get, None.append, by_type.items
-
-### sumd.renderer._render_metadata_section
-- **Calls**: a, a, a, a, a, openapi.get, a, a
-
 ### sumd.cli.validate
 > Validate a SUMD document.
 
@@ -213,14 +209,14 @@ Args:
 ### sumd.mcp_server._tool_export_sumd
 - **Calls**: sumd.mcp_server._resolve_path, arguments.get, arguments.get, sumd.parser.SUMDParser.parse_file, sumd.mcp_server._doc_to_dict, sumd.mcp_server._resolve_path, out.write_text, types.TextContent
 
+### sumd.mcp_server._tool_generate_sumd
+- **Calls**: arguments.get, data.get, data.get, None.join, section.get, sumd.mcp_server._resolve_path, out.write_text, types.TextContent
+
 ### sumd.cli.info
 > Display information about a SUMD document.
 
 FILE: Path to the SUMD markdown file
 - **Calls**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, click.echo, click.echo, click.echo, click.Path, click.echo
-
-### sumd.mcp_server._tool_generate_sumd
-- **Calls**: arguments.get, data.get, data.get, None.join, section.get, sumd.mcp_server._resolve_path, out.write_text, types.TextContent
 
 ### sumd.sections.refactor_analysis.RefactorAnalysisSection.render
 - **Calls**: a, a, a, a, None.replace, a, a, a
@@ -248,6 +244,12 @@ FILE: Path to the SUMD markdown file
 
 ### sumd.mcp_server._tool_parse_sumd
 - **Calls**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, types.TextContent, json.dumps, sumd.mcp_server._doc_to_dict
+
+### sumd.mcp_server._tool_info_sumd
+- **Calls**: sumd.mcp_server._resolve_path, sumd.parser.SUMDParser.parse_file, len, types.TextContent, json.dumps
+
+### sumd.mcp_server.call_tool
+- **Calls**: server.call_tool, _TOOL_HANDLERS.get, handler, types.TextContent, types.TextContent
 
 ## Process Flows
 
@@ -324,25 +326,25 @@ Usage:
 - **Methods**: 6
 - **Key Methods**: sumd.pipeline.RenderPipeline.__init__, sumd.pipeline.RenderPipeline._collect, sumd.pipeline.RenderPipeline._build_registered_sections, sumd.pipeline.RenderPipeline._render_legacy_sections, sumd.pipeline.RenderPipeline._assemble, sumd.pipeline.RenderPipeline.run
 
-### sumd.sections.interfaces.InterfacesSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.interfaces.InterfacesSection.should_render, sumd.sections.interfaces.InterfacesSection.render
-
 ### sumd.sections.refactor_analysis.RefactorAnalysisSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.refactor_analysis.RefactorAnalysisSection.should_render, sumd.sections.refactor_analysis.RefactorAnalysisSection.render
+
+### sumd.sections.interfaces.InterfacesSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.interfaces.InterfacesSection.should_render, sumd.sections.interfaces.InterfacesSection.render
 
 ### sumd.sections.quality.QualitySection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.quality.QualitySection.should_render, sumd.sections.quality.QualitySection.render
 
-### sumd.sections.deployment.DeploymentSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.deployment.DeploymentSection.should_render, sumd.sections.deployment.DeploymentSection.render
-
 ### sumd.sections.code_analysis.CodeAnalysisSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.code_analysis.CodeAnalysisSection.should_render, sumd.sections.code_analysis.CodeAnalysisSection.render
+
+### sumd.sections.deployment.DeploymentSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.deployment.DeploymentSection.should_render, sumd.sections.deployment.DeploymentSection.render
 
 ### sumd.sections.metadata.MetadataSection
 > Render ## Metadata — always present, all profiles.
@@ -357,13 +359,13 @@ Usage:
 - **Methods**: 2
 - **Key Methods**: sumd.sections.call_graph.CallGraphSection.should_render, sumd.sections.call_graph.CallGraphSection.render
 
-### sumd.sections.architecture.ArchitectureSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.architecture.ArchitectureSection.should_render, sumd.sections.architecture.ArchitectureSection.render
-
 ### sumd.sections.source_snippets.SourceSnippetsSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.source_snippets.SourceSnippetsSection.should_render, sumd.sections.source_snippets.SourceSnippetsSection.render
+
+### sumd.sections.architecture.ArchitectureSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.architecture.ArchitectureSection.should_render, sumd.sections.architecture.ArchitectureSection.render
 
 ### sumd.sections.workflows.WorkflowsSection
 - **Methods**: 2

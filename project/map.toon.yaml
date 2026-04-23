@@ -1,5 +1,5 @@
-# sumd | 47f 8162L | python:40,shell:5,less:2 | 2026-04-23
-# stats: 224 func | 63 cls | 47 mod | CC̄=4.5 | critical:10 | cycles:0
+# sumd | 47f 8263L | python:40,shell:5,less:2 | 2026-04-23
+# stats: 223 func | 63 cls | 47 mod | CC̄=4.5 | critical:10 | cycles:0
 # alerts[5]: CC _map_cc_stats=12; CC run=11; CC analyze=11; CC _render_api_stubs=11; CC _walk_projects=10
 # hotspots[5]: scan fan=18; scaffold fan=18; analyze fan=17; generate fan=15; _parse_doql_content fan=14
 # evolution: baseline
@@ -13,7 +13,7 @@ M[47]:
   examples/llm/ollama_example.sh,38
   examples/llm/openai_example.py,89
   examples/mcp/mcp_client.py,139
-  project.sh,42
+  project.sh,41
   scripts/bootstrap.sh,70
   sumd/__init__.py,36
   sumd/cli.py,1683
@@ -22,26 +22,26 @@ M[47]:
   sumd/mcp_server.py,359
   sumd/models.py,46
   sumd/parser.py,196
-  sumd/pipeline.py,320
-  sumd/renderer.py,1037
+  sumd/pipeline.py,436
+  sumd/renderer.py,30
   sumd/sections/__init__.py,104
-  sumd/sections/api_stubs.py,26
-  sumd/sections/architecture.py,24
+  sumd/sections/api_stubs.py,77
+  sumd/sections/architecture.py,157
   sumd/sections/base.py,94
-  sumd/sections/call_graph.py,28
-  sumd/sections/code_analysis.py,26
-  sumd/sections/configuration.py,22
-  sumd/sections/dependencies.py,27
-  sumd/sections/deployment.py,24
-  sumd/sections/environment.py,25
-  sumd/sections/extras.py,22
-  sumd/sections/interfaces.py,24
+  sumd/sections/call_graph.py,157
+  sumd/sections/code_analysis.py,69
+  sumd/sections/configuration.py,45
+  sumd/sections/dependencies.py,98
+  sumd/sections/deployment.py,112
+  sumd/sections/environment.py,73
+  sumd/sections/extras.py,73
+  sumd/sections/interfaces.py,158
   sumd/sections/metadata.py,52
-  sumd/sections/quality.py,22
+  sumd/sections/quality.py,83
   sumd/sections/refactor_analysis.py,69
-  sumd/sections/source_snippets.py,27
-  sumd/sections/test_contracts.py,26
-  sumd/sections/workflows.py,22
+  sumd/sections/source_snippets.py,70
+  sumd/sections/test_contracts.py,79
+  sumd/sections/workflows.py,87
   sumd/toon_parser.py,174
   sumd/validator.py,330
   tests/test_cli.py,324
@@ -180,121 +180,120 @@ D:
     parse_file(path)
     validate(document)
   sumd/pipeline.py:
-    e: _refresh_map_toon,_find_tools_bin_dir,_run_tool_if_present,_refresh_analysis_files,RenderPipeline
+    e: _refresh_map_toon,_find_tools_bin_dir,_run_tool_if_present,_refresh_analysis_files,_collect_tool_sources,_doql_sources,_collect_pkg_sources,_collect_infra_sources,_collect_sources,_inject_toc,RenderPipeline
     RenderPipeline: __init__(2),_collect(0),_build_registered_sections(2),_render_legacy_sections(1),_assemble(2),run(2)  # Collect project data → build sections → render → inject TOC.
     _refresh_map_toon(proj_dir)
     _find_tools_bin_dir(proj_dir)
     _run_tool_if_present(bin_dir;name;args;proj_dir)
     _refresh_analysis_files(proj_dir;profile)
+    _collect_tool_sources(pyproj;reqs;tasks;makefile;scenarios)
+    _doql_sources(doql)
+    _collect_pkg_sources(pyproj;reqs;tasks;makefile;scenarios;openapi;doql;pyqual;goal;env_vars)
+    _collect_infra_sources(dockerfile;compose;pkg_json;modules;project_analysis)
+    _collect_sources(pyproj;reqs;tasks;makefile;scenarios;openapi;doql;pyqual;goal;env_vars;dockerfile;compose;pkg_json;modules;project_analysis)
+    _inject_toc(content)
   sumd/renderer.py:
-    e: _render_architecture_doql_section,_render_architecture_modules,_render_architecture,_render_doql_app,_render_doql_entities,_render_doql_interfaces,_render_doql_integrations,_render_architecture_doql_parsed,_render_interfaces,_render_interfaces_openapi,_render_testql_raw,_render_testql_endpoint,_render_testql_extras,_render_testql_one_structured,_render_interfaces_testql,_render_workflows_doql,_render_workflows_taskfile,_render_workflows,_render_quality_raw,_render_quality_parsed,_render_quality,_render_deps_runtime,_render_deps_dev,_render_dependencies,_render_deployment_install,_render_deployment_reqs,_render_dockerfile_info,_render_deployment_docker,_render_deployment,_render_makefile_targets,_render_pkg_json_scripts,_render_extras,_render_code_analysis,_render_source_snippets,_render_api_stubs,_render_scenario_contract,_render_test_contracts,_parse_calls_header,_parse_hub_stat_line,_process_in_hubs_line,_parse_calls_hubs,_parse_calls_toon,_render_call_graph,_collect_tool_sources,_doql_sources,_collect_pkg_sources,_collect_infra_sources,_collect_sources,_render_metadata_section,_render_configuration_section,_render_env_section,_render_goal_section,_inject_toc,generate_sumd_content
+    e: generate_sumd_content
+    generate_sumd_content(proj_dir;return_sources;raw_sources;profile)
+  sumd/sections/__init__.py:
+  sumd/sections/api_stubs.py:
+    e: _render_api_stubs,ApiStubsSection
+    ApiStubsSection: should_render(1),render(1)
+    _render_api_stubs(openapi)
+  sumd/sections/architecture.py:
+    e: _render_architecture_doql_section,_render_architecture_modules,_render_doql_app,_render_doql_entities,_render_doql_interfaces,_render_doql_integrations,_render_architecture_doql_parsed,_render_architecture,ArchitectureSection
+    ArchitectureSection: should_render(1),render(1)
     _render_architecture_doql_section(doql;proj_dir;raw_sources;L)
     _render_architecture_modules(modules;name;L)
-    _render_architecture(doql;modules;name;proj_dir;raw_sources)
     _render_doql_app(doql;L)
     _render_doql_entities(doql;L)
     _render_doql_interfaces(doql;L)
     _render_doql_integrations(doql;L)
     _render_architecture_doql_parsed(doql;L)
-    _render_interfaces(scripts;openapi;scenarios;proj_dir;raw_sources)
-    _render_interfaces_openapi(openapi;proj_dir;raw_sources;L)
-    _render_testql_raw(scenarios;proj_dir;L)
-    _render_testql_endpoint(ep;L)
-    _render_testql_extras(sc;L)
-    _render_testql_one_structured(sc;L)
-    _render_interfaces_testql(scenarios;proj_dir;raw_sources;L)
-    _render_workflows_doql(doql;L)
-    _render_workflows_taskfile(tasks;proj_dir;raw_sources;L)
-    _render_workflows(doql;tasks;proj_dir;raw_sources)
-    _render_quality_raw(proj_dir;L)
-    _render_quality_parsed(pyqual;L)
-    _render_quality(pyqual;proj_dir;raw_sources)
-    _render_deps_runtime(deps;node_deps;L)
-    _render_deps_dev(dev_deps;node_dev;L)
-    _render_dependencies(deps;dev_deps;pkg_json)
-    _render_deployment_install(pkg_json;name;L)
-    _render_deployment_reqs(reqs;L)
-    _render_dockerfile_info(dockerfile;a)
-    _render_deployment_docker(dockerfile;compose;L)
-    _render_deployment(pkg_json;name;reqs;dockerfile;compose)
-    _render_makefile_targets(makefile;a)
-    _render_pkg_json_scripts(pkg_json;a)
-    _render_extras(makefile;pkg_json)
-    _render_code_analysis(project_analysis;skip_files)
-    _render_source_snippets(source_snippets;top_n)
-    _render_api_stubs(openapi)
-    _render_scenario_contract(sc;a)
-    _render_test_contracts(scenarios)
+    _render_architecture(doql;modules;name;proj_dir;raw_sources)
+  sumd/sections/base.py:
+    e: RenderContext,Section
+    RenderContext:  # All extracted data for a project, passed to every Section.re
+    Section: should_render(1),render(1)  # Protocol for all SUMD section renderers.
+  sumd/sections/call_graph.py:
+    e: _parse_calls_header,_parse_hub_stat_line,_process_in_hubs_line,_parse_calls_hubs,_parse_calls_toon,_render_call_graph,CallGraphSection
+    CallGraphSection: should_render(1),render(1)
     _parse_calls_header(lines)
     _parse_hub_stat_line(line)
     _process_in_hubs_line(line;hubs;current_hub)
     _parse_calls_hubs(lines)
     _parse_calls_toon(content)
     _render_call_graph(project_analysis)
-    _collect_tool_sources(pyproj;reqs;tasks;makefile;scenarios)
-    _doql_sources(doql)
-    _collect_pkg_sources(pyproj;reqs;tasks;makefile;scenarios;openapi;doql;pyqual;goal;env_vars)
-    _collect_infra_sources(dockerfile;compose;pkg_json;modules;project_analysis)
-    _collect_sources(pyproj;reqs;tasks;makefile;scenarios;openapi;doql;pyqual;goal;env_vars;dockerfile;compose;pkg_json;modules;project_analysis)
-    _render_metadata_section(name;version;py_req;license_;ai_model;openapi;sources_used)
+  sumd/sections/code_analysis.py:
+    e: _render_code_analysis,CodeAnalysisSection
+    CodeAnalysisSection: should_render(1),render(1)
+    _render_code_analysis(project_analysis;skip_files)
+  sumd/sections/configuration.py:
+    e: _render_configuration_section,ConfigurationSection
+    ConfigurationSection: should_render(1),render(1)
     _render_configuration_section(name;version)
+  sumd/sections/dependencies.py:
+    e: _render_deps_runtime,_render_deps_dev,_render_dependencies,DependenciesSection
+    DependenciesSection: should_render(1),render(1)
+    _render_deps_runtime(deps;node_deps;L)
+    _render_deps_dev(dev_deps;node_dev;L)
+    _render_dependencies(deps;dev_deps;pkg_json)
+  sumd/sections/deployment.py:
+    e: _render_deployment_install,_render_deployment_reqs,_render_dockerfile_info,_render_deployment_docker,_render_deployment,DeploymentSection
+    DeploymentSection: should_render(1),render(1)
+    _render_deployment_install(pkg_json;name;L)
+    _render_deployment_reqs(reqs;L)
+    _render_dockerfile_info(dockerfile;a)
+    _render_deployment_docker(dockerfile;compose;L)
+    _render_deployment(pkg_json;name;reqs;dockerfile;compose)
+  sumd/sections/environment.py:
+    e: _render_env_section,_render_goal_section,EnvironmentSection
+    EnvironmentSection: should_render(1),render(1)
     _render_env_section(env_vars)
     _render_goal_section(goal)
-    _inject_toc(content)
-    generate_sumd_content(proj_dir;return_sources;raw_sources;profile)
-  sumd/sections/__init__.py:
-  sumd/sections/api_stubs.py:
-    e: ApiStubsSection
-    ApiStubsSection: should_render(1),render(1)
-  sumd/sections/architecture.py:
-    e: ArchitectureSection
-    ArchitectureSection: should_render(1),render(1)
-  sumd/sections/base.py:
-    e: RenderContext,Section
-    RenderContext:  # All extracted data for a project, passed to every Section.re
-    Section: should_render(1),render(1)  # Protocol for all SUMD section renderers.
-  sumd/sections/call_graph.py:
-    e: CallGraphSection
-    CallGraphSection: should_render(1),render(1)
-  sumd/sections/code_analysis.py:
-    e: CodeAnalysisSection
-    CodeAnalysisSection: should_render(1),render(1)
-  sumd/sections/configuration.py:
-    e: ConfigurationSection
-    ConfigurationSection: should_render(1),render(1)
-  sumd/sections/dependencies.py:
-    e: DependenciesSection
-    DependenciesSection: should_render(1),render(1)
-  sumd/sections/deployment.py:
-    e: DeploymentSection
-    DeploymentSection: should_render(1),render(1)
-  sumd/sections/environment.py:
-    e: EnvironmentSection
-    EnvironmentSection: should_render(1),render(1)
   sumd/sections/extras.py:
-    e: ExtrasSection
+    e: _render_makefile_targets,_render_pkg_json_scripts,_render_extras,ExtrasSection
     ExtrasSection: should_render(1),render(1)
+    _render_makefile_targets(makefile;a)
+    _render_pkg_json_scripts(pkg_json;a)
+    _render_extras(makefile;pkg_json)
   sumd/sections/interfaces.py:
-    e: InterfacesSection
+    e: _render_interfaces_openapi,_render_testql_raw,_render_testql_endpoint,_render_testql_extras,_render_testql_one_structured,_render_interfaces_testql,_render_interfaces,InterfacesSection
     InterfacesSection: should_render(1),render(1)
+    _render_interfaces_openapi(openapi;proj_dir;raw_sources;L)
+    _render_testql_raw(scenarios;proj_dir;L)
+    _render_testql_endpoint(ep;L)
+    _render_testql_extras(sc;L)
+    _render_testql_one_structured(sc;L)
+    _render_interfaces_testql(scenarios;proj_dir;raw_sources;L)
+    _render_interfaces(scripts;openapi;scenarios;proj_dir;raw_sources)
   sumd/sections/metadata.py:
     e: MetadataSection
     MetadataSection: should_render(1),render(1)  # Render ## Metadata — always present, all profiles.
   sumd/sections/quality.py:
-    e: QualitySection
+    e: _render_quality_raw,_render_quality_parsed,_render_quality,QualitySection
     QualitySection: should_render(1),render(1)
+    _render_quality_raw(proj_dir;L)
+    _render_quality_parsed(pyqual;L)
+    _render_quality(pyqual;proj_dir;raw_sources)
   sumd/sections/refactor_analysis.py:
     e: RefactorAnalysisSection
     RefactorAnalysisSection: should_render(1),render(1)
   sumd/sections/source_snippets.py:
-    e: SourceSnippetsSection
+    e: _render_source_snippets,SourceSnippetsSection
     SourceSnippetsSection: should_render(1),render(1)
+    _render_source_snippets(source_snippets;top_n)
   sumd/sections/test_contracts.py:
-    e: TestContractsSection
+    e: _render_scenario_contract,_render_test_contracts,TestContractsSection
     TestContractsSection: should_render(1),render(1)
+    _render_scenario_contract(sc;a)
+    _render_test_contracts(scenarios)
   sumd/sections/workflows.py:
-    e: WorkflowsSection
+    e: _render_workflows_doql,_render_workflows_taskfile,_render_workflows,WorkflowsSection
     WorkflowsSection: should_render(1),render(1)
+    _render_workflows_doql(doql;L)
+    _render_workflows_taskfile(tasks;proj_dir;raw_sources;L)
+    _render_workflows(doql;tasks;proj_dir;raw_sources)
   sumd/toon_parser.py:
     e: _parse_toon_block_config,_parse_toon_block_api,_parse_toon_block_assert,_parse_toon_block_performance,_parse_toon_block_navigate,_parse_toon_block_gui,_parse_toon_file,extract_testql_scenarios
     _parse_toon_block_config(lines)

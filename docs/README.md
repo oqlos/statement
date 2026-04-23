@@ -1,7 +1,7 @@
 <!-- code2docs:start --># sumd
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-786-green)
-> **786** functions | **33** classes | **93** files | CC̄ = 4.3
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-844-green)
+> **844** functions | **26** classes | **95** files | CC̄ = 4.3
 
 > Auto-generated project documentation from source code analysis.
 
@@ -80,19 +80,18 @@ sumd/
     ├── guards
 ├── pyqual
 ├── sumd/
-├── pyproject
 ├── TODO
 ├── mcp
-├── CHANGELOG
 ├── Taskfile
 ├── project
 ├── SPEC
-├── README
     ├── USAGE
     ├── README
+    ├── SUMR
     ├── SUMD
     ├── sumd
     ├── README
+            ├── toon
         ├── anthropic_example
         ├── ollama_example
         ├── llm_cli_example
@@ -156,12 +155,15 @@ sumd/
             ├── toon
             ├── toon
                 ├── toon
+├── pyproject
     ├── prompt
+├── README
+├── CHANGELOG
+        ├── toon
+    ├── context
         ├── toon
         ├── toon
     ├── README
-    ├── context
-        ├── toon
         ├── toon
     ├── calls
         ├── toon
@@ -171,15 +173,8 @@ sumd/
 
 ### Classes
 
-- **`SectionType`** — —
-- **`Section`** — —
-- **`SUMDDocument`** — —
-- **`SUMDParser`** — —
+- **`RenderPipeline`** — —
 - **`CodeBlockIssue`** — —
-- **`SectionType`** — —
-- **`Section`** — —
-- **`SUMDDocument`** — —
-- **`SUMDParser`** — —
 - **`CodeBlockIssue`** — —
 - **`CodeBlockIssue`** — —
 - **`SUMDParser`** — Parser for SUMD markdown documents.
@@ -208,6 +203,19 @@ sumd/
 ### Functions
 
 - `generate_sumd_content()` — —
+- `cli()` — —
+- `validate()` — —
+- `export()` — —
+- `info()` — —
+- `generate()` — —
+- `extract()` — —
+- `scan()` — —
+- `lint()` — —
+- `analyze()` — —
+- `scaffold()` — —
+- `map_cmd()` — —
+- `main()` — —
+- `main_sumr()` — —
 - `extract_pyproject()` — —
 - `extract_taskfile()` — —
 - `extract_openapi()` — —
@@ -226,26 +234,10 @@ sumd/
 - `required_tools_for_profile()` — —
 - `extract_source_snippets()` — —
 - `extract_project_analysis()` — —
-- `cli()` — —
-- `validate()` — —
-- `export()` — —
-- `info()` — —
-- `generate()` — —
-- `extract()` — —
-- `scan()` — —
-- `lint()` — —
-- `analyze()` — —
-- `scaffold()` — —
-- `map_cmd()` — —
-- `main()` — —
-- `main_sumr()` — —
-- `parse()` — —
-- `parse_file()` — —
+- `run()` — —
 - `validate_codeblocks()` — —
 - `validate_markdown()` — —
 - `validate_sumd_file()` — —
-- `list_tools()` — —
-- `call_tool()` — —
 - `ask()` — —
 - `main()` — —
 - `build_context()` — —
@@ -284,11 +276,11 @@ sumd/
 - `call_tool()` — —
 - `parse()` — —
 - `parse_file()` — —
+- `generate_sumd_content()` — —
+- `extract_testql_scenarios()` — —
 - `validate_codeblocks()` — —
 - `validate_markdown()` — —
 - `validate_sumd_file()` — —
-- `generate_sumd_content()` — —
-- `extract_testql_scenarios()` — —
 - `sumd_file()` — —
 - `project_copy()` — —
 - `test_sumd_scans_itself()` — —
@@ -331,8 +323,15 @@ sumd/
 - `test_mcp_tools_registered()` — —
 - `test_mcp_main_no_crash()` — —
 - `print()` — —
-- `print()` — —
 - `generate_readme()` — —
+- `ask()` — —
+- `main()` — —
+- `build_context()` — —
+- `run()` — —
+- `ask()` — —
+- `main()` — —
+- `build_context()` — —
+- `run()` — —
 - `ask(sumd_path, question, model)` — —
 - `main()` — —
 - `build_context(sumd_path)` — Return a focused context string from SUMD.md.
@@ -382,6 +381,7 @@ sumd/
 - `list_tools()` — —
 - `call_tool(name, arguments)` — —
 - `main()` — —
+- `print()` — —
 - `extract_pyproject()` — —
 - `extract_taskfile()` — —
 - `extract_openapi()` — —
@@ -414,7 +414,6 @@ sumd/
 - `scaffold()` — —
 - `map_cmd()` — —
 - `main_sumr()` — —
-- `generate_sumd_content()` — —
 - `extract_testql_scenarios()` — —
 - `validate_codeblocks()` — —
 - `validate_markdown()` — —
@@ -425,11 +424,16 @@ sumd/
 - `ask()` — —
 - `list_tools()` — —
 - `call_tool()` — —
-- `sumd_file()` — —
-- `project_copy()` — —
+- `generate_sumd_content()` — —
 - `test_sumd_scans_itself()` — —
 - `test_sumd_scans_all_profiles()` — —
 - `test_sumr_generates_sumr_md()` — —
+- `test_mcp_tools_registered()` — —
+- `test_mcp_main_no_crash()` — —
+- `print()` — —
+- `generate_readme()` — —
+- `sumd_file()` — —
+- `project_copy()` — —
 - `test_sumd_lint_passes_on_generated_output()` — —
 - `test_sumd_version_flag()` — —
 - `test_sumd_scan_produces_no_unhandled_exceptions()` — —
@@ -461,10 +465,6 @@ sumd/
 - `make_ctx()` — —
 - `test_placeholder()` — —
 - `test_import()` — —
-- `test_mcp_tools_registered()` — —
-- `test_mcp_main_no_crash()` — —
-- `print()` — —
-- `generate_readme()` — —
 
 
 ## Project Structure
@@ -473,15 +473,16 @@ sumd/
 📄 `CHANGELOG`
 📄 `README` (1 functions)
 📄 `SPEC`
-📄 `SUMD` (336 functions, 5 classes)
-📄 `SUMR` (143 functions, 5 classes)
+📄 `SUMD` (387 functions, 1 classes)
+📄 `SUMR` (167 functions, 2 classes)
 📄 `TODO` (5 functions)
 📄 `Taskfile`
 📄 `Taskfile.guards`
 📄 `docs.README` (1 functions)
 📄 `docs.USAGE` (6 functions)
 📄 `examples.README`
-📄 `examples.SUMD`
+📄 `examples.SUMD` (7 functions)
+📄 `examples.SUMR`
 📄 `examples.basic.README`
 📄 `examples.basic.demo`
 📄 `examples.basic.sample-project.README`
@@ -511,6 +512,7 @@ sumd/
 📄 `examples.mcp.continue_config`
 📄 `examples.mcp.cursor_mcp`
 📄 `examples.mcp.mcp_client` (2 functions)
+📄 `examples.project.map.toon` (7 functions)
 📄 `examples.sumd`
 📄 `goal`
 📄 `mcp`
@@ -522,7 +524,7 @@ sumd/
 📄 `project.context`
 📄 `project.duplication.toon`
 📄 `project.evolution.toon`
-📄 `project.map.toon` (3557 functions)
+📄 `project.map.toon` (987 functions)
 📄 `project.project.toon`
 📄 `project.prompt`
 📄 `project.validation.toon`
@@ -536,25 +538,25 @@ sumd/
 📄 `sumd.mcp_server` (12 functions)
 📄 `sumd.models` (3 classes)
 📄 `sumd.parser` (9 functions, 1 classes)
-📄 `sumd.pipeline` (10 functions, 1 classes)
-📄 `sumd.renderer` (54 functions)
+📄 `sumd.pipeline` (16 functions, 1 classes)
+📄 `sumd.renderer` (1 functions)
 📦 `sumd.sections`
-📄 `sumd.sections.api_stubs` (2 functions, 1 classes)
-📄 `sumd.sections.architecture` (2 functions, 1 classes)
+📄 `sumd.sections.api_stubs` (3 functions, 1 classes)
+📄 `sumd.sections.architecture` (10 functions, 1 classes)
 📄 `sumd.sections.base` (2 functions, 2 classes)
-📄 `sumd.sections.call_graph` (2 functions, 1 classes)
-📄 `sumd.sections.code_analysis` (2 functions, 1 classes)
-📄 `sumd.sections.configuration` (2 functions, 1 classes)
-📄 `sumd.sections.dependencies` (2 functions, 1 classes)
-📄 `sumd.sections.deployment` (2 functions, 1 classes)
-📄 `sumd.sections.environment` (2 functions, 1 classes)
-📄 `sumd.sections.extras` (2 functions, 1 classes)
-📄 `sumd.sections.interfaces` (2 functions, 1 classes)
+📄 `sumd.sections.call_graph` (8 functions, 1 classes)
+📄 `sumd.sections.code_analysis` (3 functions, 1 classes)
+📄 `sumd.sections.configuration` (3 functions, 1 classes)
+📄 `sumd.sections.dependencies` (5 functions, 1 classes)
+📄 `sumd.sections.deployment` (7 functions, 1 classes)
+📄 `sumd.sections.environment` (4 functions, 1 classes)
+📄 `sumd.sections.extras` (5 functions, 1 classes)
+📄 `sumd.sections.interfaces` (9 functions, 1 classes)
 📄 `sumd.sections.metadata` (2 functions, 1 classes)
-📄 `sumd.sections.quality` (2 functions, 1 classes)
+📄 `sumd.sections.quality` (5 functions, 1 classes)
 📄 `sumd.sections.refactor_analysis` (2 functions, 1 classes)
-📄 `sumd.sections.source_snippets` (2 functions, 1 classes)
-📄 `sumd.sections.workflows` (2 functions, 1 classes)
+📄 `sumd.sections.source_snippets` (3 functions, 1 classes)
+📄 `sumd.sections.workflows` (5 functions, 1 classes)
 📄 `sumd.toon_parser` (8 functions)
 📄 `sumd.validator` (15 functions, 1 classes)
 📄 `testql-scenarios.generated-cli-tests.testql.toon`

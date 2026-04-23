@@ -7,16 +7,30 @@ flowchart TD
         SUMD__main["main"]
         SUMD__build_context["build_context"]
         SUMD__run["run"]
+        SUMD___detect_project_type["_detect_project_type"]
+        SUMD___render_doql_boilerplate["_render_doql_boilerplate"]
+        SUMD___node_framework["_node_framework"]
+        SUMD___node_spec_from_package_json["_node_spec_from_package_json"]
+        SUMD___build_doql_spec["_build_doql_spec"]
+        SUMD___generate_doql_less["_generate_doql_less"]
         SUMD__cli["cli"]
         SUMD__validate["validate"]
         SUMD__export["export"]
         SUMD__info["info"]
         SUMD__generate["generate"]
         SUMD__extract["extract"]
+        SUMD___is_project_dir["_is_project_dir"]
+        SUMD___walk_projects["_walk_projects"]
         SUMD___detect_projects["_detect_projects"]
+        SUMD___ensure_venv["_ensure_venv"]
+        SUMD___tool_bin["_tool_bin"]
+        SUMD___run_one_tool["_run_one_tool"]
         SUMD___run_analysis_tools["_run_analysis_tools"]
         SUMD___export_sumd_json["_export_sumd_json"]
         SUMD___render_write_validate["_render_write_validate"]
+        SUMD___echo_scan_result["_echo_scan_result"]
+        SUMD___maybe_generate_doql["_maybe_generate_doql"]
+        SUMD___finalize_scan["_finalize_scan"]
         SUMD___scan_one_project["_scan_one_project"]
         SUMD__scan["scan"]
         SUMD__lint["lint"]
@@ -37,7 +51,9 @@ flowchart TD
         SUMD__main_sumr["main_sumr"]
         SUMD___read_toml["_read_toml"]
         SUMD__extract_pyproject["extract_pyproject"]
+        SUMD___first_task_cmd["_first_task_cmd"]
         SUMD__extract_taskfile["extract_taskfile"]
+        SUMD___parse_openapi_endpoints["_parse_openapi_endpoints"]
         SUMD__extract_openapi["extract_openapi"]
         SUMD___parse_doql_entities["_parse_doql_entities"]
         SUMD___parse_doql_interfaces["_parse_doql_interfaces"]
@@ -47,22 +63,6 @@ flowchart TD
         SUMD__extract_pyqual["extract_pyqual"]
         SUMD__extract_python_modules["extract_python_modules"]
         SUMD__extract_readme_title["extract_readme_title"]
-        SUMD__extract_requirements["extract_requirements"]
-        SUMD__extract_makefile["extract_makefile"]
-        SUMD__extract_goal["extract_goal"]
-        SUMD__extract_env["extract_env"]
-        SUMD__extract_dockerfile["extract_dockerfile"]
-        SUMD__extract_docker_compose["extract_docker_compose"]
-        SUMD__extract_package_json["extract_package_json"]
-        SUMD___lang_of["_lang_of"]
-        SUMD___fan_out["_fan_out"]
-        SUMD___cc_estimate["_cc_estimate"]
-        SUMD___try_radon_cc["_try_radon_cc"]
-        SUMD___analyse_py_top_funcs["_analyse_py_top_funcs"]
-        SUMD___analyse_py_top_classes["_analyse_py_top_classes"]
-        SUMD___analyse_py_module["_analyse_py_module"]
-        SUMD___collect_map_files["_collect_map_files"]
-        SUMD___render_map_detail["_render_map_detail"]
     end
     subgraph SUMR
         SUMR___render_architecture_doql_section["_render_architecture_doql_section"]
@@ -91,17 +91,25 @@ flowchart TD
         SUMR___render_dependencies["_render_dependencies"]
         SUMR___render_deployment_install["_render_deployment_install"]
         SUMR___render_deployment_reqs["_render_deployment_reqs"]
+        SUMR___render_dockerfile_info["_render_dockerfile_info"]
         SUMR___render_deployment_docker["_render_deployment_docker"]
         SUMR___render_deployment["_render_deployment"]
+        SUMR___render_makefile_targets["_render_makefile_targets"]
+        SUMR___render_pkg_json_scripts["_render_pkg_json_scripts"]
         SUMR___render_extras["_render_extras"]
         SUMR___render_code_analysis["_render_code_analysis"]
         SUMR___render_source_snippets["_render_source_snippets"]
         SUMR___render_api_stubs["_render_api_stubs"]
+        SUMR___render_scenario_contract["_render_scenario_contract"]
         SUMR___render_test_contracts["_render_test_contracts"]
         SUMR___parse_calls_header["_parse_calls_header"]
+        SUMR___parse_hub_stat_line["_parse_hub_stat_line"]
+        SUMR___process_in_hubs_line["_process_in_hubs_line"]
         SUMR___parse_calls_hubs["_parse_calls_hubs"]
         SUMR___parse_calls_toon["_parse_calls_toon"]
         SUMR___render_call_graph["_render_call_graph"]
+        SUMR___collect_tool_sources["_collect_tool_sources"]
+        SUMR___doql_sources["_doql_sources"]
         SUMR___collect_pkg_sources["_collect_pkg_sources"]
         SUMR___collect_infra_sources["_collect_infra_sources"]
         SUMR___collect_sources["_collect_sources"]
@@ -111,20 +119,12 @@ flowchart TD
         SUMR___render_goal_section["_render_goal_section"]
         SUMR___inject_toc["_inject_toc"]
         SUMR__generate_sumd_content["generate_sumd_content"]
-        SUMR___read_toml["_read_toml"]
-        SUMR__extract_pyproject["extract_pyproject"]
-        SUMR__extract_taskfile["extract_taskfile"]
-        SUMR__extract_openapi["extract_openapi"]
-        SUMR___parse_doql_entities["_parse_doql_entities"]
-        SUMR___parse_doql_interfaces["_parse_doql_interfaces"]
-        SUMR___parse_doql_workflows["_parse_doql_workflows"]
-        SUMR___parse_doql_content["_parse_doql_content"]
-        SUMR__extract_doql["extract_doql"]
-        SUMR__extract_pyqual["extract_pyqual"]
-        SUMR__extract_python_modules["extract_python_modules"]
-        SUMR__extract_readme_title["extract_readme_title"]
-        SUMR__extract_requirements["extract_requirements"]
-        SUMR__extract_makefile["extract_makefile"]
+        SUMR___detect_project_type["_detect_project_type"]
+        SUMR___render_doql_boilerplate["_render_doql_boilerplate"]
+        SUMR___node_framework["_node_framework"]
+        SUMR___node_spec_from_package_json["_node_spec_from_package_json"]
+        SUMR___build_doql_spec["_build_doql_spec"]
+        SUMR___generate_doql_less["_generate_doql_less"]
     end
     subgraph TODO
         TODO__test_sumd_scans_itself["test_sumd_scans_itself"]
@@ -139,6 +139,12 @@ flowchart TD
     subgraph docs__USAGE
         docs__USAGE__print["print"]
     end
+    subgraph examples__SUMD
+        examples__SUMD__ask["ask"]
+        examples__SUMD__main["main"]
+        examples__SUMD__build_context["build_context"]
+        examples__SUMD__run["run"]
+    end
     subgraph examples__llm
         examples__llm__anthropic_example__ask["ask"]
         examples__llm__anthropic_example__main["main"]
@@ -150,7 +156,17 @@ flowchart TD
         examples__mcp__mcp_client__run("run CC=11")
         examples__mcp__mcp_client__main["main"]
     end
+    subgraph examples__project
+        examples__project__map__toon__ask["ask"]
+        examples__project__map__toon__main["main"]
+        examples__project__map__toon__build_context["build_context"]
+        examples__project__map__toon__run["run"]
+    end
     subgraph project__map
+        project__map__toon__ask["ask"]
+        project__map__toon__main["main"]
+        project__map__toon__build_context["build_context"]
+        project__map__toon__run["run"]
         project__map__toon___detect_project_type["_detect_project_type"]
         project__map__toon___render_doql_boilerplate["_render_doql_boilerplate"]
         project__map__toon___node_framework["_node_framework"]
@@ -173,6 +189,8 @@ flowchart TD
         project__map__toon___export_sumd_json["_export_sumd_json"]
         project__map__toon___render_write_validate["_render_write_validate"]
         project__map__toon___echo_scan_result["_echo_scan_result"]
+        project__map__toon___maybe_generate_doql["_maybe_generate_doql"]
+        project__map__toon___finalize_scan["_finalize_scan"]
         project__map__toon___scan_one_project["_scan_one_project"]
         project__map__toon__scan["scan"]
         project__map__toon__lint["lint"]
@@ -190,7 +208,6 @@ flowchart TD
         project__map__toon___scaffold_generic["_scaffold_generic"]
         project__map__toon__scaffold["scaffold"]
         project__map__toon__map_cmd["map_cmd"]
-        project__map__toon__main["main"]
         project__map__toon__main_sumr["main_sumr"]
         project__map__toon___read_toml["_read_toml"]
         project__map__toon__extract_pyproject["extract_pyproject"]
@@ -206,11 +223,6 @@ flowchart TD
         project__map__toon__extract_pyqual["extract_pyqual"]
         project__map__toon__extract_python_modules["extract_python_modules"]
         project__map__toon__extract_readme_title["extract_readme_title"]
-        project__map__toon__extract_requirements["extract_requirements"]
-        project__map__toon__extract_makefile["extract_makefile"]
-        project__map__toon__extract_goal["extract_goal"]
-        project__map__toon__extract_env["extract_env"]
-        project__map__toon___parse_dockerfile_line["_parse_dockerfile_line"]
     end
     subgraph sumd__cli
         sumd__cli___detect_project_type("_detect_project_type CC=8")
@@ -328,6 +340,12 @@ flowchart TD
         sumd__pipeline___find_tools_bin_dir["_find_tools_bin_dir"]
         sumd__pipeline___run_tool_if_present["_run_tool_if_present"]
         sumd__pipeline___refresh_analysis_files["_refresh_analysis_files"]
+        sumd__pipeline___collect_tool_sources["_collect_tool_sources"]
+        sumd__pipeline___doql_sources["_doql_sources"]
+        sumd__pipeline___collect_pkg_sources["_collect_pkg_sources"]
+        sumd__pipeline___collect_infra_sources["_collect_infra_sources"]
+        sumd__pipeline___collect_sources["_collect_sources"]
+        sumd__pipeline___inject_toc["_inject_toc"]
         sumd__pipeline__RenderPipeline____init__["__init__"]
         sumd__pipeline__RenderPipeline___collect["_collect"]
         sumd__pipeline__RenderPipeline___build_registered_sections["_build_registered_sections"]
@@ -336,94 +354,69 @@ flowchart TD
         sumd__pipeline__RenderPipeline__run["run"]
     end
     subgraph sumd__renderer
-        sumd__renderer___render_architecture_doql_section["_render_architecture_doql_section"]
-        sumd__renderer___render_architecture_modules["_render_architecture_modules"]
-        sumd__renderer___render_architecture["_render_architecture"]
-        sumd__renderer___render_doql_app["_render_doql_app"]
-        sumd__renderer___render_doql_entities["_render_doql_entities"]
-        sumd__renderer___render_doql_interfaces["_render_doql_interfaces"]
-        sumd__renderer___render_doql_integrations["_render_doql_integrations"]
-        sumd__renderer___render_architecture_doql_parsed["_render_architecture_doql_parsed"]
-        sumd__renderer___render_interfaces["_render_interfaces"]
-        sumd__renderer___render_interfaces_openapi["_render_interfaces_openapi"]
-        sumd__renderer___render_testql_raw["_render_testql_raw"]
-        sumd__renderer___render_testql_endpoint["_render_testql_endpoint"]
-        sumd__renderer___render_testql_extras["_render_testql_extras"]
-        sumd__renderer___render_testql_one_structured["_render_testql_one_structured"]
-        sumd__renderer___render_interfaces_testql["_render_interfaces_testql"]
-        sumd__renderer___render_workflows_doql["_render_workflows_doql"]
-        sumd__renderer___render_workflows_taskfile["_render_workflows_taskfile"]
-        sumd__renderer___render_workflows["_render_workflows"]
-        sumd__renderer___render_quality_raw["_render_quality_raw"]
-        sumd__renderer___render_quality_parsed("_render_quality_parsed CC=9")
-        sumd__renderer___render_quality["_render_quality"]
-        sumd__renderer___render_deps_runtime["_render_deps_runtime"]
-        sumd__renderer___render_deps_dev["_render_deps_dev"]
-        sumd__renderer___render_dependencies["_render_dependencies"]
-        sumd__renderer___render_deployment_install["_render_deployment_install"]
-        sumd__renderer___render_deployment_reqs["_render_deployment_reqs"]
-        sumd__renderer___render_dockerfile_info["_render_dockerfile_info"]
-        sumd__renderer___render_deployment_docker("_render_deployment_docker CC=8")
-        sumd__renderer___render_deployment["_render_deployment"]
-        sumd__renderer___render_makefile_targets["_render_makefile_targets"]
-        sumd__renderer___render_pkg_json_scripts["_render_pkg_json_scripts"]
-        sumd__renderer___render_extras["_render_extras"]
-        sumd__renderer___render_code_analysis("_render_code_analysis CC=9")
-        sumd__renderer___render_source_snippets("_render_source_snippets CC=8")
-        sumd__renderer___render_api_stubs("_render_api_stubs CC=11")
-        sumd__renderer___render_scenario_contract("_render_scenario_contract CC=9")
-        sumd__renderer___render_test_contracts["_render_test_contracts"]
-        sumd__renderer___parse_calls_header["_parse_calls_header"]
-        sumd__renderer___parse_hub_stat_line["_parse_hub_stat_line"]
-        sumd__renderer___process_in_hubs_line["_process_in_hubs_line"]
-        sumd__renderer___parse_calls_hubs("_parse_calls_hubs CC=8")
-        sumd__renderer___parse_calls_toon["_parse_calls_toon"]
-        sumd__renderer___render_call_graph["_render_call_graph"]
-        sumd__renderer___collect_tool_sources["_collect_tool_sources"]
-        sumd__renderer___doql_sources["_doql_sources"]
-        sumd__renderer___collect_pkg_sources["_collect_pkg_sources"]
-        sumd__renderer___collect_infra_sources["_collect_infra_sources"]
-        sumd__renderer___collect_sources["_collect_sources"]
-        sumd__renderer___render_metadata_section["_render_metadata_section"]
-        sumd__renderer___render_configuration_section["_render_configuration_section"]
-        sumd__renderer___render_env_section["_render_env_section"]
-        sumd__renderer___render_goal_section("_render_goal_section CC=9")
-        sumd__renderer___inject_toc["_inject_toc"]
         sumd__renderer__generate_sumd_content["generate_sumd_content"]
     end
     subgraph sumd__sections
         sumd__sections__base__Section__should_render["should_render"]
         sumd__sections__base__Section__render["render"]
-        sumd__sections__interfaces__InterfacesSection__should_render["should_render"]
-        sumd__sections__interfaces__InterfacesSection__render["render"]
         sumd__sections__refactor_analysis__RefactorAnalysisSection__should_render["should_render"]
         sumd__sections__refactor_analysis__RefactorAnalysisSection__render["render"]
-        sumd__sections__quality__QualitySection__should_render["should_render"]
-        sumd__sections__quality__QualitySection__render["render"]
-        sumd__sections__deployment__DeploymentSection__should_render["should_render"]
-        sumd__sections__deployment__DeploymentSection__render["render"]
-        sumd__sections__code_analysis__CodeAnalysisSection__should_render["should_render"]
-        sumd__sections__code_analysis__CodeAnalysisSection__render["render"]
         sumd__sections__metadata__MetadataSection__should_render["should_render"]
         sumd__sections__metadata__MetadataSection__render["render"]
-        sumd__sections__dependencies__DependenciesSection__should_render["should_render"]
-        sumd__sections__dependencies__DependenciesSection__render["render"]
+        sumd__sections__deployment___render_deployment_install["_render_deployment_install"]
+        sumd__sections__deployment___render_deployment_reqs["_render_deployment_reqs"]
+        sumd__sections__deployment___render_dockerfile_info["_render_dockerfile_info"]
+        sumd__sections__deployment___render_deployment_docker("_render_deployment_docker CC=8")
+        sumd__sections__deployment___render_deployment["_render_deployment"]
+        sumd__sections__deployment__DeploymentSection__should_render["should_render"]
+        sumd__sections__deployment__DeploymentSection__render["render"]
+        sumd__sections__call_graph___parse_calls_header["_parse_calls_header"]
+        sumd__sections__call_graph___parse_hub_stat_line["_parse_hub_stat_line"]
+        sumd__sections__call_graph___process_in_hubs_line["_process_in_hubs_line"]
+        sumd__sections__call_graph___parse_calls_hubs("_parse_calls_hubs CC=8")
+        sumd__sections__call_graph___parse_calls_toon["_parse_calls_toon"]
+        sumd__sections__call_graph___render_call_graph["_render_call_graph"]
         sumd__sections__call_graph__CallGraphSection__should_render["should_render"]
         sumd__sections__call_graph__CallGraphSection__render["render"]
+        sumd__sections__code_analysis___render_code_analysis("_render_code_analysis CC=9")
+        sumd__sections__code_analysis__CodeAnalysisSection__should_render["should_render"]
+        sumd__sections__code_analysis__CodeAnalysisSection__render["render"]
+        sumd__sections__dependencies___render_deps_runtime["_render_deps_runtime"]
+        sumd__sections__dependencies___render_deps_dev["_render_deps_dev"]
+        sumd__sections__dependencies___render_dependencies["_render_dependencies"]
+        sumd__sections__dependencies__DependenciesSection__should_render["should_render"]
+        sumd__sections__dependencies__DependenciesSection__render["render"]
+        sumd__sections__architecture___render_architecture_doql_section["_render_architecture_doql_section"]
+        sumd__sections__architecture___render_architecture_modules["_render_architecture_modules"]
+        sumd__sections__architecture___render_doql_app["_render_doql_app"]
+        sumd__sections__architecture___render_doql_entities["_render_doql_entities"]
+        sumd__sections__architecture___render_doql_interfaces["_render_doql_interfaces"]
+        sumd__sections__architecture___render_doql_integrations["_render_doql_integrations"]
+        sumd__sections__architecture___render_architecture_doql_parsed["_render_architecture_doql_parsed"]
+        sumd__sections__architecture___render_architecture["_render_architecture"]
         sumd__sections__architecture__ArchitectureSection__should_render["should_render"]
         sumd__sections__architecture__ArchitectureSection__render["render"]
+        sumd__sections__source_snippets___render_source_snippets("_render_source_snippets CC=8")
         sumd__sections__source_snippets__SourceSnippetsSection__should_render["should_render"]
         sumd__sections__source_snippets__SourceSnippetsSection__render["render"]
+        sumd__sections__workflows___render_workflows_doql["_render_workflows_doql"]
+        sumd__sections__workflows___render_workflows_taskfile["_render_workflows_taskfile"]
+        sumd__sections__workflows___render_workflows["_render_workflows"]
         sumd__sections__workflows__WorkflowsSection__should_render["should_render"]
         sumd__sections__workflows__WorkflowsSection__render["render"]
+        sumd__sections__extras___render_makefile_targets["_render_makefile_targets"]
+        sumd__sections__extras___render_pkg_json_scripts["_render_pkg_json_scripts"]
+        sumd__sections__extras___render_extras["_render_extras"]
         sumd__sections__extras__ExtrasSection__should_render["should_render"]
         sumd__sections__extras__ExtrasSection__render["render"]
+        sumd__sections__quality___render_quality_raw["_render_quality_raw"]
+        sumd__sections__quality___render_quality_parsed("_render_quality_parsed CC=9")
+        sumd__sections__quality___render_quality["_render_quality"]
+        sumd__sections__quality__QualitySection__should_render["should_render"]
+        sumd__sections__quality__QualitySection__render["render"]
+        sumd__sections__api_stubs___render_api_stubs("_render_api_stubs CC=11")
         sumd__sections__api_stubs__ApiStubsSection__should_render["should_render"]
         sumd__sections__api_stubs__ApiStubsSection__render["render"]
-        sumd__sections__environment__EnvironmentSection__should_render["should_render"]
-        sumd__sections__environment__EnvironmentSection__render["render"]
-        sumd__sections__configuration__ConfigurationSection__should_render["should_render"]
-        sumd__sections__configuration__ConfigurationSection__render["render"]
     end
     subgraph sumd__toon_parser
         sumd__toon_parser___parse_toon_block_config("_parse_toon_block_config CC=9")
@@ -452,15 +445,15 @@ flowchart TD
         sumd__validator__validate_markdown["validate_markdown"]
         sumd__validator__validate_sumd_file["validate_sumd_file"]
     end
-    examples__llm__anthropic_example__ask --> SUMR__parse_file
-    examples__llm__anthropic_example__main --> docs__USAGE__print
+    examples__llm__anthropic_example__ask --> sumd__parser__SUMDParser__parse_file
+    examples__llm__anthropic_example__main --> README__print
     examples__llm__anthropic_example__main --> examples__llm__anthropic_example__ask
-    examples__llm__openai_example__build_context --> SUMR__parse_file
+    examples__llm__openai_example__build_context --> sumd__parser__SUMDParser__parse_file
     examples__llm__openai_example__ask --> examples__llm__openai_example__build_context
-    examples__llm__openai_example__main --> docs__USAGE__print
+    examples__llm__openai_example__main --> README__print
     examples__llm__openai_example__main --> examples__llm__openai_example__ask
-    examples__mcp__mcp_client__run --> docs__USAGE__print
-    examples__mcp__mcp_client__main --> docs__USAGE__print
+    examples__mcp__mcp_client__run --> README__print
+    examples__mcp__mcp_client__main --> README__print
     examples__mcp__mcp_client__main --> examples__mcp__mcp_client__run
     sumd__toon_parser___parse_toon_file --> sumd__toon_parser___parse_toon_block_config
     sumd__toon_parser___parse_toon_file --> sumd__toon_parser___parse_toon_block_api
@@ -478,25 +471,25 @@ flowchart TD
     sumd__validator__validate_sumd_file --> sumd__validator__validate_markdown
     sumd__validator__validate_sumd_file --> sumd__validator__validate_codeblocks
     sumd__cli___node_spec_from_package_json --> sumd__cli___node_framework
-    sumd__cli___build_doql_spec --> SUMR__extract_package_json
+    sumd__cli___build_doql_spec --> sumd__extractor__extract_package_json
     sumd__cli___build_doql_spec --> sumd__cli___node_spec_from_package_json
     sumd__cli___generate_doql_less --> sumd__cli___build_doql_spec
     sumd__cli___generate_doql_less --> sumd__cli___render_doql_boilerplate
-    sumd__cli__validate --> SUMR__parse_file
-    sumd__cli__export --> SUMR__parse_file
-    sumd__cli__info --> SUMR__parse_file
-    sumd__cli__extract --> SUMR__parse_file
+    sumd__cli__validate --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__export --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__info --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__extract --> sumd__parser__SUMDParser__parse_file
     sumd__cli___walk_projects --> sumd__cli___is_project_dir
     sumd__cli___detect_projects --> sumd__cli___walk_projects
     sumd__cli___run_one_tool --> sumd__cli___tool_bin
     sumd__cli___run_analysis_tools --> sumd__cli___ensure_venv
     sumd__cli___run_analysis_tools --> sumd__cli___run_one_tool
-    sumd__cli___render_write_validate --> SUMR__validate_sumd_file
-    sumd__cli___render_write_validate --> SUMR__parse_file
+    sumd__cli___render_write_validate --> sumd__validator__validate_sumd_file
+    sumd__cli___render_write_validate --> sumd__parser__SUMDParser__parse_file
     sumd__cli___maybe_generate_doql --> sumd__cli___detect_project_type
-    sumd__cli___maybe_generate_doql --> SUMR__extract_pyproject
+    sumd__cli___maybe_generate_doql --> sumd__extractor__extract_pyproject
     sumd__cli___maybe_generate_doql --> sumd__cli___generate_doql_less
-    sumd__cli___maybe_generate_doql --> SUMR__extract_package_json
+    sumd__cli___maybe_generate_doql --> sumd__extractor__extract_package_json
     sumd__cli___finalize_scan --> sumd__cli___echo_scan_result
     sumd__cli___finalize_scan --> sumd__cli___export_sumd_json
     sumd__cli___finalize_scan --> sumd__cli___run_analysis_tools
@@ -505,7 +498,7 @@ flowchart TD
     sumd__cli___scan_one_project --> sumd__cli___maybe_generate_doql
     sumd__cli__scan --> sumd__cli___detect_projects
     sumd__cli__lint --> sumd__cli___lint_collect_paths
-    sumd__cli__lint --> SUMR__validate_sumd_file
+    sumd__cli__lint --> sumd__validator__validate_sumd_file
     sumd__cli__lint --> sumd__cli___lint_print_result
     sumd__cli__analyze --> sumd__cli___setup_tools_venv
     sumd__cli___scaffold_smoke_scenario --> sumd__cli___scaffold_write
@@ -518,7 +511,7 @@ flowchart TD
     sumd__cli___scaffold_generic --> sumd__cli___scaffold_write
     sumd__cli__scaffold --> sumd__cli___scaffold_from_openapi
     sumd__cli__scaffold --> sumd__cli___scaffold_generic
-    sumd__cli__map_cmd --> SUMR__generate_map_toon
+    sumd__cli__map_cmd --> sumd__extractor__generate_map_toon
     sumd__cli__main --> sumd__cli__cli
     sumd__cli__main_sumr --> sumd__cli__cli
     sumd__extractor__extract_pyproject --> sumd__extractor___read_toml
@@ -544,91 +537,90 @@ flowchart TD
     sumd__extractor__generate_map_toon --> sumd__extractor___render_map_detail
     sumd__extractor__generate_map_toon --> sumd__extractor___map_cc_stats
     sumd__extractor__extract_source_snippets --> sumd__extractor___analyse_py_module
-    sumd__renderer___render_architecture_doql_section --> sumd__renderer___render_architecture_doql_parsed
-    sumd__renderer___render_architecture --> sumd__renderer___render_architecture_doql_section
-    sumd__renderer___render_architecture --> sumd__renderer___render_architecture_modules
-    sumd__renderer___render_architecture_doql_parsed --> sumd__renderer___render_doql_app
-    sumd__renderer___render_architecture_doql_parsed --> sumd__renderer___render_doql_entities
-    sumd__renderer___render_architecture_doql_parsed --> sumd__renderer___render_doql_interfaces
-    sumd__renderer___render_architecture_doql_parsed --> sumd__renderer___render_doql_integrations
-    sumd__renderer___render_interfaces --> sumd__renderer___render_interfaces_openapi
-    sumd__renderer___render_interfaces --> sumd__renderer___render_interfaces_testql
-    sumd__renderer___render_testql_one_structured --> sumd__renderer___render_testql_extras
-    sumd__renderer___render_testql_one_structured --> sumd__renderer___render_testql_endpoint
-    sumd__renderer___render_interfaces_testql --> sumd__renderer___render_testql_raw
-    sumd__renderer___render_interfaces_testql --> sumd__renderer___render_testql_one_structured
-    sumd__renderer___render_workflows --> sumd__renderer___render_workflows_doql
-    sumd__renderer___render_workflows --> sumd__renderer___render_workflows_taskfile
-    sumd__renderer___render_quality --> sumd__renderer___render_quality_raw
-    sumd__renderer___render_quality --> sumd__renderer___render_quality_parsed
-    sumd__renderer___render_dependencies --> sumd__renderer___render_deps_runtime
-    sumd__renderer___render_dependencies --> sumd__renderer___render_deps_dev
-    sumd__renderer___render_deployment_docker --> sumd__renderer___render_dockerfile_info
-    sumd__renderer___render_deployment --> sumd__renderer___render_deployment_install
-    sumd__renderer___render_deployment --> sumd__renderer___render_deployment_reqs
-    sumd__renderer___render_deployment --> sumd__renderer___render_deployment_docker
-    sumd__renderer___render_extras --> sumd__renderer___render_makefile_targets
-    sumd__renderer___render_extras --> sumd__renderer___render_pkg_json_scripts
-    sumd__renderer___render_test_contracts --> sumd__renderer___render_scenario_contract
-    sumd__renderer___process_in_hubs_line --> sumd__renderer___parse_hub_stat_line
-    sumd__renderer___parse_calls_hubs --> sumd__renderer___process_in_hubs_line
-    sumd__renderer___parse_calls_toon --> sumd__renderer___parse_calls_header
-    sumd__renderer___parse_calls_toon --> sumd__renderer___parse_calls_hubs
-    sumd__renderer___render_call_graph --> sumd__renderer___parse_calls_toon
-    sumd__renderer___collect_pkg_sources --> sumd__renderer___collect_tool_sources
-    sumd__renderer___collect_pkg_sources --> sumd__renderer___doql_sources
-    sumd__renderer___collect_sources --> sumd__renderer___collect_pkg_sources
-    sumd__renderer___collect_sources --> sumd__renderer___collect_infra_sources
-    sumd__pipeline___refresh_map_toon --> SUMR__generate_map_toon
-    sumd__pipeline___refresh_analysis_files --> SUMR__required_tools_for_profile
-    sumd__pipeline___refresh_analysis_files --> sumd__pipeline___find_tools_bin_dir
-    sumd__pipeline___refresh_analysis_files --> sumd__pipeline___run_tool_if_present
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_pyproject
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_taskfile
-    sumd__pipeline__RenderPipeline___collect --> SUMD__extract_testql_scenarios
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_openapi
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_doql
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_pyqual
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_python_modules
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_readme_title
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_requirements
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_makefile
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_goal
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_env
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_dockerfile
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_docker_compose
-    sumd__pipeline__RenderPipeline___collect --> SUMR__extract_package_json
-    sumd__pipeline__RenderPipeline__run --> SUMR___inject_toc
     sumd__mcp_server___tool_parse_sumd --> sumd__mcp_server___resolve_path
-    sumd__mcp_server___tool_parse_sumd --> SUMR__parse_file
+    sumd__mcp_server___tool_parse_sumd --> sumd__parser__SUMDParser__parse_file
     sumd__mcp_server___tool_parse_sumd --> sumd__mcp_server___doc_to_dict
     sumd__mcp_server___tool_validate_sumd --> sumd__mcp_server___resolve_path
-    sumd__mcp_server___tool_validate_sumd --> SUMR__parse_file
+    sumd__mcp_server___tool_validate_sumd --> sumd__parser__SUMDParser__parse_file
     sumd__mcp_server___tool_export_sumd --> sumd__mcp_server___resolve_path
-    sumd__mcp_server___tool_export_sumd --> SUMR__parse_file
+    sumd__mcp_server___tool_export_sumd --> sumd__parser__SUMDParser__parse_file
     sumd__mcp_server___tool_export_sumd --> sumd__mcp_server___doc_to_dict
     sumd__mcp_server___tool_list_sections --> sumd__mcp_server___resolve_path
-    sumd__mcp_server___tool_list_sections --> SUMR__parse_file
+    sumd__mcp_server___tool_list_sections --> sumd__parser__SUMDParser__parse_file
     sumd__mcp_server___tool_get_section --> sumd__mcp_server___resolve_path
-    sumd__mcp_server___tool_get_section --> SUMR__parse_file
+    sumd__mcp_server___tool_get_section --> sumd__parser__SUMDParser__parse_file
     sumd__mcp_server___tool_info_sumd --> sumd__mcp_server___resolve_path
-    sumd__mcp_server___tool_info_sumd --> SUMR__parse_file
+    sumd__mcp_server___tool_info_sumd --> sumd__parser__SUMDParser__parse_file
     sumd__mcp_server___tool_generate_sumd --> sumd__mcp_server___resolve_path
-    sumd__sections__interfaces__InterfacesSection__render --> SUMR___render_interfaces
-    sumd__sections__quality__QualitySection__render --> SUMR___render_quality
+    sumd__sections__deployment___render_deployment_docker --> sumd__sections__deployment___render_dockerfile_info
+    sumd__sections__deployment___render_deployment --> sumd__sections__deployment___render_deployment_install
+    sumd__sections__deployment___render_deployment --> sumd__sections__deployment___render_deployment_reqs
+    sumd__sections__deployment___render_deployment --> sumd__sections__deployment___render_deployment_docker
     sumd__sections__deployment__DeploymentSection__render --> SUMR___render_deployment
-    sumd__sections__code_analysis__CodeAnalysisSection__render --> SUMR___render_code_analysis
-    sumd__sections__dependencies__DependenciesSection__render --> SUMR___render_dependencies
+    sumd__sections__call_graph___process_in_hubs_line --> sumd__sections__call_graph___parse_hub_stat_line
+    sumd__sections__call_graph___parse_calls_hubs --> sumd__sections__call_graph___process_in_hubs_line
+    sumd__sections__call_graph___parse_calls_toon --> sumd__sections__call_graph___parse_calls_header
+    sumd__sections__call_graph___parse_calls_toon --> sumd__sections__call_graph___parse_calls_hubs
+    sumd__sections__call_graph___render_call_graph --> sumd__sections__call_graph___parse_calls_toon
     sumd__sections__call_graph__CallGraphSection__render --> SUMR___render_call_graph
+    sumd__sections__code_analysis__CodeAnalysisSection__render --> SUMR___render_code_analysis
+    sumd__sections__dependencies___render_dependencies --> sumd__sections__dependencies___render_deps_runtime
+    sumd__sections__dependencies___render_dependencies --> sumd__sections__dependencies___render_deps_dev
+    sumd__sections__dependencies__DependenciesSection__render --> SUMR___render_dependencies
+    sumd__sections__architecture___render_architecture_doql_section --> sumd__sections__architecture___render_architecture_doql_parsed
+    sumd__sections__architecture___render_architecture_doql_parsed --> sumd__sections__architecture___render_doql_app
+    sumd__sections__architecture___render_architecture_doql_parsed --> sumd__sections__architecture___render_doql_entities
+    sumd__sections__architecture___render_architecture_doql_parsed --> sumd__sections__architecture___render_doql_interfaces
+    sumd__sections__architecture___render_architecture_doql_parsed --> sumd__sections__architecture___render_doql_integrations
+    sumd__sections__architecture___render_architecture --> sumd__sections__architecture___render_architecture_doql_section
+    sumd__sections__architecture___render_architecture --> sumd__sections__architecture___render_architecture_modules
     sumd__sections__architecture__ArchitectureSection__render --> SUMR___render_architecture
     sumd__sections__source_snippets__SourceSnippetsSection__render --> SUMR___render_source_snippets
+    sumd__sections__workflows___render_workflows --> sumd__sections__workflows___render_workflows_doql
+    sumd__sections__workflows___render_workflows --> sumd__sections__workflows___render_workflows_taskfile
     sumd__sections__workflows__WorkflowsSection__render --> SUMR___render_workflows
+    sumd__sections__extras___render_extras --> sumd__sections__extras___render_makefile_targets
+    sumd__sections__extras___render_extras --> sumd__sections__extras___render_pkg_json_scripts
     sumd__sections__extras__ExtrasSection__render --> SUMR___render_extras
+    sumd__sections__quality___render_quality --> sumd__sections__quality___render_quality_raw
+    sumd__sections__quality___render_quality --> sumd__sections__quality___render_quality_parsed
+    sumd__sections__quality__QualitySection__render --> SUMR___render_quality
     sumd__sections__api_stubs__ApiStubsSection__render --> SUMR___render_api_stubs
     sumd__sections__environment__EnvironmentSection__render --> SUMR___render_env_section
     sumd__sections__environment__EnvironmentSection__render --> SUMR___render_goal_section
     sumd__sections__configuration__ConfigurationSection__render --> SUMR___render_configuration_section
+    sumd__sections__interfaces___render_testql_one_structured --> sumd__sections__interfaces___render_testql_extras
+    sumd__sections__interfaces___render_testql_one_structured --> sumd__sections__interfaces___render_testql_endpoint
+    sumd__sections__interfaces___render_interfaces_testql --> sumd__sections__interfaces___render_testql_raw
+    sumd__sections__interfaces___render_interfaces_testql --> sumd__sections__interfaces___render_testql_one_structured
+    sumd__sections__interfaces___render_interfaces --> sumd__sections__interfaces___render_interfaces_openapi
+    sumd__sections__interfaces___render_interfaces --> sumd__sections__interfaces___render_interfaces_testql
+    sumd__sections__interfaces__InterfacesSection__render --> SUMR___render_interfaces
+    sumd__pipeline___refresh_map_toon --> sumd__extractor__generate_map_toon
+    sumd__pipeline___refresh_analysis_files --> sumd__extractor__required_tools_for_profile
+    sumd__pipeline___refresh_analysis_files --> sumd__pipeline___find_tools_bin_dir
+    sumd__pipeline___refresh_analysis_files --> sumd__pipeline___run_tool_if_present
+    sumd__pipeline___collect_pkg_sources --> sumd__pipeline___collect_tool_sources
+    sumd__pipeline___collect_pkg_sources --> sumd__pipeline___doql_sources
+    sumd__pipeline___collect_sources --> sumd__pipeline___collect_pkg_sources
+    sumd__pipeline___collect_sources --> sumd__pipeline___collect_infra_sources
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_pyproject
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_taskfile
+    sumd__pipeline__RenderPipeline___collect --> sumd__toon_parser__extract_testql_scenarios
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_openapi
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_doql
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_pyqual
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_python_modules
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_readme_title
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_requirements
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_makefile
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_goal
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_env
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_dockerfile
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_docker_compose
+    sumd__pipeline__RenderPipeline___collect --> sumd__extractor__extract_package_json
+    sumd__pipeline__RenderPipeline__run --> SUMR___inject_toc
 
     classDef highCC fill:#ff6b6b,stroke:#c92a2a,color:#fff
     classDef medCC fill:#ffd43b,stroke:#f08c00,color:#000
-    class examples__mcp__mcp_client__run,sumd__toon_parser___parse_toon_block_config,sumd__validator__validate_codeblocks,sumd__validator___check_metadata_fields,sumd__cli___detect_project_type,sumd__cli__export,sumd__cli__generate,sumd__cli___is_project_dir,sumd__cli___walk_projects,sumd__cli___finalize_scan,sumd__cli___scan_one_project,sumd__cli__scan,sumd__cli__lint,sumd__cli___lint_print_result,sumd__cli__analyze,sumd__cli__scaffold,sumd__cli__main,sumd__extractor___parse_openapi_endpoints,sumd__extractor__extract_env,sumd__extractor___parse_dockerfile_line,sumd__extractor__extract_docker_compose,sumd__extractor___map_cc_stats,sumd__renderer___render_quality_parsed,sumd__renderer___render_deployment_docker,sumd__renderer___render_code_analysis,sumd__renderer___render_source_snippets,sumd__renderer___render_api_stubs,sumd__renderer___render_scenario_contract,sumd__renderer___parse_calls_hubs,sumd__renderer___render_goal_section medCC
+    class examples__mcp__mcp_client__run,sumd__toon_parser___parse_toon_block_config,sumd__validator__validate_codeblocks,sumd__validator___check_metadata_fields,sumd__cli___detect_project_type,sumd__cli__export,sumd__cli__generate,sumd__cli___is_project_dir,sumd__cli___walk_projects,sumd__cli___finalize_scan,sumd__cli___scan_one_project,sumd__cli__scan,sumd__cli__lint,sumd__cli___lint_print_result,sumd__cli__analyze,sumd__cli__scaffold,sumd__cli__main,sumd__extractor___parse_openapi_endpoints,sumd__extractor__extract_env,sumd__extractor___parse_dockerfile_line,sumd__extractor__extract_docker_compose,sumd__extractor___map_cc_stats,sumd__parser__SUMDParser___parse_header,sumd__sections__deployment___render_deployment_docker,sumd__sections__call_graph___parse_calls_hubs,sumd__sections__code_analysis___render_code_analysis,sumd__sections__source_snippets___render_source_snippets,sumd__sections__quality___render_quality_parsed,sumd__sections__api_stubs___render_api_stubs,sumd__sections__environment___render_goal_section medCC

@@ -1,12 +1,12 @@
-# redup/duplication | 2 groups | 30f 5978L | 2026-04-23
+# redup/duplication | 2 groups | 30f 5979L | 2026-04-23
 
 SUMMARY:
   files_scanned: 30
-  total_lines:   5978
+  total_lines:   5979
   dup_groups:    2
   dup_fragments: 4
   saved_lines:   25
-  scan_ms:       18577
+  scan_ms:       10169
 
 HOTSPOTS[2] (files with most duplication):
   sumd/toon_parser.py  dup=28L  groups=1  frags=2  (0.5%)
