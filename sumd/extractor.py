@@ -877,6 +877,58 @@ def extract_source_snippets(proj_dir: Path, pkg_name: str) -> list[dict]:
     return results
 
 
+def extract_swop(proj_dir: Path) -> dict[str, Any]:
+    """Extract SWOP manifest files from .swop/manifests/<context>/ directory.
+
+    Returns dict with structure:
+    {
+        "contexts": {
+            "<context_name>": {
+                "commands": {file, content},
+                "queries": {file, content},
+                "events": {file, content}
+            }
+        },
+        "sources": [list of file paths]
+    }
+    """
+    swop_dir = proj_dir / ".swop" / "manifests"
+    if not swop_dir.is_dir():
+        return {}
+
+    contexts: dict[str, dict[str, Any]] = {}
+    sources: list[str] = []
+
+    for context_dir in sorted(swop_dir.iterdir()):
+        if not context_dir.is_dir():
+            continue
+
+        context_name = context_dir.name
+        context_data: dict[str, dict[str, str]] = {}
+
+        for manifest_type in ("commands.yml", "queries.yml", "events.yml"):
+            manifest_path = context_dir / manifest_type
+            if manifest_path.exists():
+                rel_path = f".swop/manifests/{context_name}/{manifest_type}"
+                try:
+                    content = manifest_path.read_text(encoding="utf-8").rstrip()
+                    context_data[manifest_type.replace(".yml", "")] = {
+                        "file": rel_path,
+                        "content": content,
+                    }
+                    sources.append(rel_path)
+                except Exception:
+                    pass
+
+        if context_data:
+            contexts[context_name] = context_data
+
+    if not contexts:
+        return {}
+
+    return {"contexts": contexts, "sources": sources}
+
+
 def extract_project_analysis(
     proj_dir: Path, refactor: bool = False
 ) -> list[dict[str, str]]:

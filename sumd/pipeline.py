@@ -42,6 +42,7 @@ from sumd.extractor import (
     extract_readme_title,
     extract_requirements,
     extract_source_snippets,
+    extract_swop,
     extract_taskfile,
     generate_map_toon,
     required_tools_for_profile,
@@ -228,11 +229,15 @@ def _collect_sources(
     pkg_json: dict,
     modules: list,
     project_analysis: list,
+    swop: dict,
 ) -> list[str]:
     """Build the list of source labels that contributed data to this SUMD."""
-    return _collect_pkg_sources(
+    sources = _collect_pkg_sources(
         pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars
     ) + _collect_infra_sources(dockerfile, compose, pkg_json, modules, project_analysis)
+    if swop.get("sources"):
+        sources.extend(swop["sources"])
+    return sources
 
 
 def _inject_toc(content: str) -> str:
@@ -289,6 +294,7 @@ class RenderPipeline:
         dockerfile = extract_dockerfile(proj_dir)
         compose = extract_docker_compose(proj_dir)
         pkg_json = extract_package_json(proj_dir)
+        swop = extract_swop(proj_dir)
 
         # Auto-regenerate map.toon.yaml — pure-Python, always fast.
         _refresh_map_toon(proj_dir)
@@ -320,6 +326,7 @@ class RenderPipeline:
             pkg_json,
             modules,
             project_analysis,
+            swop,
         )
 
         return RenderContext(
@@ -348,6 +355,7 @@ class RenderPipeline:
             pkg_json=pkg_json,
             project_analysis=project_analysis,
             source_snippets=source_snippets,
+            swop=swop,
             raw_sources=self.raw_sources,
             sources_used=sources_used,
             title=title or name,

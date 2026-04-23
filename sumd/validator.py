@@ -122,6 +122,7 @@ _VALID_MARKPACT_KINDS = {
     "taskfile",
     "pyqual",
     "analysis",
+    "swop",
 }
 _MARKPACT_REQUIRED_ATTRS = {
     "file": "path",
@@ -131,6 +132,7 @@ _MARKPACT_REQUIRED_ATTRS = {
     "taskfile": "path",
     "pyqual": "path",
     "analysis": "path",
+    "swop": "path",
 }
 
 

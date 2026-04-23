@@ -53,6 +53,7 @@ class RenderContext:
     pkg_json: dict = field(default_factory=dict)
     project_analysis: list = field(default_factory=list)
     source_snippets: list = field(default_factory=list)
+    swop: dict = field(default_factory=dict)
 
     # Rendering options
     raw_sources: bool = True

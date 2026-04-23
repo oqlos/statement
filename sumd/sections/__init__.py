@@ -28,6 +28,7 @@ from sumd.sections.metadata import MetadataSection
 from sumd.sections.quality import QualitySection
 from sumd.sections.refactor_analysis import RefactorAnalysisSection
 from sumd.sections.source_snippets import SourceSnippetsSection
+from sumd.sections.swop import SwopSection
 from sumd.sections.test_contracts import TestContractsSection
 from sumd.sections.workflows import WorkflowsSection
 
@@ -36,6 +37,7 @@ from sumd.sections.workflows import WorkflowsSection
 SECTION_REGISTRY: list[type] = [
     MetadataSection,
     ArchitectureSection,
+    SwopSection,
     InterfacesSection,
     WorkflowsSection,
     QualitySection,
@@ -71,6 +73,7 @@ PROFILES: dict[str, set[str]] = {
     "rich": {
         "metadata",
         "architecture",
+        "swop",
         "interfaces",
         "workflows",
         "quality",

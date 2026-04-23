@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.37] - 2026-04-23
+
+### Docs
+- Update README.md
+
+### Other
+- Update sumd/extractor.py
+- Update sumd/pipeline.py
+- Update sumd/sections/__init__.py
+- Update sumd/sections/base.py
+- Update sumd/sections/swop.py
+- Update sumd/validator.py
+
 ## [0.3.36] - 2026-04-23
 
 ### Docs
