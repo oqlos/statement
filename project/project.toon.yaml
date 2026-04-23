@@ -1,12 +1,10 @@
-# sumd | 782 func | 34f | 22350L | python | 2026-04-23
+# sumd | 784 func | 34f | 23116L | python | 2026-04-23
 
 HEALTH:
-  CC̄=1.3  critical=11 (limit:10)  dup=5  cycles=0
+  CC̄=1.3  critical=10 (limit:10)  dup=5  cycles=0
 
 ALERTS[20]:
   !!! high_fan_out     RenderPipeline._collect = 22 (limit:10)
-  !!  cc_exceeded      _scan_one_project = 23 (limit:15)
-  !!  high_fan_out     _scan_one_project = 19 (limit:10)
   !!  high_fan_out     scaffold = 19 (limit:10)
   !!  high_fan_out     scan = 18 (limit:10)
   !!  high_fan_out     generate = 17 (limit:10)
@@ -14,28 +12,29 @@ ALERTS[20]:
   !!  high_fan_out     _parse_doql_content = 15 (limit:10)
   !!  high_fan_out     extract_docker_compose = 15 (limit:10)
   !   high_fan_out     _parse_doql_workflows = 14 (limit:10)
+  !   high_fan_out     _parse_toon_file = 13 (limit:10)
+  !   high_fan_out     _scaffold_from_openapi = 13 (limit:10)
 
-MODULES[91] (top by size):
-  M[project/calls.yaml] 2585L C:0 F:0 CC↑0 D:0 (yaml)
-  M[project/map.toon.yaml] 2462L C:0 F:221 CC↑0 D:0 (yaml)
-  M[sumd/cli.py] 1658L C:0 F:41 CC↑23 D:0 (python)
+MODULES[92] (top by size):
+  M[project/map.toon.yaml] 3140L C:0 F:221 CC↑0 D:0 (yaml)
+  M[project/calls.yaml] 2591L C:0 F:0 CC↑0 D:0 (yaml)
+  M[sumd/cli.py] 1682L C:0 F:43 CC↑11 D:0 (python)
   M[SUMD.md] 1294L C:5 F:188 CC↑0 D:1 (md)
   M[SUMR.md] 1235L C:5 F:138 CC↑0 D:18 (md)
   M[sumd/renderer.py] 1036L C:0 F:54 CC↑11 D:0 (python)
   M[sumd/extractor.py] 908L C:0 F:39 CC↑12 D:0 (python)
-  M[CHANGELOG.md] 624L C:0 F:0 CC↑0 D:0 (md)
-  M[docs/README.md] 598L C:0 F:1 CC↑0 D:0 (md)
+  M[CHANGELOG.md] 681L C:0 F:0 CC↑0 D:0 (md)
+  M[docs/README.md] 600L C:0 F:1 CC↑0 D:0 (md)
   M[project/context.md] 556L C:0 F:0 CC↑0 D:0 (md)
   M[goal.yaml] 511L C:0 F:0 CC↑0 D:0 (yaml)
-  M[docs/USAGE.md] 487L C:0 F:1 CC↑0 D:0 (md)
+  M[docs/USAGE.md] 487L C:0 F:1 CC↑0 D:3 (md)
   M[SPEC.md] 423L C:0 F:0 CC↑0 D:0 (md)
   M[sumd/mcp_server.py] 358L C:0 F:12 CC↑5 D:0 (python)
   M[project/README.md] 339L C:0 F:0 CC↑0 D:0 (md)
-  LANGS: python:30/yaml:19/md:19/json:7/yml:6/shell:5/toml:2/other:2/txt:1
+  LANGS: python:31/yaml:19/md:19/json:7/yml:6/shell:5/toml:2/other:2/txt:1
 
 HOTSPOTS[10]:
   ★ RenderPipeline._collect fan=22  // Extract all project data and build RenderContext.
-  ★ _scan_one_project fan=19  // Generate SUMD.md (or SUMR.md for refactor profile) for one project.
   ★ scaffold fan=19  // Generate testql scenario scaffolds from OpenAPI spec or SUMD.md.
 
 Reads openapi.
@@ -45,13 +44,14 @@ Detect
   ★ generate fan=17  // Generate a SUMD document from structured format.
 
 FILE: Path to the structured f
+  ★ analyze fan=17  // Analysis pipeline, 17 stages
 
-REFACTOR[15]:
-  [1] H/H Split god module sumd/cli.py (1658L, 0 classes)
-  [2] H/H Split god module sumd/extractor.py (908L, 0 classes)
+REFACTOR[14]:
+  [1] H/H Split god module sumd/extractor.py (908L, 0 classes)
+  [2] H/H Split god module sumd/cli.py (1682L, 0 classes)
   [3] H/H Split god module sumd/renderer.py (1036L, 0 classes)
-  [4] H/H Split god module CHANGELOG.md (624L, 0 classes)
+  [4] H/H Split god module CHANGELOG.md (681L, 0 classes)
   [5] H/H Split god module SUMD.md (1294L, 5 classes)
 
 EVOLUTION:
-  2026-04-23 CC̄=1.3 crit=11 22350L // Automated analysis
+  2026-04-23 CC̄=1.3 crit=10 23116L // Automated analysis

@@ -1,0 +1,28 @@
+# examples | 7f 474L | shell:3,python:3,less:1 | 2026-04-23
+# stats: 7 func | 0 cls | 7 mod | CC̄=3.6 | critical:1 | cycles:0
+# alerts[5]: CC run=11; CC build_context=5; CC main=3; CC main=2; fan-out run=12
+# hotspots[5]: run fan=12; main fan=9; main fan=8; main fan=8; build_context fan=5
+# evolution: baseline
+# Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
+M[7]:
+  app.doql.less,60
+  basic/demo.sh,50
+  llm/anthropic_example.py,61
+  llm/llm_cli_example.sh,37
+  llm/ollama_example.sh,38
+  llm/openai_example.py,89
+  mcp/mcp_client.py,139
+D:
+  llm/anthropic_example.py:
+    e: ask,main
+    ask(sumd_path;question;model)
+    main()
+  llm/openai_example.py:
+    e: build_context,ask,main
+    build_context(sumd_path)
+    ask(sumd_path;question;model)
+    main()
+  mcp/mcp_client.py:
+    e: run,main
+    run(sumd_file;single_tool;tool_args)
+    main()

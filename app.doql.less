@@ -1,0 +1,195 @@
+// LESS format — define @variables here as needed
+
+app {
+  name: sumd;
+  version: 0.3.29;
+}
+
+dependencies {
+  runtime: "click>=8.3.3, pyyaml>=6.0.3, toml>=0.10.2, goal>=2.1.190, costs>=0.1.50, pfix>=0.1.72";
+  dev: "pytest>=9.0.3, pytest-cov>=7.1.0, ruff>=0.15.11, build>=1.4.4, twine>=6.2.0, pyqual>=0.1.143, goal>=2.1.190, costs>=0.1.50, pfix>=0.1.72, mcp>=1.27.0";
+}
+
+interface[type="cli"] {
+  framework: click;
+}
+interface[type="cli"] page[name="sumd"] {
+
+}
+
+workflow[name="install"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PIP}} install -e .[dev];
+}
+
+workflow[name="deps:update"] {
+  trigger: manual;
+  step-1: run cmd=PIP="{{.VENV_PIP}}"
+$PIP install --upgrade pip
+OUTDATED=$($PIP list --outdated --format=columns 2>/dev/null | tail -n +3 | awk '{print $1}')
+if [ -z "$OUTDATED" ]; then
+  echo "✅ All packages are up to date."
+else
+  echo "📦 Upgrading: $OUTDATED"
+  echo "$OUTDATED" | xargs $PIP install --upgrade
+  echo "✅ Done."
+fi;
+}
+
+workflow[name="quality"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m pyqual run;
+}
+
+workflow[name="quality:fix"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m pyqual run --fix;
+}
+
+workflow[name="quality:report"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m pyqual report;
+}
+
+workflow[name="test"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m pytest -q;
+}
+
+workflow[name="test:report"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m pytest --json-report --json-report-file=test-results.json -q;
+  step-2: run cmd={{.VENV_PY}} -m testql report test-results.json -o report.html;
+}
+
+workflow[name="test:report:example"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m testql report --example -o report.html;
+}
+
+workflow[name="lint"] {
+  trigger: manual;
+  step-1: run cmd=ruff check .;
+}
+
+workflow[name="fmt"] {
+  trigger: manual;
+  step-1: run cmd=ruff format .;
+}
+
+workflow[name="build"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m build;
+}
+
+workflow[name="clean"] {
+  trigger: manual;
+  step-1: run cmd=rm -rf build/ dist/ *.egg-info;
+}
+
+workflow[name="structure"] {
+  trigger: manual;
+  step-1: run cmd=echo "📁 Analyzing sumd project structure..."
+{{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.less --force
+echo "✅ Structure generated: {{.DOQL_OUTPUT}}";
+}
+
+workflow[name="doql:adopt"] {
+  trigger: manual;
+  step-1: run cmd={{.DOQL_CMD}} adopt {{.PWD}} --output app.doql.less --force;
+  step-2: run cmd=echo "✅ Captured in app.doql.less";
+}
+
+workflow[name="doql:export"] {
+  trigger: manual;
+  step-1: run cmd=if [ ! -f "app.doql.less" ]; then
+  echo "❌ app.doql.less not found. Run: task structure"
+  exit 1
+fi;
+  step-2: run cmd={{.DOQL_CMD}} export --format less -o {{.DOQL_OUTPUT}};
+  step-3: run cmd=echo "✅ Exported to {{.DOQL_OUTPUT}}";
+}
+
+workflow[name="doql:validate"] {
+  trigger: manual;
+  step-1: run cmd=if [ ! -f "{{.DOQL_OUTPUT}}" ]; then
+  echo "❌ {{.DOQL_OUTPUT}} not found. Run: task structure"
+  exit 1
+fi;
+  step-2: run cmd={{.DOQL_CMD}} validate;
+}
+
+workflow[name="doql:doctor"] {
+  trigger: manual;
+  step-1: run cmd={{.DOQL_CMD}} doctor;
+}
+
+workflow[name="doql:build"] {
+  trigger: manual;
+  step-1: run cmd=if [ ! -f "{{.DOQL_OUTPUT}}" ]; then
+  echo "❌ {{.DOQL_OUTPUT}} not found. Run: task structure"
+  exit 1
+fi;
+  step-2: run cmd={{.DOQL_CMD}} build app.doql.less --out build/;
+}
+
+workflow[name="docs:build"] {
+  trigger: manual;
+  step-1: run cmd=echo "Building SUMD documentation...";
+  step-2: run cmd={{.VENV_PY}} -m sumd.cli docs/ docs/;
+}
+
+workflow[name="sumd"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m sumd.cli scan .;
+}
+
+workflow[name="sumr"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m sumd.cli scan . --profile refactor;
+}
+
+workflow[name="version:bump"] {
+  trigger: manual;
+  step-1: run cmd=hatch version patch;
+  step-2: run cmd=echo "✅ Version bumped:";
+  step-3: run cmd=hatch version;
+}
+
+workflow[name="publish"] {
+  trigger: manual;
+  step-1: run cmd={{.VENV_PY}} -m twine upload dist/*;
+}
+
+workflow[name="doctor"] {
+  trigger: manual;
+  step-1: run cmd=echo "=== sumd doctor ==="
+check() { "$@" > /dev/null 2>&1 && echo "  ✅ $1" || echo "  ❌ $1  (command failed: $*)"; }
+check {{.VENV_PY}} -m pyqual doctor
+check {{.VENV_PY}} -m pytest --version
+check ruff --version
+check {{.PWD}}/.venv/bin/sumd --version
+check {{.PWD}}/.venv/bin/sumd --help
+echo "=== done ===";
+}
+
+workflow[name="help"] {
+  trigger: manual;
+  step-1: run cmd=task --list;
+}
+
+workflow[name="analyze"] {
+  trigger: manual;
+  step-1: run cmd=echo "🔬 Running project analysis...";
+  step-2: run cmd=sumd analyze . --tools code2llm,redup,vallm;
+}
+
+deploy {
+  target: docker;
+}
+
+environment[name="local"] {
+  runtime: docker-compose;
+  env_file: .env;
+  python_version: >=3.10;
+}

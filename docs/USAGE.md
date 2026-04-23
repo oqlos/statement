@@ -1,6 +1,6 @@
 # SUMD — Usage Guide
 
-> **Version 0.3.4** | [README](../README.md) | [SPEC](../SPEC.md)
+> **Version 0.3.29** | [README](../README.md) | [SPEC](../SPEC.md)
 
 ## Table of Contents
 
@@ -87,6 +87,13 @@ sumd scan . --fix --profile minimal
 sumd scan . --fix --profile light
 sumd scan . --fix --profile rich         # default — recommended for LLM use
 sumd scan . --fix --profile refactor     # generates SUMR.md instead of SUMD.md
+```
+
+**Tip:** For a fully reverse-engineered `app.doql.less` (entities, interfaces, dependencies from source), run [`doql adopt`](https://pypi.org/project/doql) first, then `sumd`:
+
+```bash
+doql adopt . --format less --force
+sumd . --fix
 ```
 
 ---

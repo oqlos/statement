@@ -46,10 +46,6 @@ from sumd.extractor import (
     generate_map_toon,
     required_tools_for_profile,
 )
-from sumd.renderer import (
-    _collect_sources,
-    _inject_toc,
-)
 from sumd.sections import PROFILES, SECTION_REGISTRY
 from sumd.sections.base import RenderContext
 from sumd.toon_parser import extract_testql_scenarios
@@ -136,6 +132,126 @@ def _refresh_analysis_files(proj_dir: Path, profile: str) -> None:
             )
     except Exception:  # noqa: BLE001
         pass  # non-fatal
+
+
+# ---------------------------------------------------------------------------
+# Source collection helpers (moved from renderer.py)
+# ---------------------------------------------------------------------------
+
+
+def _collect_tool_sources(
+    pyproj: dict, reqs: list, tasks: list, makefile: list, scenarios: list
+) -> list[str]:
+    """Collect source labels for file-based tool inputs."""
+    sources: list[str] = []
+    if pyproj:
+        sources.append("pyproject.toml")
+    if reqs:
+        sources.extend(r["file"] for r in reqs)
+    if tasks:
+        sources.append("Taskfile.yml")
+    if makefile:
+        sources.append("Makefile")
+    if scenarios:
+        sources.append(f"testql({len(scenarios)})")
+    return sources
+
+
+def _doql_sources(doql: dict) -> list[str]:
+    """Return doql source labels if any doql content is present."""
+    if doql.get("app") or doql.get("workflows") or doql.get("entities"):
+        return doql.get("sources", ["app.doql.less"])
+    return []
+
+
+def _collect_pkg_sources(
+    pyproj: dict,
+    reqs: list,
+    tasks: list,
+    makefile: list,
+    scenarios: list,
+    openapi: dict,
+    doql: dict,
+    pyqual: dict,
+    goal: dict,
+    env_vars: list,
+) -> list[str]:
+    """Collect source labels for code/pipeline sources."""
+    sources = _collect_tool_sources(pyproj, reqs, tasks, makefile, scenarios)
+    if openapi.get("endpoints"):
+        sources.append(f"openapi({len(openapi['endpoints'])} ep)")
+    sources.extend(_doql_sources(doql))
+    if pyqual.get("stages"):
+        sources.append("pyqual.yaml")
+    if goal.get("name"):
+        sources.append("goal.yaml")
+    if env_vars:
+        sources.append(".env.example")
+    return sources
+
+
+def _collect_infra_sources(
+    dockerfile: dict,
+    compose: dict,
+    pkg_json: dict,
+    modules: list,
+    project_analysis: list,
+) -> list[str]:
+    """Collect source labels for infra/module sources."""
+    sources: list[str] = []
+    if dockerfile:
+        sources.append("Dockerfile")
+    if compose.get("services"):
+        sources.append(compose.get("file", "docker-compose.yml"))
+    if pkg_json.get("name"):
+        sources.append("package.json")
+    if modules:
+        sources.append(f"src({len(modules)} mod)")
+    if project_analysis:
+        sources.append(f"project/({len(project_analysis)} analysis files)")
+    return sources
+
+
+def _collect_sources(
+    pyproj: dict,
+    reqs: list,
+    tasks: list,
+    makefile: list,
+    scenarios: list,
+    openapi: dict,
+    doql: dict,
+    pyqual: dict,
+    goal: dict,
+    env_vars: list,
+    dockerfile: dict,
+    compose: dict,
+    pkg_json: dict,
+    modules: list,
+    project_analysis: list,
+) -> list[str]:
+    """Build the list of source labels that contributed data to this SUMD."""
+    return _collect_pkg_sources(
+        pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars
+    ) + _collect_infra_sources(dockerfile, compose, pkg_json, modules, project_analysis)
+
+
+def _inject_toc(content: str) -> str:
+    """Inject a ## Contents TOC block before ## Metadata."""
+    import re
+
+    h2_sections = re.findall(r"^## (.+)$", content, re.MULTILINE)
+    if not h2_sections:
+        return content
+    toc_lines = ["## Contents", ""]
+    for sec in h2_sections:
+        anchor = re.sub(r"[^\w\s-]", "", sec.lower()).strip()
+        anchor = re.sub(r"\s+", "-", anchor)
+        toc_lines.append(f"- [{sec}](#{anchor})")
+    toc_lines.append("")
+    toc_block = "\n".join(toc_lines)
+    return re.sub(
+        r"(\n## Metadata\n)", f"\n{toc_block}\n## Metadata\n", content, count=1
+    )
 
 
 class RenderPipeline:
