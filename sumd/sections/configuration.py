@@ -2,8 +2,31 @@
 
 from __future__ import annotations
 
-from sumd.renderer import _render_configuration_section
 from sumd.sections.base import RenderContext, Section
+
+
+# ---------------------------------------------------------------------------
+# Private renderers (moved from renderer.py)
+# ---------------------------------------------------------------------------
+
+
+def _render_configuration_section(name: str, version: str) -> list[str]:
+    return [
+        "## Configuration",
+        "",
+        "```yaml",
+        "project:",
+        f"  name: {name}",
+        f"  version: {version}",
+        "  env: local",
+        "```",
+        "",
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Section class
+# ---------------------------------------------------------------------------
 
 
 class ConfigurationSection:

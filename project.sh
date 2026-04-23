@@ -35,8 +35,7 @@ $VENV/bin/redup scan . --format toon --output ./project
 #$VENV/bin/prefact -a -e "examples/**"
 
 $PIP install doql --upgrade --quiet
-$VENV/bin/doql adopt . --format less --force
-
+$VENV/bin/doql adopt . --format less --output app.doql.less --force
 $PIP install sumd --upgrade --quiet
 $VENV/bin/sumd .
 $VENV/bin/sumr .

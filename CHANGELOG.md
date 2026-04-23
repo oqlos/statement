@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.32] - 2026-04-23
+
+### Docs
+- Update README.md
+
+### Other
+- Update project.sh
+- Update sumd/sections/api_stubs.py
+- Update sumd/sections/call_graph.py
+- Update sumd/sections/code_analysis.py
+- Update sumd/sections/configuration.py
+- Update sumd/sections/dependencies.py
+- Update sumd/sections/deployment.py
+- Update sumd/sections/extras.py
+- Update sumd/sections/source_snippets.py
+- Update sumd/sections/test_contracts.py
+
 ## [0.3.31] - 2026-04-23
 
 ### Docs
