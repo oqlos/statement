@@ -1,4 +1,4 @@
-# code2llm/evolution | 786 func | 31f | 2026-04-23
+# code2llm/evolution | 795 func | 32f | 2026-04-23
 
 NEXT[2] (ranked by impact):
   [1] !! SPLIT           sumd/cli.py
@@ -6,13 +6,13 @@ NEXT[2] (ranked by impact):
       EFFORT: ~4h  IMPACT: 18502
 
   [2] !! SPLIT           sumd/extractor.py
-      WHY: 908L, 0 classes, max CC=12
-      EFFORT: ~4h  IMPACT: 10896
+      WHY: 960L, 0 classes, max CC=12
+      EFFORT: ~4h  IMPACT: 11520
 
 
 RISKS[2]:
   ⚠ Splitting sumd/cli.py may break 43 import paths
-  ⚠ Splitting sumd/extractor.py may break 39 import paths
+  ⚠ Splitting sumd/extractor.py may break 40 import paths
 
 METRICS-TARGET:
   CC̄:          1.2 → ≤0.8

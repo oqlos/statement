@@ -1,0 +1,33 @@
+version: 1
+project: sumd
+language: python
+
+# Directories that `swop scan` should walk for CQRS artifacts.
+source_roots:
+  - .
+
+# Glob patterns that are always excluded from scanning.
+exclude:
+  - "**/tests/**"
+  - "**/__pycache__/**"
+  - "**/.venv/**"
+  - "**/venv/**"
+  - "**/.sumd-tools/**"
+  - "**/node_modules/**"
+
+# Bounded contexts defined in this project.
+# Each context maps a name to a source subtree.
+bounded_contexts:
+  - name: core
+    source: sumd
+
+# Message bus used by generated workers. Set `type: redis` to use Redis
+# Streams instead of RabbitMQ.
+# bus:
+#   type: rabbitmq
+#   url: "${RABBITMQ_URL}"
+
+# Read-model database for projections.
+# read_models:
+#   engine: postgresql
+#   url: "${DB_URL}"

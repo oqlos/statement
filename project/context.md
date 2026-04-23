@@ -4,12 +4,12 @@
 
 - **Project**: /home/tom/github/oqlos/sumd
 - **Primary Language**: python
-- **Languages**: python: 31, shell: 5
+- **Languages**: python: 32, shell: 5
 - **Analysis Mode**: static
-- **Total Functions**: 226
-- **Total Classes**: 23
-- **Modules**: 36
-- **Entry Points**: 78
+- **Total Functions**: 230
+- **Total Classes**: 24
+- **Modules**: 37
+- **Entry Points**: 80
 
 ## Architecture by Module
 
@@ -18,7 +18,7 @@
 - **File**: `cli.py`
 
 ### sumd.extractor
-- **Functions**: 39
+- **Functions**: 40
 - **File**: `extractor.py`
 
 ### sumd.pipeline
@@ -74,15 +74,15 @@
 - **Classes**: 1
 - **File**: `dependencies.py`
 
-### sumd.sections.extras
-- **Functions**: 5
-- **Classes**: 1
-- **File**: `extras.py`
-
 ### sumd.sections.workflows
 - **Functions**: 5
 - **Classes**: 1
 - **File**: `workflows.py`
+
+### sumd.sections.extras
+- **Functions**: 5
+- **Classes**: 1
+- **File**: `extras.py`
 
 ### sumd.sections.environment
 - **Functions**: 4
@@ -103,10 +103,10 @@
 - **Classes**: 1
 - **File**: `source_snippets.py`
 
-### sumd.sections.api_stubs
+### sumd.sections.swop
 - **Functions**: 3
 - **Classes**: 1
-- **File**: `api_stubs.py`
+- **File**: `swop.py`
 
 ## Key Entry Points
 
@@ -212,14 +212,14 @@ Args:
 ### sumd.mcp_server._tool_generate_sumd
 - **Calls**: arguments.get, data.get, data.get, None.join, section.get, sumd.mcp_server._resolve_path, out.write_text, types.TextContent
 
+### sumd.sections.refactor_analysis.RefactorAnalysisSection.render
+- **Calls**: a, a, a, a, None.replace, a, a, a
+
 ### sumd.cli.info
 > Display information about a SUMD document.
 
 FILE: Path to the SUMD markdown file
 - **Calls**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, click.echo, click.echo, click.echo, click.Path, click.echo
-
-### sumd.sections.refactor_analysis.RefactorAnalysisSection.render
-- **Calls**: a, a, a, a, None.replace, a, a, a
 
 ### sumd.mcp_server.list_tools
 - **Calls**: server.list_tools, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool, types.Tool
@@ -326,25 +326,25 @@ Usage:
 - **Methods**: 6
 - **Key Methods**: sumd.pipeline.RenderPipeline.__init__, sumd.pipeline.RenderPipeline._collect, sumd.pipeline.RenderPipeline._build_registered_sections, sumd.pipeline.RenderPipeline._render_legacy_sections, sumd.pipeline.RenderPipeline._assemble, sumd.pipeline.RenderPipeline.run
 
-### sumd.sections.refactor_analysis.RefactorAnalysisSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.refactor_analysis.RefactorAnalysisSection.should_render, sumd.sections.refactor_analysis.RefactorAnalysisSection.render
-
 ### sumd.sections.interfaces.InterfacesSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.interfaces.InterfacesSection.should_render, sumd.sections.interfaces.InterfacesSection.render
+
+### sumd.sections.refactor_analysis.RefactorAnalysisSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.refactor_analysis.RefactorAnalysisSection.should_render, sumd.sections.refactor_analysis.RefactorAnalysisSection.render
 
 ### sumd.sections.quality.QualitySection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.quality.QualitySection.should_render, sumd.sections.quality.QualitySection.render
 
-### sumd.sections.deployment.DeploymentSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.deployment.DeploymentSection.should_render, sumd.sections.deployment.DeploymentSection.render
-
 ### sumd.sections.code_analysis.CodeAnalysisSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.code_analysis.CodeAnalysisSection.should_render, sumd.sections.code_analysis.CodeAnalysisSection.render
+
+### sumd.sections.deployment.DeploymentSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.deployment.DeploymentSection.should_render, sumd.sections.deployment.DeploymentSection.render
 
 ### sumd.sections.metadata.MetadataSection
 > Render ## Metadata — always present, all profiles.
@@ -367,25 +367,29 @@ Usage:
 - **Methods**: 2
 - **Key Methods**: sumd.sections.architecture.ArchitectureSection.should_render, sumd.sections.architecture.ArchitectureSection.render
 
-### sumd.sections.extras.ExtrasSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.extras.ExtrasSection.should_render, sumd.sections.extras.ExtrasSection.render
-
 ### sumd.sections.workflows.WorkflowsSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.workflows.WorkflowsSection.should_render, sumd.sections.workflows.WorkflowsSection.render
+
+### sumd.sections.swop.SwopSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.swop.SwopSection.should_render, sumd.sections.swop.SwopSection.render
+
+### sumd.sections.extras.ExtrasSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.extras.ExtrasSection.should_render, sumd.sections.extras.ExtrasSection.render
 
 ### sumd.sections.api_stubs.ApiStubsSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.api_stubs.ApiStubsSection.should_render, sumd.sections.api_stubs.ApiStubsSection.render
 
-### sumd.sections.environment.EnvironmentSection
-- **Methods**: 2
-- **Key Methods**: sumd.sections.environment.EnvironmentSection.should_render, sumd.sections.environment.EnvironmentSection.render
-
 ### sumd.sections.configuration.ConfigurationSection
 - **Methods**: 2
 - **Key Methods**: sumd.sections.configuration.ConfigurationSection.should_render, sumd.sections.configuration.ConfigurationSection.render
+
+### sumd.sections.environment.EnvironmentSection
+- **Methods**: 2
+- **Key Methods**: sumd.sections.environment.EnvironmentSection.should_render, sumd.sections.environment.EnvironmentSection.render
 
 ### sumd.sections.base.Section
 > Protocol for all SUMD section renderers.
@@ -398,11 +402,6 @@ Attributes:
 
 ### sumd.validator.CodeBlockIssue
 - **Methods**: 0
-
-### sumd.models.SectionType
-> SUMD section types.
-- **Methods**: 0
-- **Inherits**: Enum
 
 ## Data Transformation Functions
 
@@ -593,16 +592,17 @@ Functions exposed as public API (no underscore prefix):
 - `sumd.extractor.extract_env` - 13 calls
 - `sumd.cli.validate` - 13 calls
 - `sumd.cli.extract` - 13 calls
-- `sumd.toon_parser.extract_testql_scenarios` - 12 calls
 - `examples.mcp.mcp_client.main` - 12 calls
+- `sumd.toon_parser.extract_testql_scenarios` - 12 calls
 - `sumd.extractor.extract_pyqual` - 12 calls
 - `sumd.extractor.extract_makefile` - 12 calls
 - `sumd.extractor.extract_source_snippets` - 12 calls
-- `sumd.cli.info` - 11 calls
 - `sumd.sections.refactor_analysis.RefactorAnalysisSection.render` - 11 calls
+- `sumd.cli.info` - 11 calls
 - `sumd.extractor.extract_taskfile` - 10 calls
 - `examples.llm.openai_example.build_context` - 9 calls
 - `sumd.extractor.extract_requirements` - 9 calls
+- `sumd.extractor.extract_swop` - 9 calls
 - `sumd.mcp_server.list_tools` - 8 calls
 - `sumd.extractor.extract_project_analysis` - 7 calls
 - `sumd.validator.validate_markdown` - 6 calls
@@ -611,7 +611,6 @@ Functions exposed as public API (no underscore prefix):
 - `sumd.extractor.extract_dockerfile` - 5 calls
 - `sumd.mcp_server.call_tool` - 5 calls
 - `sumd.parser.SUMDParser.parse` - 4 calls
-- `sumd.parser.SUMDParser.validate` - 4 calls
 
 ## System Interactions
 

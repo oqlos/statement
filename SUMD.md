@@ -6,6 +6,7 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 
 - [Metadata](#metadata)
 - [Architecture](#architecture)
+- [SWOP](#swop)
 - [Interfaces](#interfaces)
 - [Workflows](#workflows)
 - [Quality Pipeline (`pyqual.yaml`)](#quality-pipeline-pyqualyaml)
@@ -23,12 +24,12 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.3.34`
+- **version**: `0.3.37`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
 - **ecosystem**: SUMD + DOQL + testql + taskfile
-- **generated_from**: pyproject.toml, Taskfile.yml, testql(3), app.doql.less, pyqual.yaml, goal.yaml, .env.example, src(10 mod), project/(2 analysis files)
+- **generated_from**: pyproject.toml, Taskfile.yml, testql(3), app.doql.less, pyqual.yaml, goal.yaml, .env.example, src(10 mod), project/(2 analysis files), .swop/manifests/core/commands.yml, .swop/manifests/core/queries.yml, .swop/manifests/core/events.yml
 
 ## Architecture
 
@@ -43,7 +44,7 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: sumd;
-  version: 0.3.34;
+  version: 0.3.37;
 }
 
 dependencies {
@@ -248,6 +249,69 @@ environment[name="local"] {
 - `sumd.renderer`
 - `sumd.toon_parser`
 - `sumd.validator`
+
+## SWOP
+
+SWOP - Bi-directional runtime reconciler and drift-aware state graph for full-stack systems.
+
+### Context: `core`
+
+#### Commands (`.swop/manifests/core/commands.yml`)
+
+```yaml markpact:swop path=.swop/manifests/core/commands.yml
+version: 1
+context: core
+commands:
+  GenerateSUMD:
+    module: sumd.cli
+    fields:
+      - name: project_dir
+        type: Path
+        required: true
+      - name: profile
+        type: str
+        required: false
+  ExtractSwop:
+    module: sumd.extractor
+    fields:
+      - name: proj_dir
+        type: Path
+        required: true
+```
+
+#### Queries (`.swop/manifests/core/queries.yml`)
+
+```yaml markpact:swop path=.swop/manifests/core/queries.yml
+version: 1
+context: core
+queries:
+  ListProjects:
+    module: sumd.pipeline
+    fields:
+      - name: workspace
+        type: Path
+        required: true
+      - name: max_depth
+        type: int
+        required: false
+```
+
+#### Events (`.swop/manifests/core/events.yml`)
+
+```yaml markpact:swop path=.swop/manifests/core/events.yml
+version: 1
+context: core
+events:
+  SUMDGenerated:
+    module: sumd.generator
+    fields:
+      - name: project_name
+        type: str
+        required: true
+      - name: sections
+        type: list
+        required: true
+```
 
 ## Interfaces
 
@@ -636,7 +700,7 @@ pipeline:
 ```yaml
 project:
   name: sumd
-  version: 0.3.34
+  version: 0.3.37
   env: local
 ```
 
@@ -706,13 +770,13 @@ pip install -e .[dev]
 ### `project/map.toon.yaml`
 
 ```toon markpact:analysis path=project/map.toon.yaml
-# sumd | 47f 8263L | python:40,shell:5,less:2 | 2026-04-23
-# stats: 223 func | 63 cls | 47 mod | CC̄=4.5 | critical:10 | cycles:0
+# sumd | 48f 8398L | python:41,shell:5,less:2 | 2026-04-23
+# stats: 225 func | 64 cls | 48 mod | CC̄=4.6 | critical:10 | cycles:0
 # alerts[5]: CC _map_cc_stats=12; CC run=11; CC analyze=11; CC _render_api_stubs=11; CC _walk_projects=10
 # hotspots[5]: scan fan=18; scaffold fan=18; analyze fan=17; generate fan=15; _parse_doql_content fan=14
 # evolution: baseline
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
-M[47]:
+M[48]:
   app.doql.less,196
   examples/app.doql.less,60
   examples/basic/demo.sh,50
@@ -725,17 +789,17 @@ M[47]:
   scripts/bootstrap.sh,70
   sumd/__init__.py,36
   sumd/cli.py,1683
-  sumd/extractor.py,909
+  sumd/extractor.py,961
   sumd/generator.py,16
   sumd/mcp_server.py,359
   sumd/models.py,46
   sumd/parser.py,196
-  sumd/pipeline.py,436
+  sumd/pipeline.py,444
   sumd/renderer.py,30
-  sumd/sections/__init__.py,104
+  sumd/sections/__init__.py,107
   sumd/sections/api_stubs.py,77
   sumd/sections/architecture.py,157
-  sumd/sections/base.py,94
+  sumd/sections/base.py,95
   sumd/sections/call_graph.py,157
   sumd/sections/code_analysis.py,69
   sumd/sections/configuration.py,45
@@ -748,10 +812,11 @@ M[47]:
   sumd/sections/quality.py,83
   sumd/sections/refactor_analysis.py,69
   sumd/sections/source_snippets.py,70
+  sumd/sections/swop.py,69
   sumd/sections/test_contracts.py,79
   sumd/sections/workflows.py,87
   sumd/toon_parser.py,174
-  sumd/validator.py,330
+  sumd/validator.py,332
   tests/test_cli.py,324
   tests/test_dogfood.py,148
   tests/test_extractor.py,313
@@ -821,7 +886,7 @@ D:
     main()
     main_sumr()
   sumd/extractor.py:
-    e: _read_toml,extract_pyproject,_first_task_cmd,extract_taskfile,_parse_openapi_endpoints,extract_openapi,_parse_doql_entities,_parse_doql_interfaces,_parse_doql_workflows,_parse_doql_content,extract_doql,extract_pyqual,extract_python_modules,extract_readme_title,extract_requirements,extract_makefile,extract_goal,extract_env,_parse_dockerfile_line,extract_dockerfile,extract_docker_compose,extract_package_json,_lang_of,_fan_out,_cc_estimate,_try_radon_cc,_analyse_py_top_funcs,_analyse_class_methods,_analyse_py_top_classes,_analyse_py_module,_is_map_ignored_path,_collect_map_files,_render_map_detail,_map_cc_stats,_render_py_module_detail,generate_map_toon,required_tools_for_profile,extract_source_snippets,extract_project_analysis
+    e: _read_toml,extract_pyproject,_first_task_cmd,extract_taskfile,_parse_openapi_endpoints,extract_openapi,_parse_doql_entities,_parse_doql_interfaces,_parse_doql_workflows,_parse_doql_content,extract_doql,extract_pyqual,extract_python_modules,extract_readme_title,extract_requirements,extract_makefile,extract_goal,extract_env,_parse_dockerfile_line,extract_dockerfile,extract_docker_compose,extract_package_json,_lang_of,_fan_out,_cc_estimate,_try_radon_cc,_analyse_py_top_funcs,_analyse_class_methods,_analyse_py_top_classes,_analyse_py_module,_is_map_ignored_path,_collect_map_files,_render_map_detail,_map_cc_stats,_render_py_module_detail,generate_map_toon,required_tools_for_profile,extract_source_snippets,extract_swop,extract_project_analysis
     _read_toml(path)
     extract_pyproject(proj_dir)
     _first_task_cmd(cmds)
@@ -860,6 +925,7 @@ D:
     generate_map_toon(proj_dir)
     required_tools_for_profile(profile)
     extract_source_snippets(proj_dir;pkg_name)
+    extract_swop(proj_dir)
     extract_project_analysis(proj_dir;refactor)
   sumd/generator.py:
   sumd/mcp_server.py:
@@ -898,7 +964,7 @@ D:
     _doql_sources(doql)
     _collect_pkg_sources(pyproj;reqs;tasks;makefile;scenarios;openapi;doql;pyqual;goal;env_vars)
     _collect_infra_sources(dockerfile;compose;pkg_json;modules;project_analysis)
-    _collect_sources(pyproj;reqs;tasks;makefile;scenarios;openapi;doql;pyqual;goal;env_vars;dockerfile;compose;pkg_json;modules;project_analysis)
+    _collect_sources(pyproj;reqs;tasks;makefile;scenarios;openapi;doql;pyqual;goal;env_vars;dockerfile;compose;pkg_json;modules;project_analysis;swop)
     _inject_toc(content)
   sumd/renderer.py:
     e: generate_sumd_content
@@ -991,6 +1057,10 @@ D:
     e: _render_source_snippets,SourceSnippetsSection
     SourceSnippetsSection: should_render(1),render(1)
     _render_source_snippets(source_snippets;top_n)
+  sumd/sections/swop.py:
+    e: _render_swop_section,SwopSection
+    SwopSection: should_render(1),render(1)
+    _render_swop_section(swop;raw_sources)
   sumd/sections/test_contracts.py:
     e: _render_scenario_contract,_render_test_contracts,TestContractsSection
     TestContractsSection: should_render(1),render(1)
@@ -1219,6 +1289,7 @@ def _render_py_module_detail(rel, info, a)  # CC=7, fan=3
 def generate_map_toon(proj_dir)  # CC=5, fan=13
 def required_tools_for_profile(profile)  # CC=4, fan=0
 def extract_source_snippets(proj_dir, pkg_name)  # CC=6, fan=11
+def extract_swop(proj_dir)  # CC=9, fan=8
 def extract_project_analysis(proj_dir, refactor)  # CC=6, fan=7
 ```
 
@@ -1233,7 +1304,7 @@ def _collect_tool_sources(pyproj, reqs, tasks, makefile, scenarios)  # CC=7, fan
 def _doql_sources(doql)  # CC=4, fan=1
 def _collect_pkg_sources(pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars)  # CC=5, fan=6
 def _collect_infra_sources(dockerfile, compose, pkg_json, modules, project_analysis)  # CC=6, fan=3
-def _collect_sources(pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars, dockerfile, compose, pkg_json, modules, project_analysis)  # CC=1, fan=2
+def _collect_sources(pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars, dockerfile, compose, pkg_json, modules, project_analysis, swop)  # CC=2, fan=4
 def _inject_toc(content)  # CC=3, fan=6
 class RenderPipeline:  # Collect project data → build sections → render → inject TOC.
     def __init__(proj_dir, raw_sources)  # CC=1
@@ -1284,7 +1355,7 @@ def main()  # CC=1, fan=3
 
 ## Call Graph
 
-*171 nodes · 159 edges · 24 modules · CC̄=1.2*
+*173 nodes · 160 edges · 25 modules · CC̄=1.2*
 
 ### Hubs (by degree)
 
@@ -1293,15 +1364,15 @@ def main()  # CC=1, fan=3
 | `run` *(in examples.mcp.mcp_client)* | 11 ⚠ | 1 | 53 | **54** |
 | `print` *(in README)* | 0 | 42 | 0 | **42** |
 | `analyze` *(in sumd.cli)* | 11 ⚠ | 0 | 33 | **33** |
-| `_collect` *(in sumd.pipeline.RenderPipeline)* | 3 | 0 | 30 | **30** |
+| `_collect` *(in sumd.pipeline.RenderPipeline)* | 3 | 0 | 31 | **31** |
 | `_render_call_graph` *(in sumd.sections.call_graph)* | 7 | 1 | 28 | **29** |
 | `_render_api_stubs` *(in sumd.sections.api_stubs)* | 11 ⚠ | 1 | 27 | **28** |
 | `generate_map_toon` *(in sumd.extractor)* | 5 | 2 | 24 | **26** |
-| `_render_quality_parsed` *(in sumd.sections.quality)* | 9 | 1 | 21 | **22** |
+| `_render_swop_section` *(in sumd.sections.swop)* | 9 | 1 | 24 | **25** |
 
 ```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/oqlos/sumd
-# nodes: 171 | edges: 159 | modules: 24
+# nodes: 173 | edges: 160 | modules: 25
 # CC̄=1.2
 
 HUBS[20]:
@@ -1312,39 +1383,39 @@ HUBS[20]:
   sumd.cli.analyze
     CC=11  in:0  out:33  total:33
   sumd.pipeline.RenderPipeline._collect
-    CC=3  in:0  out:30  total:30
+    CC=3  in:0  out:31  total:31
   sumd.sections.call_graph._render_call_graph
     CC=7  in:1  out:28  total:29
   sumd.sections.api_stubs._render_api_stubs
     CC=11  in:1  out:27  total:28
   sumd.extractor.generate_map_toon
     CC=5  in:2  out:24  total:26
+  sumd.sections.swop._render_swop_section
+    CC=9  in:1  out:24  total:25
   sumd.sections.quality._render_quality_parsed
     CC=9  in:1  out:21  total:22
+  sumd.sections.interfaces._render_interfaces_openapi
+    CC=6  in:1  out:19  total:20
   sumd.extractor._parse_doql_content
+    CC=6  in:1  out:19  total:20
+  sumd.sections.dependencies._render_deps_runtime
     CC=6  in:1  out:19  total:20
   sumd.cli.map_cmd
     CC=7  in:0  out:20  total:20
-  sumd.sections.dependencies._render_deps_runtime
-    CC=6  in:1  out:19  total:20
-  sumd.sections.interfaces._render_interfaces_openapi
-    CC=6  in:1  out:19  total:20
-  sumd.extractor.extract_pyproject
-    CC=3  in:2  out:17  total:19
   sumd.extractor._parse_doql_workflows
     CC=7  in:1  out:18  total:19
   sumd.cli.lint
     CC=10  in:0  out:19  total:19
-  sumd.validator.validate_codeblocks
-    CC=9  in:1  out:17  total:18
+  sumd.extractor.extract_pyproject
+    CC=3  in:2  out:17  total:19
+  sumd.sections.workflows._render_workflows_taskfile
+    CC=6  in:1  out:17  total:18
   sumd.sections.environment._render_goal_section
     CC=9  in:1  out:17  total:18
   sumd.extractor.extract_package_json
     CC=3  in:3  out:15  total:18
-  sumd.sections.workflows._render_workflows_taskfile
-    CC=6  in:1  out:17  total:18
-  sumd.sections.source_snippets._render_source_snippets
-    CC=8  in:1  out:16  total:17
+  sumd.validator.validate_codeblocks
+    CC=9  in:1  out:17  total:18
 
 MODULES:
   README  [1 funcs]
@@ -1394,11 +1465,11 @@ MODULES:
   sumd.parser  [1 funcs]
     parse_file  CC=1  out:2
   sumd.pipeline  [12 funcs]
-    _collect  CC=3  out:30
+    _collect  CC=3  out:31
     run  CC=2  out:3
     _collect_infra_sources  CC=6  out:10
     _collect_pkg_sources  CC=5  out:11
-    _collect_sources  CC=1  out:2
+    _collect_sources  CC=2  out:4
     _collect_tool_sources  CC=7  out:6
     _doql_sources  CC=4  out:4
     _find_tools_bin_dir  CC=3  out:1
@@ -1467,6 +1538,9 @@ MODULES:
   sumd.sections.source_snippets  [2 funcs]
     render  CC=1  out:1
     _render_source_snippets  CC=8  out:16
+  sumd.sections.swop  [2 funcs]
+    render  CC=1  out:1
+    _render_swop_section  CC=9  out:24
   sumd.sections.workflows  [4 funcs]
     render  CC=1  out:1
     _render_workflows  CC=4  out:5

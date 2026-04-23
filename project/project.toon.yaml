@@ -1,10 +1,10 @@
-# sumd | 801 func | 36f | 21168L | python | 2026-04-23
+# sumd | 810 func | 37f | 21481L | python | 2026-04-23
 
 HEALTH:
   CC̄=1.2  critical=10 (limit:10)  dup=3  cycles=0
 
 ALERTS[20]:
-  !!! high_fan_out     RenderPipeline._collect = 22 (limit:10)
+  !!! high_fan_out     RenderPipeline._collect = 23 (limit:10)
   !!  high_fan_out     scaffold = 19 (limit:10)
   !!  high_fan_out     scan = 18 (limit:10)
   !!  high_fan_out     generate = 17 (limit:10)
@@ -15,26 +15,26 @@ ALERTS[20]:
   !   high_fan_out     _parse_toon_file = 13 (limit:10)
   !   high_fan_out     _scaffold_from_openapi = 13 (limit:10)
 
-MODULES[94] (top by size):
-  M[project/calls.yaml] 2622L C:0 F:0 CC↑0 D:0 (yaml)
+MODULES[96] (top by size):
+  M[project/calls.yaml] 2598L C:0 F:0 CC↑0 D:0 (yaml)
   M[sumd/cli.py] 1682L C:0 F:43 CC↑11 D:0 (python)
-  M[SUMD.md] 1571L C:2 F:220 CC↑0 D:0 (md)
-  M[SUMR.md] 1499L C:2 F:124 CC↑0 D:0 (md)
-  M[sumd/extractor.py] 908L C:0 F:39 CC↑12 D:2 (python)
-  M[CHANGELOG.md] 766L C:0 F:0 CC↑0 D:0 (md)
-  M[project/context.md] 664L C:0 F:0 CC↑0 D:0 (md)
-  M[docs/README.md] 604L C:0 F:1 CC↑0 D:0 (md)
+  M[SUMD.md] 1652L C:2 F:222 CC↑0 D:0 (md)
+  M[SUMR.md] 1521L C:2 F:125 CC↑0 D:0 (md)
+  M[sumd/extractor.py] 960L C:0 F:40 CC↑12 D:2 (python)
+  M[CHANGELOG.md] 805L C:0 F:0 CC↑0 D:0 (md)
+  M[project/context.md] 663L C:0 F:0 CC↑0 D:0 (md)
+  M[docs/README.md] 612L C:0 F:1 CC↑0 D:0 (md)
   M[goal.yaml] 511L C:0 F:0 CC↑0 D:0 (yaml)
   M[docs/USAGE.md] 494L C:0 F:1 CC↑0 D:0 (md)
-  M[sumd/pipeline.py] 435L C:1 F:16 CC↑7 D:0 (python)
+  M[sumd/pipeline.py] 443L C:1 F:16 CC↑7 D:0 (python)
+  M[project/map.toon.yaml] 424L C:0 F:217 CC↑0 D:0 (yaml)
   M[SPEC.md] 423L C:0 F:0 CC↑0 D:0 (md)
-  M[project/map.toon.yaml] 418L C:0 F:215 CC↑0 D:0 (yaml)
   M[sumd/mcp_server.py] 358L C:0 F:12 CC↑5 D:0 (python)
   M[project/README.md] 339L C:0 F:0 CC↑0 D:0 (md)
-  LANGS: python:31/yaml:20/md:20/json:7/yml:6/shell:5/toml:2/other:2/txt:1
+  LANGS: python:32/yaml:21/md:20/json:7/yml:6/shell:5/toml:2/other:2/txt:1
 
 HOTSPOTS[10]:
-  ★ RenderPipeline._collect fan=22  // Extract all project data and build RenderContext.
+  ★ RenderPipeline._collect fan=23  // Extract all project data and build RenderContext.
   ★ scaffold fan=19  // Generate testql scenario scaffolds from OpenAPI spec or SUMD.md.
 
 Reads openapi.
@@ -47,11 +47,11 @@ FILE: Path to the structured f
   ★ analyze fan=17  // Analysis pipeline, 17 stages
 
 REFACTOR[12]:
-  [1] H/H Split god module sumd/extractor.py (908L, 0 classes)
+  [1] H/H Split god module sumd/extractor.py (960L, 0 classes)
   [2] H/H Split god module sumd/cli.py (1682L, 0 classes)
-  [3] H/H Split god module CHANGELOG.md (766L, 0 classes)
-  [4] H/H Split god module SUMD.md (1571L, 2 classes)
-  [5] H/H Split god module SUMR.md (1499L, 2 classes)
+  [3] H/H Split god module CHANGELOG.md (805L, 0 classes)
+  [4] H/H Split god module SUMD.md (1652L, 2 classes)
+  [5] H/H Split god module SUMR.md (1521L, 2 classes)
 
 EVOLUTION:
-  2026-04-23 CC̄=1.2 crit=10 21168L // Automated analysis
+  2026-04-23 CC̄=1.2 crit=10 21481L // Automated analysis

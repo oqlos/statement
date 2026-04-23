@@ -1,7 +1,7 @@
-# vallm batch | 101f | 56✓ 0⚠ 7✗ | 2026-04-23
+# vallm batch | 102f | 57✓ 0⚠ 7✗ | 2026-04-23
 
 SUMMARY:
-  scanned: 101  passed: 56 (55.4%)  warnings: 0  errors: 7  unsupported: 38
+  scanned: 102  passed: 57 (55.9%)  warnings: 0  errors: 7  unsupported: 38
 
 ERRORS[7]{path,score}:
   /home/tom/github/oqlos/sumd/sumd/mcp_server.py,0.86

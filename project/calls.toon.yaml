@@ -1,5 +1,5 @@
 # code2llm call graph | /home/tom/github/oqlos/sumd
-# nodes: 171 | edges: 159 | modules: 24
+# nodes: 173 | edges: 160 | modules: 25
 # CC̄=1.2
 
 HUBS[20]:
@@ -10,39 +10,39 @@ HUBS[20]:
   sumd.cli.analyze
     CC=11  in:0  out:33  total:33
   sumd.pipeline.RenderPipeline._collect
-    CC=3  in:0  out:30  total:30
+    CC=3  in:0  out:31  total:31
   sumd.sections.call_graph._render_call_graph
     CC=7  in:1  out:28  total:29
   sumd.sections.api_stubs._render_api_stubs
     CC=11  in:1  out:27  total:28
   sumd.extractor.generate_map_toon
     CC=5  in:2  out:24  total:26
+  sumd.sections.swop._render_swop_section
+    CC=9  in:1  out:24  total:25
   sumd.sections.quality._render_quality_parsed
     CC=9  in:1  out:21  total:22
+  sumd.sections.interfaces._render_interfaces_openapi
+    CC=6  in:1  out:19  total:20
   sumd.extractor._parse_doql_content
+    CC=6  in:1  out:19  total:20
+  sumd.sections.dependencies._render_deps_runtime
     CC=6  in:1  out:19  total:20
   sumd.cli.map_cmd
     CC=7  in:0  out:20  total:20
-  sumd.sections.dependencies._render_deps_runtime
-    CC=6  in:1  out:19  total:20
-  sumd.sections.interfaces._render_interfaces_openapi
-    CC=6  in:1  out:19  total:20
-  sumd.extractor.extract_pyproject
-    CC=3  in:2  out:17  total:19
   sumd.extractor._parse_doql_workflows
     CC=7  in:1  out:18  total:19
   sumd.cli.lint
     CC=10  in:0  out:19  total:19
-  sumd.validator.validate_codeblocks
-    CC=9  in:1  out:17  total:18
+  sumd.extractor.extract_pyproject
+    CC=3  in:2  out:17  total:19
+  sumd.sections.workflows._render_workflows_taskfile
+    CC=6  in:1  out:17  total:18
   sumd.sections.environment._render_goal_section
     CC=9  in:1  out:17  total:18
   sumd.extractor.extract_package_json
     CC=3  in:3  out:15  total:18
-  sumd.sections.workflows._render_workflows_taskfile
-    CC=6  in:1  out:17  total:18
-  sumd.sections.source_snippets._render_source_snippets
-    CC=8  in:1  out:16  total:17
+  sumd.validator.validate_codeblocks
+    CC=9  in:1  out:17  total:18
 
 MODULES:
   README  [1 funcs]
@@ -92,11 +92,11 @@ MODULES:
   sumd.parser  [1 funcs]
     parse_file  CC=1  out:2
   sumd.pipeline  [12 funcs]
-    _collect  CC=3  out:30
+    _collect  CC=3  out:31
     run  CC=2  out:3
     _collect_infra_sources  CC=6  out:10
     _collect_pkg_sources  CC=5  out:11
-    _collect_sources  CC=1  out:2
+    _collect_sources  CC=2  out:4
     _collect_tool_sources  CC=7  out:6
     _doql_sources  CC=4  out:4
     _find_tools_bin_dir  CC=3  out:1
@@ -165,6 +165,9 @@ MODULES:
   sumd.sections.source_snippets  [2 funcs]
     render  CC=1  out:1
     _render_source_snippets  CC=8  out:16
+  sumd.sections.swop  [2 funcs]
+    render  CC=1  out:1
+    _render_swop_section  CC=9  out:24
   sumd.sections.workflows  [4 funcs]
     render  CC=1  out:1
     _render_workflows  CC=4  out:5

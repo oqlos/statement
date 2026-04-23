@@ -1,12 +1,12 @@
-# code2llm | 30f 5875L | python:28,shell:2 | 2026-04-23
-# CC̄=4.3 | critical:0/226 | dups:0 | cycles:1
+# code2llm | 31f 6009L | python:29,shell:2 | 2026-04-23
+# CC̄=4.3 | critical:0/230 | dups:0 | cycles:1
 
 HEALTH[0]: ok
 
 REFACTOR[1]:
   1. break 1 circular dependencies
 
-PIPELINES[70]:
+PIPELINES[72]:
   [1] Src [main]: main → ask → parse_file
       PURITY: 100% pure
   [2] Src [main]: main → ask → build_context → parse_file
@@ -21,19 +21,19 @@ PIPELINES[70]:
 LAYERS:
   sumd/                           CC̄=4.3    ←in:0  →out:0
   │ !! cli                       1682L  0C   43m  CC=11     ←0
-  │ !! extractor                  908L  0C   39m  CC=12     ←2
-  │ pipeline                   435L  1C   16m  CC=7      ←0
+  │ !! extractor                  960L  0C   40m  CC=12     ←2
+  │ pipeline                   443L  1C   16m  CC=7      ←0
   │ mcp_server                 358L  0C   12m  CC=5      ←0
-  │ validator                  329L  1C   15m  CC=9      ←1
+  │ validator                  331L  1C   15m  CC=9      ←1
   │ parser                     195L  1C    9m  CC=9      ←4
   │ toon_parser                173L  0C    8m  CC=9      ←1
   │ interfaces                 157L  1C    9m  CC=7      ←0
   │ call_graph                 156L  1C    8m  CC=8      ←0
   │ architecture               156L  1C   10m  CC=6      ←0
   │ deployment                 111L  1C    7m  CC=8      ←0
-  │ __init__                   103L  0C    0m  CC=0.0    ←0
+  │ __init__                   106L  0C    0m  CC=0.0    ←0
   │ dependencies                97L  1C    5m  CC=6      ←0
-  │ base                        93L  2C    2m  CC=1      ←0
+  │ base                        94L  2C    2m  CC=1      ←0
   │ workflows                   86L  1C    5m  CC=6      ←0
   │ quality                     82L  1C    5m  CC=9      ←0
   │ api_stubs                   76L  1C    3m  CC=11     ←0
@@ -42,6 +42,7 @@ LAYERS:
   │ source_snippets             69L  1C    3m  CC=8      ←0
   │ refactor_analysis           68L  1C    2m  CC=3      ←0
   │ code_analysis               68L  1C    3m  CC=9      ←0
+  │ swop                        68L  1C    3m  CC=9      ←0
   │ metadata                    51L  1C    2m  CC=5      ←0
   │ models                      45L  3C    0m  CC=0.0    ←0
   │ configuration               44L  1C    3m  CC=1      ←0

@@ -1,7 +1,7 @@
 <!-- code2docs:start --># sumd
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-810-green)
-> **810** functions | **27** classes | **95** files | CC̄ = 4.3
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-819-green)
+> **819** functions | **28** classes | **96** files | CC̄ = 4.3
 
 > Auto-generated project documentation from source code analysis.
 
@@ -74,17 +74,20 @@ docs = generate_docs("./my-project", config=config)
 ```
 sumd/
 ├── SUMR
+├── swop
 ├── goal
 ├── SUMD
     ├── pre-commit-config
     ├── guards
 ├── pyqual
-├── sumd/
+├── pyproject
 ├── TODO
 ├── mcp
+├── CHANGELOG
 ├── Taskfile
 ├── project
 ├── SPEC
+├── README
     ├── USAGE
     ├── README
     ├── SUMR
@@ -125,6 +128,7 @@ sumd/
     ├── validator
     ├── cli
     ├── generator
+├── sumd/
     ├── extractor
     ├── parser
     ├── models
@@ -144,6 +148,7 @@ sumd/
         ├── architecture
         ├── source_snippets
         ├── workflows
+        ├── swop
         ├── extras
         ├── api_stubs
         ├── environment
@@ -155,16 +160,13 @@ sumd/
             ├── toon
             ├── toon
                 ├── toon
-├── pyproject
     ├── prompt
-├── README
-├── CHANGELOG
-        ├── toon
-        ├── toon
         ├── toon
         ├── toon
     ├── context
+        ├── toon
     ├── README
+        ├── toon
     ├── calls
         ├── toon
 ```
@@ -196,6 +198,7 @@ sumd/
 - **`ArchitectureSection`** — —
 - **`SourceSnippetsSection`** — —
 - **`WorkflowsSection`** — —
+- **`SwopSection`** — —
 - **`ExtrasSection`** — —
 - **`ApiStubsSection`** — —
 - **`EnvironmentSection`** — —
@@ -233,6 +236,7 @@ sumd/
 - `generate_map_toon()` — —
 - `required_tools_for_profile()` — —
 - `extract_source_snippets()` — —
+- `extract_swop()` — —
 - `extract_project_analysis()` — —
 - `run()` — —
 - `validate_codeblocks()` — —
@@ -273,6 +277,7 @@ sumd/
 - `generate_map_toon()` — —
 - `required_tools_for_profile()` — —
 - `extract_source_snippets()` — —
+- `extract_swop()` — —
 - `extract_project_analysis()` — —
 - `list_tools()` — —
 - `call_tool()` — —
@@ -325,6 +330,7 @@ sumd/
 - `test_mcp_tools_registered()` — —
 - `test_mcp_main_no_crash()` — —
 - `print()` — —
+- `print()` — —
 - `generate_readme()` — —
 - `ask()` — —
 - `main()` — —
@@ -375,6 +381,7 @@ sumd/
 - `generate_map_toon(proj_dir)` — Generate project/map.toon.yaml content for proj_dir.
 - `required_tools_for_profile(profile)` — Return the set of external tools needed to refresh analysis files for *profile*.
 - `extract_source_snippets(proj_dir, pkg_name)` — Return per-module AST summary for source_snippets section.
+- `extract_swop(proj_dir)` — Extract SWOP manifest files from .swop/manifests/<context>/ directory.
 - `extract_project_analysis(proj_dir, refactor)` — Return list of {file, lang, content} for files present in project/ subdir.
 - `parse(content)` — Parse a SUMD markdown document.
 - `parse_file(path)` — Parse a SUMD file.
@@ -383,7 +390,6 @@ sumd/
 - `list_tools()` — —
 - `call_tool(name, arguments)` — —
 - `main()` — —
-- `print()` — —
 - `extract_pyproject()` — —
 - `extract_taskfile()` — —
 - `extract_openapi()` — —
@@ -401,6 +407,7 @@ sumd/
 - `generate_map_toon()` — —
 - `required_tools_for_profile()` — —
 - `extract_source_snippets()` — —
+- `extract_swop()` — —
 - `extract_project_analysis()` — —
 - `run()` — —
 - `main()` — —
@@ -475,8 +482,8 @@ sumd/
 📄 `CHANGELOG`
 📄 `README` (1 functions)
 📄 `SPEC`
-📄 `SUMD` (348 functions, 2 classes)
-📄 `SUMR` (125 functions, 2 classes)
+📄 `SUMD` (351 functions, 2 classes)
+📄 `SUMR` (126 functions, 2 classes)
 📄 `TODO` (5 functions)
 📄 `Taskfile`
 📄 `Taskfile.guards`
@@ -526,7 +533,7 @@ sumd/
 📄 `project.context`
 📄 `project.duplication.toon`
 📄 `project.evolution.toon`
-📄 `project.map.toon` (905 functions)
+📄 `project.map.toon` (913 functions)
 📄 `project.project.toon`
 📄 `project.prompt`
 📄 `project.validation.toon`
@@ -535,7 +542,7 @@ sumd/
 📄 `scripts.bootstrap`
 📦 `sumd`
 📄 `sumd.cli` (43 functions)
-📄 `sumd.extractor` (39 functions)
+📄 `sumd.extractor` (40 functions)
 📄 `sumd.generator`
 📄 `sumd.mcp_server` (12 functions)
 📄 `sumd.models` (3 classes)
@@ -558,9 +565,11 @@ sumd/
 📄 `sumd.sections.quality` (5 functions, 1 classes)
 📄 `sumd.sections.refactor_analysis` (2 functions, 1 classes)
 📄 `sumd.sections.source_snippets` (3 functions, 1 classes)
+📄 `sumd.sections.swop` (3 functions, 1 classes)
 📄 `sumd.sections.workflows` (5 functions, 1 classes)
 📄 `sumd.toon_parser` (8 functions)
 📄 `sumd.validator` (15 functions, 1 classes)
+📄 `swop`
 📄 `testql-scenarios.generated-cli-tests.testql.toon`
 📄 `testql-scenarios.generated-from-pytests.testql.toon`
 📄 `testql-scenarios.generated.generated-cli-tests.testql.toon`
