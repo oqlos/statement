@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sumd"
-version = "0.3.28"
+version = "0.3.29"
 description = "SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation"
 readme = "README.md"
 license = "Apache-2.0"
@@ -14,12 +14,12 @@ authors = [
 ]
 keywords = ["sumd", "markdown", "documentation", "llm", "project-descriptor"]
 dependencies = [
-    "click>=8.0",
-    "pyyaml>=6.0",
-    "toml>=0.10.0",
-    "goal>=2.1.0",
-    "costs>=0.1.20",
-    "pfix>=0.1.60",
+    "click>=8.3.3",
+    "pyyaml>=6.0.3",
+    "toml>=0.10.2",
+    "goal>=2.1.190",
+    "costs>=0.1.50",
+    "pfix>=0.1.72",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -32,19 +32,19 @@ classifiers = [
 
 [project.optional-dependencies]
 mcp = [
-    "mcp>=1.0.0",
+    "mcp>=1.27.0",
 ]
 dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "ruff>=0.1",
-    "build",
-    "twine",
-    "pyqual>=0.1",
-    "goal>=2.1.0",
-    "costs>=0.1.20",
-    "pfix>=0.1.60",
-    "mcp>=1.0.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.11",
+    "build>=1.4.4",
+    "twine>=6.2.0",
+    "pyqual>=0.1.143",
+    "goal>=2.1.190",
+    "costs>=0.1.50",
+    "pfix>=0.1.72",
+    "mcp>=1.27.0",
 ]
 
 [tool.pytest.ini_options]
