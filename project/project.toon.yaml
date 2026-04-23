@@ -1,4 +1,4 @@
-# sumd | 810 func | 37f | 21481L | python | 2026-04-23
+# sumd | 810 func | 37f | 21400L | python | 2026-04-23
 
 HEALTH:
   CC̄=1.2  critical=10 (limit:10)  dup=3  cycles=0
@@ -16,16 +16,16 @@ ALERTS[20]:
   !   high_fan_out     _scaffold_from_openapi = 13 (limit:10)
 
 MODULES[96] (top by size):
-  M[project/calls.yaml] 2598L C:0 F:0 CC↑0 D:0 (yaml)
+  M[project/calls.yaml] 2558L C:0 F:0 CC↑0 D:0 (yaml)
   M[sumd/cli.py] 1682L C:0 F:43 CC↑11 D:0 (python)
-  M[SUMD.md] 1652L C:2 F:222 CC↑0 D:0 (md)
-  M[SUMR.md] 1521L C:2 F:125 CC↑0 D:0 (md)
+  M[SUMD.md] 1641L C:2 F:222 CC↑0 D:0 (md)
+  M[SUMR.md] 1499L C:2 F:125 CC↑0 D:0 (md)
   M[sumd/extractor.py] 960L C:0 F:40 CC↑12 D:2 (python)
-  M[CHANGELOG.md] 805L C:0 F:0 CC↑0 D:0 (md)
+  M[CHANGELOG.md] 828L C:0 F:0 CC↑0 D:0 (md)
   M[project/context.md] 663L C:0 F:0 CC↑0 D:0 (md)
-  M[docs/README.md] 612L C:0 F:1 CC↑0 D:0 (md)
+  M[docs/README.md] 615L C:0 F:1 CC↑0 D:0 (md)
   M[goal.yaml] 511L C:0 F:0 CC↑0 D:0 (yaml)
-  M[docs/USAGE.md] 494L C:0 F:1 CC↑0 D:0 (md)
+  M[docs/USAGE.md] 494L C:0 F:1 CC↑0 D:3 (md)
   M[sumd/pipeline.py] 443L C:1 F:16 CC↑7 D:0 (python)
   M[project/map.toon.yaml] 424L C:0 F:217 CC↑0 D:0 (yaml)
   M[SPEC.md] 423L C:0 F:0 CC↑0 D:0 (md)
@@ -49,9 +49,9 @@ FILE: Path to the structured f
 REFACTOR[12]:
   [1] H/H Split god module sumd/extractor.py (960L, 0 classes)
   [2] H/H Split god module sumd/cli.py (1682L, 0 classes)
-  [3] H/H Split god module CHANGELOG.md (805L, 0 classes)
-  [4] H/H Split god module SUMD.md (1652L, 2 classes)
-  [5] H/H Split god module SUMR.md (1521L, 2 classes)
+  [3] H/H Split god module CHANGELOG.md (828L, 0 classes)
+  [4] H/H Split god module SUMD.md (1641L, 2 classes)
+  [5] H/H Split god module SUMR.md (1499L, 2 classes)
 
 EVOLUTION:
-  2026-04-23 CC̄=1.2 crit=10 21481L // Automated analysis
+  2026-04-23 CC̄=1.2 crit=10 21400L // Automated analysis

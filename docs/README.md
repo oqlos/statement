@@ -155,17 +155,17 @@ sumd/
         ├── configuration
     ├── bootstrap
         ├── toon
+    ├── prompt
+        ├── toon
         ├── toon
             ├── toon
             ├── toon
             ├── toon
                 ├── toon
-    ├── prompt
-        ├── toon
-        ├── toon
     ├── context
-        ├── toon
     ├── README
+        ├── toon
+        ├── toon
         ├── toon
     ├── calls
         ├── toon
@@ -440,7 +440,6 @@ sumd/
 - `test_mcp_tools_registered()` — —
 - `test_mcp_main_no_crash()` — —
 - `print()` — —
-- `generate_readme()` — —
 - `sumd_file()` — —
 - `project_copy()` — —
 - `test_sumd_lint_passes_on_generated_output()` — —
@@ -474,6 +473,7 @@ sumd/
 - `make_ctx()` — —
 - `test_placeholder()` — —
 - `test_import()` — —
+- `generate_readme()` — —
 
 
 ## Project Structure

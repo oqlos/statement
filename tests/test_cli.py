@@ -198,6 +198,30 @@ class TestProjectDetection:
         found = {p.name for p in _detect_projects(tmp_path)}
         assert found == {"py-app", "node-app", "rust-app"}
 
+    def test_detect_projects_non_recursive_skips_nested(self, tmp_path: Path):
+        (tmp_path / "proj1").mkdir()
+        (tmp_path / "proj1" / "pyproject.toml").write_text("", encoding="utf-8")
+        (tmp_path / "middle").mkdir()
+        (tmp_path / "middle" / "deep").mkdir()
+        (tmp_path / "middle" / "deep" / "nested").mkdir()
+        (tmp_path / "middle" / "deep" / "nested" / "package.json").write_text("{}", encoding="utf-8")
+
+        # max_depth=0 (default non-recursive) should only find immediate children.
+        found = {p.name for p in _detect_projects(tmp_path, max_depth=0)}
+        assert found == {"proj1"}
+
+    def test_detect_projects_recursive_finds_nested(self, tmp_path: Path):
+        (tmp_path / "proj1").mkdir()
+        (tmp_path / "proj1" / "pyproject.toml").write_text("", encoding="utf-8")
+        (tmp_path / "middle").mkdir()
+        (tmp_path / "middle" / "deep").mkdir()
+        (tmp_path / "middle" / "deep" / "nested").mkdir()
+        (tmp_path / "middle" / "deep" / "nested" / "package.json").write_text("{}", encoding="utf-8")
+
+        # max_depth=None (recursive) should find nested projects too.
+        found = {p.name for p in _detect_projects(tmp_path, max_depth=None)}
+        assert found == {"proj1", "nested"}
+
 
 class TestNodeSpecFromPackageJson:
     """Node DOQL spec must mirror real package.json (scripts + framework)."""

@@ -447,14 +447,14 @@ flowchart TD
         sumd__validator__validate_sumd_file["validate_sumd_file"]
     end
     examples__llm__anthropic_example__ask --> sumd__parser__SUMDParser__parse_file
-    examples__llm__anthropic_example__main --> README__print
+    examples__llm__anthropic_example__main --> docs__USAGE__print
     examples__llm__anthropic_example__main --> examples__llm__anthropic_example__ask
     examples__llm__openai_example__build_context --> sumd__parser__SUMDParser__parse_file
     examples__llm__openai_example__ask --> examples__llm__openai_example__build_context
-    examples__llm__openai_example__main --> README__print
+    examples__llm__openai_example__main --> docs__USAGE__print
     examples__llm__openai_example__main --> examples__llm__openai_example__ask
-    examples__mcp__mcp_client__run --> README__print
-    examples__mcp__mcp_client__main --> README__print
+    examples__mcp__mcp_client__run --> docs__USAGE__print
+    examples__mcp__mcp_client__main --> docs__USAGE__print
     examples__mcp__mcp_client__main --> examples__mcp__mcp_client__run
     sumd__toon_parser___parse_toon_file --> sumd__toon_parser___parse_toon_block_config
     sumd__toon_parser___parse_toon_file --> sumd__toon_parser___parse_toon_block_api

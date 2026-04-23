@@ -1039,7 +1039,12 @@ def _scan_one_project(
     "--depth",
     type=int,
     default=None,
-    help="Max directory depth to scan for projects (default: unlimited)",
+    help="Max directory depth to scan for projects (default: 0 unless --recursive)",
+)
+@click.option(
+    "--recursive/--no-recursive",
+    default=False,
+    help="Recursively scan subdirectories for projects (default: scan immediate children only)",
 )
 @click.option(
     "--generate-doql/--no-generate-doql",
@@ -1061,6 +1066,7 @@ def scan(
     tools: str,
     profile: str,
     depth: Optional[int],
+    recursive: bool,
     generate_doql: bool,
     doql_sync: bool,
 ):
@@ -1087,7 +1093,11 @@ def scan(
     total = ok_count = skip_count = fail_count = 0
     tool_list = [t.strip() for t in tools.split(",") if t.strip()]
 
-    project_dirs = _detect_projects(workspace, max_depth=depth)
+    # Default non-recursive: only immediate children (max_depth=0).
+    # --recursive or --depth overrides this default.
+    effective_depth = depth if depth is not None else (None if recursive else 0)
+
+    project_dirs = _detect_projects(workspace, max_depth=effective_depth)
 
     # If workspace itself looks like a project root, include it.
     if _is_project_dir(workspace):

@@ -24,7 +24,7 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.3.37`
+- **version**: `0.3.38`
 - **python_requires**: `>=3.10`
 - **license**: Apache-2.0
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -44,7 +44,7 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: sumd;
-  version: 0.3.37;
+  version: 0.3.38;
 }
 
 dependencies {
@@ -700,7 +700,7 @@ pipeline:
 ```yaml
 project:
   name: sumd
-  version: 0.3.37
+  version: 0.3.38
   env: local
 ```
 
@@ -1362,7 +1362,7 @@ def main()  # CC=1, fan=3
 | Function | CC | in | out | total |
 |----------|----|----|-----|-------|
 | `run` *(in examples.mcp.mcp_client)* | 11 ⚠ | 1 | 53 | **54** |
-| `print` *(in README)* | 0 | 42 | 0 | **42** |
+| `print` *(in docs.USAGE)* | 0 | 42 | 0 | **42** |
 | `analyze` *(in sumd.cli)* | 11 ⚠ | 0 | 33 | **33** |
 | `_collect` *(in sumd.pipeline.RenderPipeline)* | 3 | 0 | 31 | **31** |
 | `_render_call_graph` *(in sumd.sections.call_graph)* | 7 | 1 | 28 | **29** |
@@ -1378,7 +1378,7 @@ def main()  # CC=1, fan=3
 HUBS[20]:
   examples.mcp.mcp_client.run
     CC=11  in:1  out:53  total:54
-  README.print
+  docs.USAGE.print
     CC=0  in:42  out:0  total:42
   sumd.cli.analyze
     CC=11  in:0  out:33  total:33
@@ -1394,31 +1394,31 @@ HUBS[20]:
     CC=9  in:1  out:24  total:25
   sumd.sections.quality._render_quality_parsed
     CC=9  in:1  out:21  total:22
+  sumd.cli.map_cmd
+    CC=7  in:0  out:20  total:20
   sumd.sections.interfaces._render_interfaces_openapi
-    CC=6  in:1  out:19  total:20
-  sumd.extractor._parse_doql_content
     CC=6  in:1  out:19  total:20
   sumd.sections.dependencies._render_deps_runtime
     CC=6  in:1  out:19  total:20
-  sumd.cli.map_cmd
-    CC=7  in:0  out:20  total:20
-  sumd.extractor._parse_doql_workflows
-    CC=7  in:1  out:18  total:19
-  sumd.cli.lint
-    CC=10  in:0  out:19  total:19
+  sumd.extractor._parse_doql_content
+    CC=6  in:1  out:19  total:20
   sumd.extractor.extract_pyproject
     CC=3  in:2  out:17  total:19
-  sumd.sections.workflows._render_workflows_taskfile
-    CC=6  in:1  out:17  total:18
+  sumd.cli.lint
+    CC=10  in:0  out:19  total:19
+  sumd.extractor._parse_doql_workflows
+    CC=7  in:1  out:18  total:19
+  sumd.validator.validate_codeblocks
+    CC=9  in:1  out:17  total:18
   sumd.sections.environment._render_goal_section
     CC=9  in:1  out:17  total:18
   sumd.extractor.extract_package_json
     CC=3  in:3  out:15  total:18
-  sumd.validator.validate_codeblocks
-    CC=9  in:1  out:17  total:18
+  sumd.sections.workflows._render_workflows_taskfile
+    CC=6  in:1  out:17  total:18
 
 MODULES:
-  README  [1 funcs]
+  docs.USAGE  [1 funcs]
     print  CC=0  out:0
   examples.llm.anthropic_example  [2 funcs]
     ask  CC=1  out:3
@@ -1567,13 +1567,13 @@ MODULES:
 
 EDGES:
   examples.llm.anthropic_example.ask → sumd.parser.SUMDParser.parse_file
-  examples.llm.anthropic_example.main → README.print
+  examples.llm.anthropic_example.main → docs.USAGE.print
   examples.llm.anthropic_example.main → examples.llm.anthropic_example.ask
   examples.llm.openai_example.build_context → sumd.parser.SUMDParser.parse_file
   examples.llm.openai_example.ask → examples.llm.openai_example.build_context
-  examples.llm.openai_example.main → README.print
-  examples.mcp.mcp_client.run → README.print
-  examples.mcp.mcp_client.main → README.print
+  examples.llm.openai_example.main → docs.USAGE.print
+  examples.mcp.mcp_client.run → docs.USAGE.print
+  examples.mcp.mcp_client.main → docs.USAGE.print
   sumd.toon_parser._parse_toon_file → sumd.toon_parser._parse_toon_block_config
   sumd.toon_parser._parse_toon_file → sumd.toon_parser._parse_toon_block_api
   sumd.toon_parser._parse_toon_file → sumd.toon_parser._parse_toon_block_assert
