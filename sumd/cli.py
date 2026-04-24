@@ -1096,8 +1096,8 @@ def _scan_one_project(
 )
 @click.option(
     "--workspace-mode/--no-workspace-mode",
-    default=False,
-    help="Treat the workspace root as a single project; skip scanning subdirectories for separate projects",
+    default=True,
+    help="Treat the workspace root as a single project; skip scanning subdirectories for separate projects (default: enabled)",
 )
 def scan(
     workspace: Path,
