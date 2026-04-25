@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
 
 
 # ---------------------------------------------------------------------------
@@ -65,8 +66,7 @@ class ExtrasSection:
     def should_render(self, ctx: RenderContext) -> bool:
         return bool(ctx.makefile or ctx.pkg_json.get("scripts"))
 
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_extras(ctx.makefile, ctx.pkg_json)
+    render = call_with_ctx(_render_extras, "makefile", "pkg_json")
 
 
 assert isinstance(ExtrasSection(), Section)

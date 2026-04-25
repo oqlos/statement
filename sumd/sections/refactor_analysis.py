@@ -17,6 +17,7 @@ Files that don't exist are silently skipped (non-blocking).
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.should_render import has_attr
 
 # Display order and labels for refactor analysis files.
 _REFACTOR_FILE_LABELS: dict[str, str] = {
@@ -36,8 +37,7 @@ class RefactorAnalysisSection:
     level = 2
     profiles = frozenset({"refactor"})
 
-    def should_render(self, ctx: RenderContext) -> bool:
-        return bool(ctx.project_analysis)
+    should_render = has_attr("project_analysis")
 
     def render(self, ctx: RenderContext) -> list[str]:
         L: list[str] = []

@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
 
 
 # ---------------------------------------------------------------------------
@@ -148,10 +149,9 @@ class InterfacesSection:
     def should_render(self, ctx: RenderContext) -> bool:
         return bool(ctx.scripts or ctx.openapi.get("endpoints") or ctx.scenarios)
 
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_interfaces(
-            ctx.scripts, ctx.openapi, ctx.scenarios, ctx.proj_dir, ctx.raw_sources
-        )
+    render = call_with_ctx(
+        _render_interfaces, "scripts", "openapi", "scenarios", "proj_dir", "raw_sources"
+    )
 
 
 assert isinstance(InterfacesSection(), Section)

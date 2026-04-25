@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
 
 
 # ---------------------------------------------------------------------------
@@ -149,8 +150,7 @@ class CallGraphSection:
     def should_render(self, ctx: RenderContext) -> bool:
         return any("calls.toon" in e.get("file", "") for e in ctx.project_analysis)
 
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_call_graph(ctx.project_analysis)
+    render = call_with_ctx(_render_call_graph, "project_analysis")
 
 
 assert isinstance(CallGraphSection(), Section)

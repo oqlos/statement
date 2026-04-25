@@ -8,6 +8,7 @@ This serves as the reference implementation for all other sections.
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.should_render import always
 
 
 class MetadataSection:
@@ -17,8 +18,7 @@ class MetadataSection:
     level: int = 2
     profiles: frozenset[str] = frozenset({"minimal", "light", "rich"})
 
-    def should_render(self, ctx: RenderContext) -> bool:
-        return True  # Always render
+    should_render = always
 
     def render(self, ctx: RenderContext) -> list[str]:
         L: list[str] = []

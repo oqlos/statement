@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
 
 
 def _render_swop_section(swop: dict, raw_sources: bool) -> list[str]:
@@ -61,8 +62,7 @@ class SwopSection:
     def should_render(self, ctx: RenderContext) -> bool:
         return bool(ctx.swop.get("contexts"))
 
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_swop_section(ctx.swop, ctx.raw_sources)
+    render = call_with_ctx(_render_swop_section, "swop", "raw_sources")
 
 
 assert isinstance(SwopSection(), Section)

@@ -7,6 +7,8 @@ LLM sees what the system guarantees without reading full scenario files.
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
+from sumd.sections.utils.should_render import has_attr
 
 
 # ---------------------------------------------------------------------------
@@ -68,11 +70,8 @@ class TestContractsSection:
     level = 2
     profiles = frozenset({"rich"})
 
-    def should_render(self, ctx: RenderContext) -> bool:
-        return bool(ctx.scenarios)
-
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_test_contracts(ctx.scenarios)
+    should_render = has_attr("scenarios")
+    render = call_with_ctx(_render_test_contracts, "scenarios")
 
 
 assert isinstance(TestContractsSection(), Section)

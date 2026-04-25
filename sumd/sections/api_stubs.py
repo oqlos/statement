@@ -7,6 +7,7 @@ LLM sees function signatures and HTTP method/path without reading full openapi.y
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
 
 
 # ---------------------------------------------------------------------------
@@ -69,8 +70,7 @@ class ApiStubsSection:
     def should_render(self, ctx: RenderContext) -> bool:
         return bool(ctx.openapi.get("endpoints"))
 
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_api_stubs(ctx.openapi)
+    render = call_with_ctx(_render_api_stubs, "openapi")
 
 
 assert isinstance(ApiStubsSection(), Section)

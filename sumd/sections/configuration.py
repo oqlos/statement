@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
+from sumd.sections.utils.should_render import always
 
 
 # ---------------------------------------------------------------------------
@@ -34,11 +36,8 @@ class ConfigurationSection:
     level = 2
     profiles = frozenset({"light", "rich"})
 
-    def should_render(self, ctx: RenderContext) -> bool:
-        return True
-
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_configuration_section(ctx.name, ctx.version)
+    should_render = always
+    render = call_with_ctx(_render_configuration_section, "name", "version")
 
 
 assert isinstance(ConfigurationSection(), Section)

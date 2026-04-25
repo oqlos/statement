@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
+from sumd.sections.utils.should_render import has_attr
 
 
 # ---------------------------------------------------------------------------
@@ -72,11 +74,8 @@ class QualitySection:
     level = 2
     profiles = frozenset({"light", "rich", "refactor"})
 
-    def should_render(self, ctx: RenderContext) -> bool:
-        return bool(ctx.pyqual)
-
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_quality(ctx.pyqual, ctx.proj_dir, ctx.raw_sources)
+    should_render = has_attr("pyqual")
+    render = call_with_ctx(_render_quality, "pyqual", "proj_dir", "raw_sources")
 
 
 assert isinstance(QualitySection(), Section)

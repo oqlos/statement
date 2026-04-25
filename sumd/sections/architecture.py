@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
+from sumd.sections.utils.should_render import always
 
 
 # ---------------------------------------------------------------------------
@@ -143,13 +145,10 @@ class ArchitectureSection:
     level = 2
     profiles = frozenset({"minimal", "light", "rich"})
 
-    def should_render(self, ctx: RenderContext) -> bool:
-        return True
-
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_architecture(
-            ctx.doql, ctx.modules, ctx.name, ctx.proj_dir, ctx.raw_sources
-        )
+    should_render = always
+    render = call_with_ctx(
+        _render_architecture, "doql", "modules", "name", "proj_dir", "raw_sources"
+    )
 
 
 assert isinstance(ArchitectureSection(), Section)

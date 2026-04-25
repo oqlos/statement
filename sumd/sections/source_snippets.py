@@ -8,6 +8,8 @@ to read full source files.
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
+from sumd.sections.utils.should_render import has_attr
 
 
 # ---------------------------------------------------------------------------
@@ -59,11 +61,8 @@ class SourceSnippetsSection:
     level = 2
     profiles = frozenset({"rich"})
 
-    def should_render(self, ctx: RenderContext) -> bool:
-        return bool(ctx.source_snippets)
-
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_source_snippets(ctx.source_snippets)
+    should_render = has_attr("source_snippets")
+    render = call_with_ctx(_render_source_snippets, "source_snippets")
 
 
 assert isinstance(SourceSnippetsSection(), Section)

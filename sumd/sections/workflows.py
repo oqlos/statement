@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
 
 
 # ---------------------------------------------------------------------------
@@ -79,8 +80,7 @@ class WorkflowsSection:
     def should_render(self, ctx: RenderContext) -> bool:
         return bool(ctx.tasks or ctx.doql.get("workflows"))
 
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_workflows(ctx.doql, ctx.tasks, ctx.proj_dir, ctx.raw_sources)
+    render = call_with_ctx(_render_workflows, "doql", "tasks", "proj_dir", "raw_sources")
 
 
 assert isinstance(WorkflowsSection(), Section)

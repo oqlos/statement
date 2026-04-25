@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from sumd.sections.base import RenderContext, Section
+from sumd.sections.utils.render import call_with_ctx
 
 
 # ---------------------------------------------------------------------------
@@ -90,8 +91,7 @@ class DependenciesSection:
             or ctx.pkg_json.get("devDependencies")
         )
 
-    def render(self, ctx: RenderContext) -> list[str]:
-        return _render_dependencies(ctx.deps, ctx.dev_deps, ctx.pkg_json)
+    render = call_with_ctx(_render_dependencies, "deps", "dev_deps", "pkg_json")
 
 
 assert isinstance(DependenciesSection(), Section)
