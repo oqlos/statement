@@ -1,9 +1,8 @@
 # SUMD
 
-
 ## AI Cost Tracking
 
-![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.3.45-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.3.45-blue) ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
 ![AI Cost](https://img.shields.io/badge/AI%20Cost-$7.50-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-27.6h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
 
 - 🤖 **LLM usage:** $7.5000 (75 commits)
@@ -12,8 +11,6 @@
 Generated on 2026-04-25 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/qwen/qwen3-coder-next)
 
 ---
-
-![Version](https://img.shields.io/badge/version-0.3.45-blue) ![Python](https://img.shields.io/badge/python-3.10+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
 
 **SUMD** (Structured Unified Markdown Descriptor) is a semantic project descriptor format in Markdown.  
 It defines intent, structure, execution entry points, and the mental model of a system for both humans and LLMs.
@@ -45,7 +42,7 @@ Think of it as a machine-readable README: a file an AI agent can parse, reason o
 
 ```bash
 pip install sumd                  # stable
-pip install sumd==0.2.0rc1        # latest release candidate
+pip install sumd==0.3.45           # specific version
 ```
 
 ## Developer Workflow
@@ -63,8 +60,6 @@ task pyqual
 # build + publish (runs automatically when gates pass via pyqual pipeline)
 task publish
 ```
-
-
 
 ## Usage
 
@@ -187,31 +182,38 @@ SUMD auto-embeds the following sources from a project (when present):
 
 ## Ecosystem Architecture
 
-SUMD is part of a three-layer system:
+SUMD is part of a four-layer system:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     SUMD (opis)                              │
-│              Structured Unified Markdown Descriptor          │
-│         Project description, intent, architecture            │
+│                     SUMD (opis)                             │
+│              Structured Unified Markdown Descriptor         │
+│         Project description, intent, architecture           │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                    DOQL (wykonanie)                          │
-│              Declarative Object Query Language               │
-│              Data manipulation and execution                 │
+│                    DOQL (wykonanie)                         │
+│              Declarative Object Query Language              │
+│              Data manipulation and execution                │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                  Taskfile (runtime)                          │
-│              Task runner and workflow execution              │
+│                  Taskfile (runtime)                         │
+│              Task runner and workflow execution             │
 │              Automation and orchestration                   │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   testql (weryfikacja)                      │
+│              Test generation and execution                  │
+│              API, GUI, hardware, shell, WebSocket tests     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 - **SUMD → opis (description)**: Defines what the system is and how it should work
 - **DOQL → wykonanie (execution)**: Provides the language to manipulate and execute operations
 - **Taskfile → runtime**: Manages the actual execution of workflows and tasks
+- **testql → weryfikacja (verification)**: Generates and executes tests across multiple domains
 
 ## DOQL Integration
 
@@ -255,6 +257,104 @@ Flow:
 4. If sections changed → DOQL regenerates **only** the affected generators (API, web, documents, etc.)
 
 This gives you a single command that keeps both documentation and generated code in sync, without unnecessary rebuilds.
+
+## testql Integration
+
+testql is the testing framework in the SUMD ecosystem, providing automated test generation and execution for APIs, GUI, hardware, shell commands, and WebSockets.
+
+### testql Features
+
+#### Test Generation
+
+testql automatically generates test scenarios from various sources:
+
+- **API Tests**: From OpenAPI/Swagger specifications, FastAPI/Flask/Django routes, Express.js endpoints
+- **GUI Tests**: From Playwright/Selenium configurations
+- **Hardware Tests**: From hardware peripheral configurations
+- **Shell Tests**: From CLI command definitions
+- **WebSocket Tests**: From WebSocket endpoint definitions
+- **Pytest Conversion**: Converts existing Python pytest tests to testql format
+- **OQL/CQL Scenarios**: Converts OQL/CQL scenario files to testql format
+
+#### Test Execution
+
+testql executes test scenarios written in `.testql.toon.yaml` format with support for:
+
+- **API Commands**: `API[method, endpoint, expected_status]` with retry logic
+- **Assertions**: `ASSERT_STATUS`, `ASSERT_OK`, `ASSERT_CONTAINS`, `ASSERT_JSON`, `ASSERT_HEADERS`, `ASSERT_SCHEMA`, `ASSERT_COOKIES`
+- **GUI Commands**: `GUI_START`, `GUI_CLICK`, `GUI_INPUT`, `GUI_ASSERT_VISIBLE`, `GUI_ASSERT_TEXT`, `GUI_CAPTURE`, `GUI_STOP`
+- **Hardware Commands**: `ENCODER_ON`, `ENCODER_OFF`, `ENCODER_SCROLL`, `ENCODER_CLICK`, `ENCODER_FOCUS`, `ENCODER_STATUS`
+- **Shell Commands**: `SHELL`, `EXEC`, `RUN` with exit code and output assertions
+- **WebSocket Commands**: `WS_CONNECT`, `WS_SEND`, `WS_RECEIVE`, `WS_ASSERT_MSG`, `WS_CLOSE`
+- **Flow Control**: `WAIT`, `WAIT_FOR`, `LOG`, `PRINT`, `INCLUDE`
+
+#### Endpoint Detection
+
+testql includes automatic endpoint detection from:
+
+- **Docker Compose**: Service port mappings and configurations
+- **Kubernetes Configs**: Service and deployment configurations
+- **.env Files**: Environment variables with URL, HOST, PORT patterns
+- **config.py Files**: Python configuration files with host/port/url assignments
+- **Framework Detectors**: FastAPI, Flask, Django, Express.js route discovery
+- **Specification Files**: OpenAPI/Swagger, GraphQL schemas
+
+#### Configuration
+
+testql scenarios support configuration via `CONFIG` block:
+
+```yaml
+CONFIG[4]{key, value}:
+  base_url, ${api_url:-http://localhost:8100}
+  timeout_ms, 10000
+  retry_count, 3
+  retry_backoff_ms, 100
+```
+
+#### Reporting
+
+testql generates HTML reports from test results:
+
+```bash
+# Generate report from pytest JSON output
+pytest --json-report --json-report-file=test-results.json
+testql report test-results.json -o report.html
+
+# Generate example report
+testql report --example -o report.html
+```
+
+#### Integration with SUMD
+
+SUMD automatically embeds testql scenarios from `testql-scenarios/` directory into SUMD.md:
+
+```yaml markpact:testql path=testql-scenarios/generated-cli-tests.testql.toon.yaml
+# SCENARIO: CLI Command Tests
+# TYPE: cli
+# GENERATED: true
+
+CONFIG[2]{key, value}:
+  cli_command, python -msumd
+  timeout_ms, 10000
+
+LOG[3]{message}:
+  "Test CLI help command"
+  "Test CLI version command"
+  "Test CLI main workflow"
+```
+
+#### Workflow Integration
+
+testql is integrated into SUMD workflows:
+
+```bash
+# Run pytest with testql report generation
+task test:report
+
+# Generate testql scenario scaffolds from OpenAPI
+sumd scaffold ./my-project --type smoke
+sumd scaffold ./my-project --type crud
+```
 
 ## License
 
