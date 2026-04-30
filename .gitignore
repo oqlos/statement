@@ -1,3 +1,10 @@
+.testql
+!.testql/
+!.testql/autoloop-state.json
+!.testql/schemas/
+!.testql/schemas/llm-decision.schema.json
+!.testql/reports/
+!.testql/reports/llm-decision.json
 # Byte-compiled / optimized / DLL files
 .env.example
 __pycache__/
