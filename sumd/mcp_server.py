@@ -1,4 +1,4 @@
-"""SUMD MCP Server — exposes sumd as an MCP service.
+"""SUMD MCP Server — exposes sumd as an MCP service with CQRS ES and DSL support.
 
 Tools exposed:
   - parse_sumd       : parse a SUMD.md file and return structured data
@@ -8,6 +8,16 @@ Tools exposed:
   - get_section      : retrieve content of a specific section
   - info_sumd        : return project name, description and stats
   - generate_sumd    : generate SUMD.md from a JSON payload
+  
+CQRS ES Tools:
+  - execute_command  : execute CQRS command
+  - execute_query    : execute CQRS query
+  - get_events       : get event history
+  - get_aggregate    : get aggregate state
+  
+DSL Tools:
+  - execute_dsl      : execute DSL expression
+  - dsl_shell_info   : get DSL shell information
 """
 
 from __future__ import annotations
@@ -22,6 +32,59 @@ import mcp.types as types
 from mcp.server import Server
 
 from sumd.parser import SUMDParser, parse_file
+from sumd.cqrs.events import EventStore
+from sumd.cqrs.commands import CommandBus, SumdCommandHandler
+from sumd.cqrs.queries import QueryBus, SumdQueryHandler
+from sumd.cqrs.aggregates import EventSourcedRepository
+from sumd.cqrs.sumd_aggregate import SumdAggregate
+from sumd.dsl.shell import DSLShellServer
+
+# ---------------------------------------------------------------------------
+# CQRS ES Infrastructure
+# ---------------------------------------------------------------------------
+
+# Initialize CQRS ES components
+event_store = EventStore(Path.home() / ".sumd" / "events")
+command_bus = CommandBus(event_store)
+query_bus = QueryBus(event_store)
+
+# Register handlers
+command_handler = SumdCommandHandler(event_store)
+query_handler = SumdQueryHandler(event_store)
+
+# Register command handlers
+for cmd_type in [
+    "create_sumd_document",
+    "update_sumd_document", 
+    "add_sumd_section",
+    "remove_sumd_section",
+    "validate_sumd_document",
+    "scan_project",
+    "generate_map",
+    "execute_dsl_command",
+]:
+    command_bus.register_handler(cmd_type, command_handler)
+
+# Register query handlers
+for query_type in [
+    "get_sumd_document",
+    "list_sumd_sections",
+    "get_sumd_section",
+    "get_project_info",
+    "get_event_history",
+    "get_all_events",
+    "search_documents",
+    "get_validation_results",
+    "execute_dsl_query",
+]:
+    query_bus.register_handler(query_type, query_handler)
+
+# Initialize DSL shell server
+dsl_server = DSLShellServer()
+
+# Initialize repository
+sumd_repository = EventSourcedRepository(event_store, SumdAggregate)
+
 
 # ---------------------------------------------------------------------------
 # Server instance
@@ -183,6 +246,133 @@ async def list_tools() -> list[types.Tool]:
                 "required": ["data"],
             },
         ),
+        # CQRS ES Tools
+        types.Tool(
+            name="execute_command",
+            description="Execute a CQRS command on SUMD aggregate.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "command_type": {
+                        "type": "string",
+                        "enum": [
+                            "create_sumd_document",
+                            "update_sumd_document",
+                            "add_sumd_section", 
+                            "remove_sumd_section",
+                            "validate_sumd_document",
+                            "scan_project",
+                            "generate_map",
+                            "execute_dsl_command"
+                        ],
+                        "description": "Type of command to execute.",
+                    },
+                    "aggregate_id": {
+                        "type": "string",
+                        "description": "ID of the aggregate (usually file path).",
+                    },
+                    "data": {
+                        "type": "object",
+                        "description": "Command data payload.",
+                    },
+                },
+                "required": ["command_type", "aggregate_id"],
+            },
+        ),
+        types.Tool(
+            name="execute_query",
+            description="Execute a CQRS query to read SUMD data.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query_type": {
+                        "type": "string",
+                        "enum": [
+                            "get_sumd_document",
+                            "list_sumd_sections",
+                            "get_sumd_section",
+                            "get_project_info",
+                            "get_event_history",
+                            "get_all_events",
+                            "search_documents",
+                            "get_validation_results",
+                            "execute_dsl_query"
+                        ],
+                        "description": "Type of query to execute.",
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "description": "Query parameters.",
+                    },
+                },
+                "required": ["query_type"],
+            },
+        ),
+        types.Tool(
+            name="get_events",
+            description="Get event history for an aggregate.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "aggregate_id": {
+                        "type": "string",
+                        "description": "ID of the aggregate.",
+                    },
+                    "from_version": {
+                        "type": "integer",
+                        "description": "Starting version (default: 0).",
+                        "default": 0,
+                    },
+                },
+                "required": ["aggregate_id"],
+            },
+        ),
+        types.Tool(
+            name="get_aggregate",
+            description="Get current state of a SUMD aggregate.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "aggregate_id": {
+                        "type": "string",
+                        "description": "ID of the aggregate (usually file path).",
+                    },
+                },
+                "required": ["aggregate_id"],
+            },
+        ),
+        # DSL Tools
+        types.Tool(
+            name="execute_dsl",
+            description="Execute a SUMD DSL expression.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "dsl_expression": {
+                        "type": "string",
+                        "description": "DSL expression to execute.",
+                    },
+                    "context_vars": {
+                        "type": "object",
+                        "description": "Optional context variables.",
+                    },
+                    "working_directory": {
+                        "type": "string",
+                        "description": "Working directory for execution.",
+                    },
+                },
+                "required": ["dsl_expression"],
+            },
+        ),
+        types.Tool(
+            name="dsl_shell_info",
+            description="Get information about DSL shell capabilities.",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        ),
     ]
 
 
@@ -311,6 +501,164 @@ async def _tool_generate_sumd(arguments: dict) -> list[types.TextContent]:
     return [types.TextContent(type="text", text=content)]
 
 
+# ---------------------------------------------------------------------------
+# CQRS ES Tool Handlers
+# ---------------------------------------------------------------------------
+
+async def _tool_execute_command(arguments: dict) -> list[types.TextContent]:
+    """Execute CQRS command."""
+    from sumd.cqrs.commands import (
+        CreateSumdDocument,
+        UpdateSumdDocument,
+        AddSumdSection,
+        RemoveSumdSection,
+        ValidateSumdDocument,
+        ScanProject,
+        GenerateMap,
+        ExecuteDslCommand,
+    )
+    
+    command_type = arguments["command_type"]
+    aggregate_id = arguments["aggregate_id"]
+    data = arguments.get("data", {})
+    
+    # Create command based on type
+    command_classes = {
+        "create_sumd_document": CreateSumdDocument,
+        "update_sumd_document": UpdateSumdDocument,
+        "add_sumd_section": AddSumdSection,
+        "remove_sumd_section": RemoveSumdSection,
+        "validate_sumd_document": ValidateSumdDocument,
+        "scan_project": ScanProject,
+        "generate_map": GenerateMap,
+        "execute_dsl_command": ExecuteDslCommand,
+    }
+    
+    command_class = command_classes.get(command_type)
+    if not command_class:
+        return [types.TextContent(type="text", text=f"Unknown command type: {command_type}")]
+    
+    command = command_class(aggregate_id=aggregate_id, data=data)
+    
+    try:
+        events = await command_bus.dispatch(command)
+        result = {
+            "command_type": command_type,
+            "aggregate_id": aggregate_id,
+            "events_generated": len(events),
+            "success": True,
+        }
+        return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"Command execution failed: {e}")]
+
+
+async def _tool_execute_query(arguments: dict) -> list[types.TextContent]:
+    """Execute CQRS query."""
+    from sumd.cqrs.queries import (
+        GetSumdDocument,
+        ListSumdSections,
+        GetSumdSection,
+        GetProjectInfo,
+        GetEventHistory,
+        GetAllEvents,
+        SearchDocuments,
+        GetValidationResults,
+        ExecuteDslQuery,
+    )
+    
+    query_type = arguments["query_type"]
+    parameters = arguments.get("parameters", {})
+    
+    # Create query based on type
+    query_classes = {
+        "get_sumd_document": GetSumdDocument,
+        "list_sumd_sections": ListSumdSections,
+        "get_sumd_section": GetSumdSection,
+        "get_project_info": GetProjectInfo,
+        "get_event_history": GetEventHistory,
+        "get_all_events": GetAllEvents,
+        "search_documents": SearchDocuments,
+        "get_validation_results": GetValidationResults,
+        "execute_dsl_query": ExecuteDslQuery,
+    }
+    
+    query_class = query_classes.get(query_type)
+    if not query_class:
+        return [types.TextContent(type="text", text=f"Unknown query type: {query_type}")]
+    
+    query = query_class(parameters=parameters)
+    
+    try:
+        result = await query_bus.dispatch(query)
+        return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"Query execution failed: {e}")]
+
+
+async def _tool_get_events(arguments: dict) -> list[types.TextContent]:
+    """Get event history."""
+    aggregate_id = arguments["aggregate_id"]
+    from_version = arguments.get("from_version", 0)
+    
+    try:
+        events = event_store.get_events(aggregate_id, from_version)
+        result = {
+            "aggregate_id": aggregate_id,
+            "from_version": from_version,
+            "events": [event.to_dict() for event in events],
+            "total_events": len(events),
+        }
+        return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"Failed to get events: {e}")]
+
+
+async def _tool_get_aggregate(arguments: dict) -> list[types.TextContent]:
+    """Get aggregate state."""
+    aggregate_id = arguments["aggregate_id"]
+    
+    try:
+        aggregate = await sumd_repository.get_by_id(aggregate_id)
+        if not aggregate:
+            return [types.TextContent(type="text", text=f"Aggregate not found: {aggregate_id}")]
+        
+        state = aggregate.get_state()
+        return [types.TextContent(type="text", text=json.dumps(state, indent=2))]
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"Failed to get aggregate: {e}")]
+
+
+# ---------------------------------------------------------------------------
+# DSL Tool Handlers
+# ---------------------------------------------------------------------------
+
+async def _tool_execute_dsl(arguments: dict) -> list[types.TextContent]:
+    """Execute DSL expression."""
+    dsl_expression = arguments["dsl_expression"]
+    context_vars = arguments.get("context_vars", {})
+    working_directory = arguments.get("working_directory")
+    
+    if working_directory:
+        dsl_server.working_directory = Path(working_directory)
+        dsl_server.shell.context.working_directory = Path(working_directory)
+    
+    try:
+        result = await dsl_server.execute_dsl(dsl_expression, context_vars)
+        return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"DSL execution failed: {e}")]
+
+
+async def _tool_dsl_shell_info(arguments: dict) -> list[types.TextContent]:
+    """Get DSL shell info."""
+    try:
+        info = await dsl_server.get_shell_info()
+        return [types.TextContent(type="text", text=json.dumps(info, indent=2))]
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"Failed to get shell info: {e}")]
+
+
 _TOOL_HANDLERS = {
     "parse_sumd": _tool_parse_sumd,
     "validate_sumd": _tool_validate_sumd,
@@ -319,6 +667,14 @@ _TOOL_HANDLERS = {
     "get_section": _tool_get_section,
     "info_sumd": _tool_info_sumd,
     "generate_sumd": _tool_generate_sumd,
+    # CQRS ES Tools
+    "execute_command": _tool_execute_command,
+    "execute_query": _tool_execute_query,
+    "get_events": _tool_get_events,
+    "get_aggregate": _tool_get_aggregate,
+    # DSL Tools
+    "execute_dsl": _tool_execute_dsl,
+    "dsl_shell_info": _tool_dsl_shell_info,
 }
 
 

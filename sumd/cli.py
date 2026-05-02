@@ -1028,7 +1028,7 @@ def _scan_one_project(
         return {"status": "ERROR", "error": str(exc)}
 
 
-@cli.command()
+@cli.command("scan")
 @click.argument("workspace", type=click.Path(exists=True, path_type=Path), default=".")
 @click.option(
     "--export-json/--no-export-json",
@@ -1686,6 +1686,244 @@ def map_cmd(project: Path, output: Optional[Path], force: bool, stdout: bool):
     click.echo("\n💡 Next: sumd scan . --fix  (to embed map in SUMD.md)")
 
 
+@cli.command()
+@click.option(
+    "--directory",
+    "-d",
+    type=click.Path(exists=True, path_type=Path),
+    default=Path.cwd(),
+    help="Working directory for DSL shell",
+)
+@click.option(
+    "--command",
+    "-c",
+    help="Execute single DSL command",
+)
+@click.option(
+    "--script",
+    "-s",
+    type=click.Path(exists=True, path_type=Path),
+    help="Execute DSL script file",
+)
+@click.option(
+    "--interactive",
+    "-i",
+    is_flag=True,
+    help="Run interactively after script/command",
+)
+def dsl(directory: Path, command: Optional[str], script: Optional[Path], interactive: bool):
+    """SUMD DSL Shell - Domain Specific Language for SUMD operations.
+    
+    Provides an interactive shell and scripting interface for SUMD operations
+    with CQRS ES architecture support.
+    
+    Examples:
+        sumd dsl                           # Start interactive shell
+        sumd dsl -c "scan('.')"            # Execute single command
+        sumd dsl -s script.dsl             # Execute script file
+        sumd dsl -d /path/to/project       # Set working directory
+    """
+    import asyncio
+    from sumd.dsl.shell import DSLShell
+    
+    async def run_dsl():
+        shell = DSLShell(working_directory=directory)
+        
+        try:
+            if command:
+                # Execute single command
+                result = await shell.execute_command(command)
+                if result is not None:
+                    if isinstance(result, (list, dict)):
+                        click.echo(json.dumps(result, indent=2))
+                    else:
+                        click.echo(result)
+            
+            elif script:
+                # Execute script
+                await shell.execute_script(script)
+            
+            if interactive or not (command or script):
+                # Run interactive shell
+                await shell.run()
+        
+        except KeyboardInterrupt:
+            click.echo("\nInterrupted.")
+        except Exception as e:
+            click.echo(f"Error: {e}", err=True)
+            sys.exit(1)
+    
+    # Run async function
+    asyncio.run(run_dsl())
+
+
+@cli.command("cqrs")
+@click.option(
+    "--directory",
+    "-d",
+    type=click.Path(exists=True, path_type=Path),
+    default=Path.cwd(),
+    help="Working directory for CQRS ES operations",
+)
+@click.argument("command_type")
+@click.argument("aggregate_id")
+@click.option(
+    "--data",
+    help="Command data as JSON string",
+)
+def cqrs_command(directory: Path, command_type: str, aggregate_id: str, data: Optional[str]):
+    """Execute CQRS command on SUMD aggregate.
+    
+    COMMAND_TYPE: Type of command to execute
+    AGGREGATE_ID: ID of the aggregate (usually file path)
+    
+    Examples:
+        sumd cqrs-cmd create_sumd_document ./SUMD.md --data '{"project_name":"MyProject"}'
+        sumd cqrs-cmd add_section ./SUMD.md --data '{"section_name":"Architecture","content":"..."}'
+    """
+    import asyncio
+    from sumd.cqrs.events import EventStore
+    from sumd.cqrs.commands import CommandBus, SumdCommandHandler
+    from pathlib import Path
+    
+    async def run_command():
+        try:
+            # Initialize CQRS ES components
+            event_store = EventStore(Path.home() / ".sumd" / "events")
+            command_bus = CommandBus(event_store)
+            command_handler = SumdCommandHandler(event_store)
+            
+            # Register handler
+            command_bus.register_handler(command_type, command_handler)
+            
+            # Parse data
+            command_data = {}
+            if data:
+                try:
+                    command_data = json.loads(data)
+                except json.JSONDecodeError:
+                    click.echo(f"Invalid JSON data: {data}", err=True)
+                    sys.exit(1)
+            
+            # Create and execute command
+            from sumd.cqrs.commands import (
+                CreateSumdDocument,
+                UpdateSumdDocument,
+                AddSumdSection,
+                RemoveSumdSection,
+                ValidateSumdDocument,
+                ScanProject,
+                GenerateMap,
+                ExecuteDslCommand,
+            )
+            
+            command_classes = {
+                "create_sumd_document": CreateSumdDocument,
+                "update_sumd_document": UpdateSumdDocument,
+                "add_sumd_section": AddSumdSection,
+                "remove_sumd_section": RemoveSumdSection,
+                "validate_sumd_document": ValidateSumdDocument,
+                "scan_project": ScanProject,
+                "generate_map": GenerateMap,
+                "execute_dsl_command": ExecuteDslCommand,
+            }
+            
+            command_class = command_classes.get(command_type)
+            if not command_class:
+                click.echo(f"Unknown command type: {command_type}", err=True)
+                sys.exit(1)
+            
+            command = command_class(aggregate_id=aggregate_id, data=command_data)
+            events = await command_bus.dispatch(command)
+            
+            click.echo(f"✅ Command executed: {command_type}")
+            click.echo(f"   Aggregate ID: {aggregate_id}")
+            click.echo(f"   Events generated: {len(events)}")
+            
+        except Exception as e:
+            click.echo(f"Error: {e}", err=True)
+            sys.exit(1)
+    
+    asyncio.run(run_command())
+
+
+@cli.command("nlp")
+@click.argument("text", type=str)
+@click.option(
+    "-d", "--directory",
+    type=click.Path(exists=True, path_type=Path),
+    default=Path.cwd(),
+    help="Working directory for NLP processing"
+)
+@click.option(
+    "-e", "--execute",
+    is_flag=True,
+    help="Execute the generated DSL command"
+)
+@click.option(
+    "-v", "--verbose",
+    is_flag=True,
+    help="Show verbose output"
+)
+def nlp_command(text: str, directory: Path, execute: bool, verbose: bool):
+    """Process natural language text and convert to DSL commands."""
+    import asyncio
+    from .dsl.engine import DSLEngine, DSLContext
+    from .dsl.schema import DEFAULT_PROJECT_SCHEMA
+    
+    async def run_nlp():
+        try:
+            # Initialize DSL engine with NLP
+            engine = DSLEngine(project_schema=DEFAULT_PROJECT_SCHEMA)
+            context = DSLContext(directory)
+            
+            if verbose:
+                click.echo(f"🤖 Processing: \"{text}\"")
+                click.echo(f"📁 Directory: {directory}")
+                click.echo()
+            
+            # Process natural language
+            nlp_result = await engine.process_natural_language(text)
+            
+            if not nlp_result.success:
+                click.echo(f"❌ NLP processing failed: {nlp_result.error}", err=True)
+                sys.exit(1)
+            
+            result = nlp_result.result
+            
+            # Display results
+            click.echo("🧠 NLP Analysis:")
+            click.echo(f"   Original: \"{result['original_text']}\"")
+            click.echo(f"   Intent: {result['intent']}")
+            click.echo(f"   Entities: {result['entities']}")
+            click.echo(f"   Generated DSL: {result['dsl_command']}")
+            click.echo()
+            
+            if execute:
+                if verbose:
+                    click.echo("⚡ Executing generated DSL command...")
+                
+                # Execute the generated DSL command
+                exec_result = await engine.execute_text(result['dsl_command'], context)
+                
+                if exec_result.success:
+                    click.echo("✅ Command executed successfully!")
+                    if exec_result.result:
+                        click.echo(f"   Result: {exec_result.result}")
+                else:
+                    click.echo(f"❌ Command execution failed: {exec_result.error}", err=True)
+                    sys.exit(1)
+            else:
+                click.echo(f"💡 To execute this command, use:")
+                click.echo(f"   sumd nlp \"{text}\" --execute")
+        
+        except Exception as e:
+            click.echo(f"❌ Error: {e}", err=True)
+            sys.exit(1)
+    
+    asyncio.run(run_nlp())
+
+
 def main():
     """Main entry point — if first arg is a path, run 'scan <path> --fix'."""
     import sys as _sys
@@ -1704,6 +1942,9 @@ def main():
         "extract",
         "info",
         "reload",
+        "dsl",
+        "cqrs",
+        "nlp",
         "--help",
         "--version",
     }

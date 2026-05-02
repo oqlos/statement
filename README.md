@@ -110,6 +110,17 @@ sumd scaffold ./my-project --force          # overwrite existing files
 sumd analyze ./my-project                    # run all tools
 sumd analyze ./my-project --tools code2llm   # only code2llm
 sumd analyze ./my-project --force            # reinstall tools
+
+# DSL (Domain Specific Language) operations
+sumd dsl                                     # start interactive DSL shell
+sumd dsl -c "scan('.')"                      # execute single DSL command
+sumd dsl -s script.dsl                       # execute DSL script file
+sumd dsl -d /path/to/project                 # set working directory
+
+# CQRS ES (Command Query) operations
+sumd cqrs create_sumd_document ./SUMD.md --data '{"project_name":"MyProject"}'
+sumd cqrs add_section ./SUMD.md --data '{"section_name":"Architecture","content":"..."}'
+sumd cqrs validate_sumd_document ./SUMD.md
 ```
 
 ### Section Profiles
@@ -142,6 +153,174 @@ if not result["ok"]:
     for issue in result["markdown"] + result["codeblocks"]:
         print(issue)
 ```
+
+## File Filtering
+
+SUMD respects standard ignore files to exclude unwanted files and directories from analysis:
+
+### Supported Ignore Files
+
+- **`.gitignore`** - Standard Git ignore patterns (automatically detected)
+- **`.sumdignore`** - SUMD-specific ignore patterns (overrides .gitignore)
+
+### Pattern Syntax
+
+Supports full gitignore pattern syntax:
+
+```gitignore
+# File patterns
+*.log
+*.tmp
+coverage.xml
+
+# Directory patterns  
+temp/
+build/
+__pycache__/
+
+# Negation (include despite other patterns)
+!important.log
+!src/temp/
+```
+
+### Behavior
+
+- Patterns are read from both `.gitignore` and `.sumdignore` files
+- `.sumdignore` patterns take precedence over `.gitignore` patterns
+- Improves performance by skipping ignored files during analysis
+- Works with all `sumd scan`, `sumd map`, and `sumd analyze` commands
+
+## CQRS ES Architecture
+
+SUMD now implements **Command Query Responsibility Segregation (CQRS)** with **Event Sourcing (ES)** for robust state management and audit trails:
+
+### Architecture Components
+
+- **Commands**: Write operations that modify system state
+- **Queries**: Read operations that retrieve system state
+- **Events**: Immutable records of state changes
+- **Aggregates**: Consistency boundaries for business logic
+- **Event Store**: Persistent storage for event history
+
+### Benefits
+
+- **Audit Trail**: Complete history of all changes
+- **Temporal Queries**: Reconstruct state at any point in time
+- **Scalability**: Separate read/write models
+- **Resilience**: Event replay for error recovery
+
+### CLI Integration
+
+```bash
+# Execute CQRS commands
+sumd cqrs create_sumd_document ./SUMD.md --data '{"project_name":"MyProject"}'
+sumd cqrs add_section ./SUMD.md --data '{"section_name":"Architecture","content":"..."}'
+
+# Query system state
+sumd cqrs get_aggregate ./SUMD.md
+sumd cqrs get_events ./SUMD.md
+```
+
+### MCP Integration
+
+The MCP server exposes CQRS ES tools:
+
+- `execute_command` - Execute write commands
+- `execute_query` - Execute read queries  
+- `get_events` - Retrieve event history
+- `get_aggregate` - Get current aggregate state
+
+## DSL (Domain Specific Language)
+
+SUMD provides a powerful DSL for interactive operations and scripting:
+
+### DSL Shell
+
+```bash
+# Start interactive shell
+sumd dsl
+
+# Execute single command
+sumd dsl -c "scan('.') | validate('.')"
+
+# Execute script file
+sumd dsl -s script.dsl
+```
+
+### DSL Features
+
+- **Arithmetic**: `1 + 2 * 3`
+- **Logic**: `x and y or not z`
+- **Comparison**: `x == 42`, `name contains "test"`
+- **Variables**: `x = 42`, `result = scan('.')`
+- **Functions**: `len("hello")`, `exists("file.txt")`
+- **Pipelines**: `scan('.') | validate('.') | export("json")`
+- **File Operations**: `cat("file.txt")`, `ls("*.md")`, `edit("file.txt", "content")`
+
+### Built-in Commands
+
+#### File Operations
+- `cat` - Display file contents
+- `ls` - List directory contents  
+- `edit` - Edit file content
+- `mkdir` - Create directory
+- `rm` - Remove file/directory
+
+#### SUMD Operations
+- `sumd_scan` - Scan and generate SUMD
+- `sumd_map` - Generate project map
+- `sumd_validate` - Validate SUMD document
+- `sumd_info` - Show document info
+
+#### Search Operations
+- `find` - Find files matching pattern
+- `grep` - Search text in files
+
+#### Utility Operations
+- `echo` - Display message
+- `pwd` - Print working directory
+- `cd` - Change directory
+- `help` - Show help
+
+#### Variables
+- `set` - Set variable
+- `get` - Get variable value
+- `unset` - Remove variable
+- `vars` - List all variables
+
+### DSL Examples
+
+```bash
+# Basic arithmetic
+result = 1 + 2 * 3
+
+# File operations
+if exists("SUMD.md"):
+    content = cat("SUMD.md")
+    print(len(content))
+
+# SUMD workflow
+scan(".") | validate(".") | export("json")
+
+# Variable usage
+project = "my-project"
+files = ls("*.py")
+print(f"Found {len(files)} Python files in {project}")
+
+# Conditional logic
+if exists("pyproject.toml"):
+    scan(".")
+    validate("SUMD.md")
+else:
+    print("No Python project found")
+```
+
+### MCP DSL Integration
+
+The MCP server provides DSL tools:
+
+- `execute_dsl` - Execute DSL expressions
+- `dsl_shell_info` - Get shell capabilities
 
 ## What is Embedded in SUMD.md?
 

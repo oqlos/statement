@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **CQRS ES Architecture**: Implemented Command Query Responsibility Segregation with Event Sourcing
+  - Command and Query buses for separate read/write operations
+  - Event store for persistent audit trail and state reconstruction
+  - Aggregate roots for business logic consistency
+  - SUMD-specific aggregates, commands, queries, and events
+- **Domain Specific Language (DSL)**: Powerful scripting and interactive shell
+  - Complete lexer, parser, and engine for DSL expressions
+  - Arithmetic, logical, comparison, and pipeline operations
+  - Built-in commands for file operations, SUMD operations, search, and utilities
+  - Interactive shell with tab completion and history
+  - Script execution support with error handling
+- **Enhanced MCP Server**: Extended with CQRS ES and DSL capabilities
+  - New MCP tools: execute_command, execute_query, get_events, get_aggregate
+  - New MCP tools: execute_dsl, dsl_shell_info
+  - Full integration with CQRS ES architecture and DSL engine
+- **New CLI Commands**:
+  - `sumd dsl` - Interactive DSL shell and command execution
+  - `sumd cqrs` - Execute CQRS commands on SUMD aggregates
+- **Comprehensive Testing**: Full test suite for CQRS ES and DSL functionality
+  - Event store, command bus, query bus, and aggregate tests
+  - DSL parser, engine, and shell tests
+  - MCP server integration tests
+- **Documentation**: Updated README with CQRS ES and DSL architecture details
+
+### Fixed
+- **File filtering**: sumd now properly respects .gitignore and .sumdignore files when analyzing source files
+- Added support for standard gitignore patterns including wildcards, directory patterns, and negation
+- Improved file collection performance by skipping ignored files and directories
+
 ## [0.3.46] - 2026-05-02
 
 ### Docs

@@ -2,7 +2,7 @@
 set -e
 clear
 
-VENV="venv"
+VENV=".venv"
 PIP="$VENV/bin/pip"
 
 if [ ! -f "$PIP" ]; then
