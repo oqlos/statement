@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import fnmatch
 import re
 from datetime import date
 from pathlib import Path
@@ -644,6 +645,107 @@ def _analyse_py_module(path: Path) -> dict[str, Any]:
     }
 
 
+def _parse_ignore_file(ignore_path: Path) -> list[str]:
+    """Parse .gitignore or .sumdignore file and return list of patterns."""
+    if not ignore_path.exists():
+        return []
+    
+    patterns = []
+    try:
+        content = ignore_path.read_text(encoding="utf-8")
+        for line in content.splitlines():
+            line = line.strip()
+            # Skip empty lines and comments
+            if not line or line.startswith("#"):
+                continue
+            # Remove trailing spaces
+            patterns.append(line.rstrip())
+    except Exception:
+        # If we can't read the file, return empty patterns
+        pass
+    
+    return patterns
+
+
+def _path_matches_pattern(path: Path, pattern: str) -> bool:
+    """Check if a path matches a gitignore-style pattern."""
+    path_str = str(path)
+    
+    # Handle negation patterns (starting with !)
+    if pattern.startswith("!"):
+        # This is a negation - we handle it at the caller level
+        return False
+    
+    # Handle directory patterns (ending with /)
+    if pattern.endswith("/"):
+        # Pattern only matches directories and their contents
+        dir_pattern = pattern[:-1]  # Remove trailing slash
+        # Check if the path is the directory itself or inside it
+        if fnmatch.fnmatch(path_str, dir_pattern):
+            return True
+        if fnmatch.fnmatch(path_str, dir_pattern + "/*"):
+            return True
+        if fnmatch.fnmatch(path_str, "*/" + dir_pattern):
+            return True
+        if fnmatch.fnmatch(path_str, "*/" + dir_pattern + "/*"):
+            return True
+        # Check if any parent directory matches
+        for part in path.parts:
+            if fnmatch.fnmatch(part, dir_pattern):
+                return True
+        return False
+    
+    # Handle absolute patterns (starting with /)
+    if pattern.startswith("/"):
+        # Pattern matches from the root
+        pattern = pattern[1:]
+        return fnmatch.fnmatch(path_str, pattern) or fnmatch.fnmatch(path_str, pattern + "/*")
+    
+    # Handle recursive patterns (starting with **/)
+    if pattern.startswith("**/"):
+        pattern = pattern[3:]
+        return fnmatch.fnmatch(path_str, pattern) or fnmatch.fnmatch(path_str, "*/" + pattern) or fnmatch.fnmatch(path_str, "**/" + pattern)
+    
+    # Regular pattern - match any part of the path
+    if fnmatch.fnmatch(path_str, pattern) or fnmatch.fnmatch(path_str, "*/" + pattern):
+        return True
+    
+    # Check if any parent directory matches the pattern
+    for part in path.parts:
+        if fnmatch.fnmatch(part, pattern):
+            return True
+    
+    return False
+
+
+def _is_path_ignored(path: Path, proj_dir: Path, ignore_patterns: list[str]) -> bool:
+    """Check if a path should be ignored based on gitignore-style patterns."""
+    if not ignore_patterns:
+        return False
+    
+    # Convert to relative path for matching
+    try:
+        rel_path = path.relative_to(proj_dir)
+    except ValueError:
+        # If path is not relative to proj_dir, treat it as not ignored
+        return False
+    
+    # First check for negation patterns, then for regular patterns
+    is_ignored = False
+    
+    for pattern in ignore_patterns:
+        if pattern.startswith("!"):
+            # Negation pattern - unignore if it matches
+            if _path_matches_pattern(rel_path, pattern[1:]):
+                is_ignored = False
+        else:
+            # Regular ignore pattern
+            if _path_matches_pattern(rel_path, pattern):
+                is_ignored = True
+    
+    return is_ignored
+
+
 def _is_map_ignored_path(p: Path) -> bool:
     """Return True if *p* (relative) contains an ignored directory segment."""
     for part in p.parts:
@@ -659,9 +761,25 @@ def _collect_map_files(
     lang_counts: dict[str, int] = {}
     modules: list[tuple[Path, int, str]] = []  # (path, lines, lang)
 
+    # Load ignore patterns from .gitignore and .sumdignore
+    gitignore_patterns = _parse_ignore_file(proj_dir / ".gitignore")
+    sumdignore_patterns = _parse_ignore_file(proj_dir / ".sumdignore")
+    all_ignore_patterns = gitignore_patterns + sumdignore_patterns
+
     for f in sorted(proj_dir.rglob("*")):
-        if not f.is_file() or _is_map_ignored_path(f.relative_to(proj_dir)):
+        if not f.is_file():
             continue
+            
+        rel_path = f.relative_to(proj_dir)
+        
+        # Check hardcoded ignore patterns first
+        if _is_map_ignored_path(rel_path):
+            continue
+            
+        # Check .gitignore and .sumdignore patterns
+        if _is_path_ignored(f, proj_dir, all_ignore_patterns):
+            continue
+            
         lang = _lang_of(f)
         if lang == "other" or lang not in _SOURCE_LANGS:
             continue
@@ -669,9 +787,8 @@ def _collect_map_files(
             lines = f.read_text(encoding="utf-8", errors="replace").count("\n") + 1
         except Exception:
             continue
-        rel = f.relative_to(proj_dir)
         lang_counts[lang] = lang_counts.get(lang, 0) + 1
-        modules.append((rel, lines, lang))
+        modules.append((rel_path, lines, lang))
 
     return lang_counts, modules
 

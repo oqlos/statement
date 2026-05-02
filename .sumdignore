@@ -1,0 +1,6 @@
+# Test .sumdignore file for sumd bug fix
+*.log
+*.tmp
+temp/
+test_files/
+docs/USAGE.md
