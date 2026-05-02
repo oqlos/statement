@@ -201,6 +201,10 @@ class DSLEngine:
         if self.command_bus:
             return await self._execute_sumd_command(command_name, args, context)
         
+        # If no args and unknown command, treat as variable name (fallback)
+        if not args:
+            return command_name
+        
         raise ValueError(f"Unknown command: {command_name}")
     
     async def _execute_function_call(self, expression: DSLExpression, context: DSLContext) -> Any:

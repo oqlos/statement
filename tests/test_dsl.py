@@ -28,7 +28,7 @@ class TestDSLLexer:
         assert len(tokens) == 3  # scan, ., EOF
         assert tokens[0].type.value == "IDENTIFIER"
         assert tokens[0].value == "scan"
-        assert tokens[1].type.value == "IDENTIFIER"
+        assert tokens[1].type.value == "DOT"
         assert tokens[1].value == "."
         assert tokens[2].type.value == "EOF"
     
@@ -447,7 +447,7 @@ description = "Test project"
     async def test_error_handling(self):
         """Test error handling in DSL."""
         engine = DSLEngine()
-        context = DSLContext()
+        context = DSLContext(working_directory=Path.cwd())
         
         # Test division by zero
         with pytest.raises(ZeroDivisionError):

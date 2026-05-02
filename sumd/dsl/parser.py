@@ -216,7 +216,55 @@ class DSLParser:
         if self._match(DSLTokenType.NEWLINE):
             return None
         
-        # Parse pipeline or command
+        # Check if this is a command at top level: IDENTIFIER followed by arguments
+        if (self._check(DSLTokenType.IDENTIFIER) and 
+            not self._check_next(DSLTokenType.LPAREN) and  # not a function call
+            not self._check_next(DSLTokenType.OPERATOR, "=") and  # not assignment
+            not self._check_next(DSLTokenType.PIPE) and  # not start of pipeline
+            not self._check_next(DSLTokenType.OPERATOR) and  # not arithmetic/logical
+            not self._check_next(DSLTokenType.COMPARATOR) and  # not comparison
+            not self._check_next(DSLTokenType.LOGICAL)):  # not logical operator
+            
+            # Look ahead to see if there are arguments before statement boundary
+            saved_pos = self.current
+            self._advance()  # consume identifier
+            
+            args = []
+            has_pipe = False
+            # Collect arguments until statement boundary
+            while (not self._is_at_end() and 
+                   not self._check(DSLTokenType.NEWLINE) and
+                   not self._check(DSLTokenType.EOF) and
+                   not self._check(DSLTokenType.SEMICOLON)):
+                if self._check(DSLTokenType.PIPE):
+                    has_pipe = True
+                    break
+                arg = self._parse_primary()
+                if arg:
+                    args.append(arg)
+            
+            # If we consumed something that looks like a command (has args or is standalone)
+            if args or self._check(DSLTokenType.NEWLINE) or self._check(DSLTokenType.EOF) or self._check(DSLTokenType.SEMICOLON) or has_pipe:
+                cmd = DSLExpression(
+                    type=DSLExpressionType.COMMAND,
+                    value=self.tokens[saved_pos].value,
+                    children=args,
+                )
+                # If followed by pipe, create pipeline
+                if has_pipe and self._match(DSLTokenType.PIPE):
+                    right = self._parse_statement()
+                    if right:
+                        return DSLExpression(
+                            type=DSLExpressionType.PIPELINE,
+                            value="|",
+                            children=[cmd, right],
+                        )
+                return cmd
+            
+            # Otherwise rewind and parse normally
+            self.current = saved_pos
+        
+        # Parse pipeline or expression
         expr = self._parse_pipeline()
         
         # Skip trailing newline
@@ -380,9 +428,20 @@ class DSLParser:
         if self._check(DSLTokenType.IDENTIFIER) and self._check_next(DSLTokenType.LPAREN):
             return self._parse_function_call()
         
-        # Property access
-        if self._check(DSLTokenType.IDENTIFIER) and self._check_next(DSLTokenType.DOT):
+        # Property access (e.g., obj.property - requires identifier after dot)
+        if (self._check(DSLTokenType.IDENTIFIER) and 
+            self._check_next(DSLTokenType.DOT) and 
+            self.current + 2 < len(self.tokens) and
+            self.tokens[self.current + 2].type == DSLTokenType.IDENTIFIER):
             return self._parse_property_access()
+        
+        # Dot as literal (e.g., "scan ." where "." means current directory)
+        if self._match(DSLTokenType.DOT):
+            return DSLExpression(
+                type=DSLExpressionType.LITERAL,
+                value=".",
+                metadata={"type": "string"},
+            )
         
         # Command (check if it's a standalone identifier)
         if self._check(DSLTokenType.IDENTIFIER):
