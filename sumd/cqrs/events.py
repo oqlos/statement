@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import uuid
 from datetime import datetime
@@ -57,15 +58,22 @@ class EventStore:
         """Save an event to the store."""
         if event.aggregate_id not in self._events:
             self._events[event.aggregate_id] = []
+
+        existing = self._events[event.aggregate_id]
+        # Auto-increment version if default (1) and aggregate already has events
+        if event.version == 1 and existing:
+            next_version = max(e.version for e in existing) + 1
+            event = dataclasses.replace(event, version=next_version)
+
         self._events[event.aggregate_id].append(event)
-        
+
         if self._storage_path:
             self._persist_event(event)
     
     def get_events(self, aggregate_id: str, from_version: int = 0) -> List[Event]:
         """Get all events for an aggregate from a specific version."""
         events = self._events.get(aggregate_id, [])
-        return [e for e in events if e.version > from_version]
+        return [e for e in events if e.version >= from_version]
     
     def get_all_events(self) -> List[Event]:
         """Get all events from the store."""

@@ -204,8 +204,9 @@ class EventSourcedRepository(Repository):
     
     async def save(self, aggregate: AggregateRoot) -> None:
         """Save an aggregate to the event store."""
+        aggregate.set_event_store(self._event_store)
         aggregate.commit()
-        
+
         # Update cache
         self._cache[aggregate.aggregate_id] = aggregate
     

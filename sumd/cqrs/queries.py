@@ -194,9 +194,10 @@ class SumdQueryHandler(QueryHandler):
     
     async def _handle_get_sumd_document(self, query: Query) -> Dict[str, Any]:
         """Handle get SUMD document query."""
+        from pathlib import Path
         from ..parser import parse_file
-        file_path = query.parameters.get("file_path")
-        
+        file_path = Path(query.parameters.get("file_path"))
+
         try:
             doc = parse_file(file_path)
             return {
@@ -223,9 +224,10 @@ class SumdQueryHandler(QueryHandler):
     
     async def _handle_list_sumd_sections(self, query: Query) -> Dict[str, Any]:
         """Handle list SUMD sections query."""
+        from pathlib import Path
         from ..parser import parse_file
-        file_path = query.parameters.get("file_path")
-        
+        file_path = Path(query.parameters.get("file_path"))
+
         try:
             doc = parse_file(file_path)
             sections = [
@@ -248,8 +250,9 @@ class SumdQueryHandler(QueryHandler):
     
     async def _handle_get_sumd_section(self, query: Query) -> Dict[str, Any]:
         """Handle get SUMD section query."""
+        from pathlib import Path
         from ..parser import parse_file
-        file_path = query.parameters.get("file_path")
+        file_path = Path(query.parameters.get("file_path"))
         section_name = query.parameters.get("section_name")
         
         try:
@@ -377,10 +380,11 @@ class SumdQueryHandler(QueryHandler):
     
     async def _handle_get_validation_results(self, query: Query) -> Dict[str, Any]:
         """Handle get validation results query."""
+        from pathlib import Path
         from ..parser import validate_sumd_file
-        file_path = query.parameters.get("file_path")
+        file_path = Path(query.parameters.get("file_path"))
         profile = query.parameters.get("profile", "rich")
-        
+
         try:
             result = validate_sumd_file(file_path, profile=profile)
             return {

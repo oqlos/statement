@@ -373,7 +373,7 @@ Test description
             
             # 4. Get event history
             history_query = GetEventHistory(parameters={"aggregate_id": aggregate_id})
-            history = await query_bus.dispatch(history)
+            history = await query_bus.dispatch(history_query)
             assert history["success"] is True
             assert len(history["data"]) == 4  # 2 commands * 2 events each
             
